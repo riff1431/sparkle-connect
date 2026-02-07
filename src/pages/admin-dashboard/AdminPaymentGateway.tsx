@@ -19,8 +19,12 @@ import {
   AlertTriangle,
   CheckCircle2,
   Loader2,
-  ExternalLink
+  ExternalLink,
+  Banknote,
+  Landmark,
+  FileText
 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 
 interface PaymentSettings {
   // Stripe Settings
@@ -28,6 +32,18 @@ interface PaymentSettings {
   stripe_mode: "test" | "live";
   stripe_publishable_key: string;
   stripe_webhook_secret: string;
+  // Cash Payment Settings
+  cash_enabled: boolean;
+  cash_instructions: string;
+  cash_confirmation_required: boolean;
+  // Bank Transfer Settings
+  bank_enabled: boolean;
+  bank_name: string;
+  bank_account_name: string;
+  bank_account_number: string;
+  bank_routing_number: string;
+  bank_swift_code: string;
+  bank_instructions: string;
   // Payout Settings
   auto_payouts_enabled: boolean;
   payout_schedule: "daily" | "weekly" | "biweekly" | "monthly";
@@ -47,6 +63,16 @@ const DEFAULT_SETTINGS: PaymentSettings = {
   stripe_mode: "test",
   stripe_publishable_key: "",
   stripe_webhook_secret: "",
+  cash_enabled: false,
+  cash_instructions: "Please pay the cleaner in cash after the service is completed.",
+  cash_confirmation_required: true,
+  bank_enabled: false,
+  bank_name: "",
+  bank_account_name: "",
+  bank_account_number: "",
+  bank_routing_number: "",
+  bank_swift_code: "",
+  bank_instructions: "Please transfer the payment before your scheduled booking date.",
   auto_payouts_enabled: true,
   payout_schedule: "weekly",
   minimum_payout_amount: 50,
@@ -160,32 +186,53 @@ const AdminPaymentGateway = () => {
         </div>
       </div>
 
-      {/* Connection Status Banner */}
-      <Card className={settings.stripe_enabled ? "border-primary/50 bg-primary/5" : "border-destructive/50 bg-destructive/5"}>
-        <CardContent className="flex items-center justify-between py-4">
-          <div className="flex items-center gap-3">
-            {settings.stripe_enabled ? (
-              <CheckCircle2 className="h-5 w-5 text-primary" />
-            ) : (
-              <AlertTriangle className="h-5 w-5 text-destructive" />
-            )}
-            <div>
-              <p className="font-medium">
-                {settings.stripe_enabled ? "Stripe Connected" : "Stripe Not Connected"}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {settings.stripe_enabled 
-                  ? `Running in ${settings.stripe_mode} mode`
-                  : "Connect Stripe to start accepting payments"
-                }
-              </p>
+      {/* Payment Methods Overview */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card className={settings.stripe_enabled ? "border-primary/50 bg-primary/5" : "border-muted"}>
+          <CardContent className="flex items-center gap-3 py-4">
+            <div className={`p-2 rounded-full ${settings.stripe_enabled ? "bg-primary/10" : "bg-muted"}`}>
+              <CreditCard className={`h-5 w-5 ${settings.stripe_enabled ? "text-primary" : "text-muted-foreground"}`} />
             </div>
-          </div>
-          <Badge variant={settings.stripe_mode === "live" ? "default" : "secondary"}>
-            {settings.stripe_mode === "live" ? "Live Mode" : "Test Mode"}
-          </Badge>
-        </CardContent>
-      </Card>
+            <div className="flex-1">
+              <p className="font-medium">Stripe</p>
+              <p className="text-xs text-muted-foreground">Credit/Debit Cards</p>
+            </div>
+            <Badge variant={settings.stripe_enabled ? "default" : "secondary"}>
+              {settings.stripe_enabled ? "Active" : "Inactive"}
+            </Badge>
+          </CardContent>
+        </Card>
+
+        <Card className={settings.cash_enabled ? "border-primary/50 bg-primary/5" : "border-muted"}>
+          <CardContent className="flex items-center gap-3 py-4">
+            <div className={`p-2 rounded-full ${settings.cash_enabled ? "bg-primary/10" : "bg-muted"}`}>
+              <Banknote className={`h-5 w-5 ${settings.cash_enabled ? "text-primary" : "text-muted-foreground"}`} />
+            </div>
+            <div className="flex-1">
+              <p className="font-medium">Cash</p>
+              <p className="text-xs text-muted-foreground">Pay on Service</p>
+            </div>
+            <Badge variant={settings.cash_enabled ? "default" : "secondary"}>
+              {settings.cash_enabled ? "Active" : "Inactive"}
+            </Badge>
+          </CardContent>
+        </Card>
+
+        <Card className={settings.bank_enabled ? "border-primary/50 bg-primary/5" : "border-muted"}>
+          <CardContent className="flex items-center gap-3 py-4">
+            <div className={`p-2 rounded-full ${settings.bank_enabled ? "bg-primary/10" : "bg-muted"}`}>
+              <Landmark className={`h-5 w-5 ${settings.bank_enabled ? "text-primary" : "text-muted-foreground"}`} />
+            </div>
+            <div className="flex-1">
+              <p className="font-medium">Bank Transfer</p>
+              <p className="text-xs text-muted-foreground">Offline Payment</p>
+            </div>
+            <Badge variant={settings.bank_enabled ? "default" : "secondary"}>
+              {settings.bank_enabled ? "Active" : "Inactive"}
+            </Badge>
+          </CardContent>
+        </Card>
+      </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Stripe Configuration */}
@@ -271,6 +318,187 @@ const AdminPaymentGateway = () => {
                 Open Stripe Dashboard
               </a>
             </Button>
+          </CardContent>
+        </Card>
+
+        {/* Cash Payment Settings */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Banknote className="h-5 w-5" />
+              Cash Payment
+            </CardTitle>
+            <CardDescription>
+              Allow customers to pay cleaners directly in cash
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Enable Cash Payments</Label>
+                <p className="text-sm text-muted-foreground">
+                  Allow customers to select cash as payment method
+                </p>
+              </div>
+              <Switch
+                checked={settings.cash_enabled}
+                onCheckedChange={(checked) =>
+                  setSettings({ ...settings, cash_enabled: checked })
+                }
+              />
+            </div>
+
+            <Separator />
+
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Require Confirmation</Label>
+                <p className="text-sm text-muted-foreground">
+                  Cleaner must confirm cash was received
+                </p>
+              </div>
+              <Switch
+                checked={settings.cash_confirmation_required}
+                onCheckedChange={(checked) =>
+                  setSettings({ ...settings, cash_confirmation_required: checked })
+                }
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Payment Instructions</Label>
+              <Textarea
+                placeholder="Instructions shown to customers..."
+                value={settings.cash_instructions}
+                onChange={(e) =>
+                  setSettings({ ...settings, cash_instructions: e.target.value })
+                }
+                rows={3}
+              />
+              <p className="text-xs text-muted-foreground">
+                Displayed to customers when they select cash payment
+              </p>
+            </div>
+
+            <div className="rounded-lg bg-muted p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium text-sm">Important Note</span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Cash payments bypass online processing. Platform commission must be collected separately from cleaners.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Bank Transfer Settings */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Landmark className="h-5 w-5" />
+              Bank Transfer (Offline)
+            </CardTitle>
+            <CardDescription>
+              Accept direct bank transfers for bookings
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Enable Bank Transfers</Label>
+                <p className="text-sm text-muted-foreground">
+                  Allow customers to pay via bank transfer
+                </p>
+              </div>
+              <Switch
+                checked={settings.bank_enabled}
+                onCheckedChange={(checked) =>
+                  setSettings({ ...settings, bank_enabled: checked })
+                }
+              />
+            </div>
+
+            <Separator />
+
+            <div className="space-y-2">
+              <Label>Bank Name</Label>
+              <Input
+                placeholder="e.g., TD Bank, RBC, etc."
+                value={settings.bank_name}
+                onChange={(e) =>
+                  setSettings({ ...settings, bank_name: e.target.value })
+                }
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Account Holder Name</Label>
+              <Input
+                placeholder="Business or personal name"
+                value={settings.bank_account_name}
+                onChange={(e) =>
+                  setSettings({ ...settings, bank_account_name: e.target.value })
+                }
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Account Number</Label>
+                <Input
+                  type="password"
+                  placeholder="••••••••"
+                  value={settings.bank_account_number}
+                  onChange={(e) =>
+                    setSettings({ ...settings, bank_account_number: e.target.value })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Routing Number</Label>
+                <Input
+                  placeholder="Transit/Routing #"
+                  value={settings.bank_routing_number}
+                  onChange={(e) =>
+                    setSettings({ ...settings, bank_routing_number: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>SWIFT/BIC Code (Optional)</Label>
+              <Input
+                placeholder="For international transfers"
+                value={settings.bank_swift_code}
+                onChange={(e) =>
+                  setSettings({ ...settings, bank_swift_code: e.target.value })
+                }
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Transfer Instructions</Label>
+              <Textarea
+                placeholder="Instructions for customers..."
+                value={settings.bank_instructions}
+                onChange={(e) =>
+                  setSettings({ ...settings, bank_instructions: e.target.value })
+                }
+                rows={3}
+              />
+            </div>
+
+            <div className="rounded-lg bg-muted p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <FileText className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium text-sm">Verification Required</span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Bank transfers require manual verification. Bookings will remain pending until payment is confirmed by admin.
+              </p>
+            </div>
           </CardContent>
         </Card>
 
