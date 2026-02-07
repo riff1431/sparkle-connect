@@ -45,7 +45,8 @@ import {
   Eye,
   Pencil,
   Trash2,
-  Zap
+  Zap,
+  Plus
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
@@ -53,6 +54,7 @@ import { toast } from "sonner";
 import { EditCleanerDialog } from "@/components/admin-dashboard/EditCleanerDialog";
 import { DeleteCleanerDialog } from "@/components/admin-dashboard/DeleteCleanerDialog";
 import { ViewCleanerDialog } from "@/components/admin-dashboard/ViewCleanerDialog";
+import { CreateCleanerDialog } from "@/components/admin-dashboard/CreateCleanerDialog";
 
 interface CleanerProfile {
   id: string;
@@ -89,6 +91,7 @@ const AdminCleaners = () => {
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   // Loading states for inline actions
   const [updatingCleaners, setUpdatingCleaners] = useState<Set<string>>(new Set());
@@ -236,6 +239,11 @@ const AdminCleaners = () => {
     setTotalCount((prev) => prev - 1);
   };
 
+  const handleCleanerCreated = (newCleaner: CleanerProfile) => {
+    setCleaners((prev) => [newCleaner, ...prev]);
+    setTotalCount((prev) => prev + 1);
+  };
+
   const handlePageSizeChange = (newSize: string) => {
     setPageSize(Number(newSize));
     setCurrentPage(1);
@@ -275,9 +283,15 @@ const AdminCleaners = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="font-heading text-2xl font-bold text-foreground">Cleaner Management</h2>
-        <p className="text-muted-foreground">View and manage service providers on the platform.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 className="font-heading text-2xl font-bold text-foreground">Cleaner Management</h2>
+          <p className="text-muted-foreground">View and manage service providers on the platform.</p>
+        </div>
+        <Button onClick={() => setIsCreateDialogOpen(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Add Cleaner
+        </Button>
       </div>
 
       {/* Summary Cards */}
@@ -559,6 +573,11 @@ const AdminCleaners = () => {
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
         onCleanerDeleted={handleCleanerDeleted}
+      />
+      <CreateCleanerDialog
+        open={isCreateDialogOpen}
+        onOpenChange={setIsCreateDialogOpen}
+        onCleanerCreated={handleCleanerCreated}
       />
     </div>
   );
