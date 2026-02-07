@@ -18,6 +18,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { Search, UserCircle, Mail, Calendar, Loader2, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
@@ -41,6 +49,7 @@ interface UserWithRole extends UserProfile {
 }
 
 const AVAILABLE_ROLES: AppRole[] = ["customer", "cleaner", "company", "admin"];
+const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
 const AdminUsers = () => {
   const [users, setUsers] = useState<UserWithRole[]>([]);
@@ -49,25 +58,50 @@ const AdminUsers = () => {
   const [updatingRoles, setUpdatingRoles] = useState<Set<string>>(new Set());
   const [editingUser, setEditingUser] = useState<UserWithRole | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [currentPage, pageSize]);
+
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
 
   const fetchUsers = async () => {
+    setLoading(true);
     try {
-      // Fetch profiles
+      // Get total count first
+      const { count, error: countError } = await supabase
+        .from("profiles")
+        .select("*", { count: "exact", head: true });
+
+      if (countError) throw countError;
+      setTotalCount(count || 0);
+
+      // Fetch paginated profiles
+      const from = (currentPage - 1) * pageSize;
+      const to = from + pageSize - 1;
+
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
         .select("*")
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .range(from, to);
 
       if (profilesError) throw profilesError;
 
-      // Fetch roles
+      // Fetch roles for these users
+      const userIds = profiles?.map((p) => p.id) || [];
       const { data: roles, error: rolesError } = await supabase
         .from("user_roles")
-        .select("id, user_id, role");
+        .select("id, user_id, role")
+        .in("user_id", userIds);
 
       if (rolesError) throw rolesError;
 
@@ -108,7 +142,6 @@ const AdminUsers = () => {
 
       if (error) throw error;
 
-      // Update local state
       setUsers((prev) =>
         prev.map((user) =>
           user.id === userId ? { ...user, role: newRole } : user
@@ -143,11 +176,19 @@ const AdminUsers = () => {
     );
   };
 
+  const handlePageSizeChange = (newSize: string) => {
+    setPageSize(Number(newSize));
+    setCurrentPage(1);
+  };
+
+  // Filter users client-side for current page
   const filteredUsers = users.filter(
     (user) =>
       user.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.email?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const totalPages = Math.ceil(totalCount / pageSize);
 
   const getRoleBadgeVariant = (role: AppRole) => {
     switch (role) {
@@ -162,6 +203,36 @@ const AdminUsers = () => {
     }
   };
 
+  // Generate page numbers for pagination
+  const getPageNumbers = () => {
+    const pages: (number | "ellipsis")[] = [];
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) pages.push(i);
+        pages.push("ellipsis");
+        pages.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pages.push(1);
+        pages.push("ellipsis");
+        for (let i = totalPages - 3; i <= totalPages; i++) pages.push(i);
+      } else {
+        pages.push(1);
+        pages.push("ellipsis");
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) pages.push(i);
+        pages.push("ellipsis");
+        pages.push(totalPages);
+      }
+    }
+
+    return pages;
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -174,16 +245,30 @@ const AdminUsers = () => {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <CardTitle>All Users</CardTitle>
-              <CardDescription>{users.length} total users registered</CardDescription>
+              <CardDescription>{totalCount} total users registered</CardDescription>
             </div>
-            <div className="relative w-full sm:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search users..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9"
-              />
+            <div className="flex items-center gap-3">
+              <div className="relative w-full sm:w-64">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search users..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+              <Select value={String(pageSize)} onValueChange={handlePageSizeChange}>
+                <SelectTrigger className="w-20">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PAGE_SIZE_OPTIONS.map((size) => (
+                    <SelectItem key={size} value={String(size)}>
+                      {size}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </CardHeader>
@@ -198,88 +283,133 @@ const AdminUsers = () => {
               <p className="text-muted-foreground">No users found.</p>
             </div>
           ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>User</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Joined</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredUsers.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
-                            <UserCircle className="h-6 w-6 text-muted-foreground" />
-                          </div>
-                          <div>
-                            <p className="font-medium">{user.full_name || "No name"}</p>
-                            {user.phone && (
-                              <p className="text-sm text-muted-foreground">{user.phone}</p>
-                            )}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Mail className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm">{user.email || "No email"}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Select
-                          value={user.role}
-                          onValueChange={(value: AppRole) => handleRoleChange(user.id, user.roleId, value)}
-                          disabled={updatingRoles.has(user.id)}
-                        >
-                          <SelectTrigger className="w-32">
-                            {updatingRoles.has(user.id) ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <SelectValue>
-                                <Badge variant={getRoleBadgeVariant(user.role)}>
-                                  {user.role}
-                                </Badge>
-                              </SelectValue>
-                            )}
-                          </SelectTrigger>
-                          <SelectContent>
-                            {AVAILABLE_ROLES.map((role) => (
-                              <SelectItem key={role} value={role}>
-                                <Badge variant={getRoleBadgeVariant(role)}>
-                                  {role}
-                                </Badge>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Calendar className="h-4 w-4" />
-                          {format(new Date(user.created_at), "MMM d, yyyy")}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEditUser(user)}
-                        >
-                          <Pencil className="h-4 w-4 mr-1" />
-                          Edit
-                        </Button>
-                      </TableCell>
+            <>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>User</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Role</TableHead>
+                      <TableHead>Joined</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredUsers.map((user) => (
+                      <TableRow key={user.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+                              <UserCircle className="h-6 w-6 text-muted-foreground" />
+                            </div>
+                            <div>
+                              <p className="font-medium">{user.full_name || "No name"}</p>
+                              {user.phone && (
+                                <p className="text-sm text-muted-foreground">{user.phone}</p>
+                              )}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Mail className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm">{user.email || "No email"}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Select
+                            value={user.role}
+                            onValueChange={(value: AppRole) => handleRoleChange(user.id, user.roleId, value)}
+                            disabled={updatingRoles.has(user.id)}
+                          >
+                            <SelectTrigger className="w-32">
+                              {updatingRoles.has(user.id) ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <SelectValue>
+                                  <Badge variant={getRoleBadgeVariant(user.role)}>
+                                    {user.role}
+                                  </Badge>
+                                </SelectValue>
+                              )}
+                            </SelectTrigger>
+                            <SelectContent>
+                              {AVAILABLE_ROLES.map((role) => (
+                                <SelectItem key={role} value={role}>
+                                  <Badge variant={getRoleBadgeVariant(role)}>
+                                    {role}
+                                  </Badge>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Calendar className="h-4 w-4" />
+                            {format(new Date(user.created_at), "MMM d, yyyy")}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditUser(user)}
+                          >
+                            <Pencil className="h-4 w-4 mr-1" />
+                            Edit
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between mt-4">
+                  <p className="text-sm text-muted-foreground">
+                    Showing {(currentPage - 1) * pageSize + 1} to{" "}
+                    {Math.min(currentPage * pageSize, totalCount)} of {totalCount} users
+                  </p>
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                          className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        />
+                      </PaginationItem>
+                      {getPageNumbers().map((page, index) =>
+                        page === "ellipsis" ? (
+                          <PaginationItem key={`ellipsis-${index}`}>
+                            <span className="px-3 py-2">...</span>
+                          </PaginationItem>
+                        ) : (
+                          <PaginationItem key={page}>
+                            <PaginationLink
+                              onClick={() => setCurrentPage(page)}
+                              isActive={currentPage === page}
+                              className="cursor-pointer"
+                            >
+                              {page}
+                            </PaginationLink>
+                          </PaginationItem>
+                        )
+                      )}
+                      <PaginationItem>
+                        <PaginationNext
+                          onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                          className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
+            </>
           )}
         </CardContent>
       </Card>
