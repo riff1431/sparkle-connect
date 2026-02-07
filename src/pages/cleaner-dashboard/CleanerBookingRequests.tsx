@@ -1,0 +1,362 @@
+import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { 
+  Calendar, 
+  Clock, 
+  MapPin,
+  CheckCircle,
+  XCircle,
+  Eye
+} from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { format } from "date-fns";
+import { toast } from "sonner";
+import type { Database } from "@/integrations/supabase/types";
+
+type BookingStatus = Database["public"]["Enums"]["booking_status"];
+
+interface Booking {
+  id: string;
+  service_type: string;
+  scheduled_date: string;
+  scheduled_time: string;
+  status: BookingStatus;
+  service_price: number;
+  duration_hours: number;
+  special_instructions: string | null;
+  customer_id: string;
+  address_id: string | null;
+}
+
+const CleanerBookingRequests = () => {
+  const { user } = useAuth();
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
+
+  const fetchBookings = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from("bookings")
+        .select("*")
+        .eq("cleaner_id", user.id)
+        .order("scheduled_date", { ascending: true });
+
+      if (error) throw error;
+      setBookings(data || []);
+    } catch (error) {
+      console.error("Error fetching bookings:", error);
+      toast.error("Failed to load bookings");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBookings();
+  }, [user]);
+
+  const handleAcceptBooking = async (bookingId: string) => {
+    setActionLoading(true);
+    try {
+      const { error } = await supabase
+        .from("bookings")
+        .update({ status: "confirmed" as BookingStatus })
+        .eq("id", bookingId);
+
+      if (error) throw error;
+      toast.success("Booking accepted!");
+      fetchBookings();
+      setSelectedBooking(null);
+    } catch (error) {
+      console.error("Error accepting booking:", error);
+      toast.error("Failed to accept booking");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDeclineBooking = async (bookingId: string) => {
+    setActionLoading(true);
+    try {
+      const { error } = await supabase
+        .from("bookings")
+        .update({ status: "cancelled" as BookingStatus })
+        .eq("id", bookingId);
+
+      if (error) throw error;
+      toast.success("Booking declined");
+      fetchBookings();
+      setSelectedBooking(null);
+    } catch (error) {
+      console.error("Error declining booking:", error);
+      toast.error("Failed to decline booking");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleCompleteBooking = async (bookingId: string) => {
+    setActionLoading(true);
+    try {
+      const { error } = await supabase
+        .from("bookings")
+        .update({ status: "completed" as BookingStatus })
+        .eq("id", bookingId);
+
+      if (error) throw error;
+      toast.success("Booking marked as completed!");
+      fetchBookings();
+      setSelectedBooking(null);
+    } catch (error) {
+      console.error("Error completing booking:", error);
+      toast.error("Failed to complete booking");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    const styles: Record<string, string> = {
+      pending: "bg-amber-100 text-amber-700",
+      confirmed: "bg-blue-100 text-blue-700",
+      in_progress: "bg-purple-100 text-purple-700",
+      completed: "bg-green-100 text-green-700",
+      cancelled: "bg-red-100 text-red-700",
+    };
+    return styles[status] || "bg-gray-100 text-gray-700";
+  };
+
+  const pendingBookings = bookings.filter(b => b.status === "pending");
+  const confirmedBookings = bookings.filter(b => b.status === "confirmed");
+  const completedBookings = bookings.filter(b => b.status === "completed");
+
+  const BookingCard = ({ booking }: { booking: Booking }) => (
+    <Card className="border-border hover:shadow-md transition-shadow">
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-foreground">{booking.service_type}</h3>
+              <Badge className={getStatusBadge(booking.status)}>
+                {booking.status.replace("_", " ")}
+              </Badge>
+            </div>
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <span className="flex items-center gap-1">
+                <Calendar className="h-4 w-4" />
+                {format(new Date(booking.scheduled_date), "MMM d, yyyy")}
+              </span>
+              <span className="flex items-center gap-1">
+                <Clock className="h-4 w-4" />
+                {booking.scheduled_time}
+              </span>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Duration: {booking.duration_hours} hours
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-xl font-bold text-foreground">
+              ${Number(booking.service_price).toFixed(0)}
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-2"
+              onClick={() => setSelectedBooking(booking)}
+            >
+              <Eye className="mr-1 h-4 w-4" />
+              View Details
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="font-heading text-2xl font-bold text-foreground">Booking Requests</h1>
+        <p className="text-muted-foreground">Manage your incoming booking requests and scheduled jobs.</p>
+      </div>
+
+      <Tabs defaultValue="pending" className="w-full">
+        <TabsList className="grid w-full grid-cols-3 max-w-md">
+          <TabsTrigger value="pending" className="gap-2">
+            Pending
+            {pendingBookings.length > 0 && (
+              <Badge variant="secondary" className="ml-1">{pendingBookings.length}</Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="confirmed">Confirmed</TabsTrigger>
+          <TabsTrigger value="completed">Completed</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="pending" className="mt-6">
+          {pendingBookings.length > 0 ? (
+            <div className="grid gap-4">
+              {pendingBookings.map((booking) => (
+                <BookingCard key={booking.id} booking={booking} />
+              ))}
+            </div>
+          ) : (
+            <Card className="border-border">
+              <CardContent className="py-12 text-center">
+                <Clock className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="font-semibold text-lg mb-2">No pending requests</h3>
+                <p className="text-muted-foreground">New booking requests will appear here.</p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="confirmed" className="mt-6">
+          {confirmedBookings.length > 0 ? (
+            <div className="grid gap-4">
+              {confirmedBookings.map((booking) => (
+                <BookingCard key={booking.id} booking={booking} />
+              ))}
+            </div>
+          ) : (
+            <Card className="border-border">
+              <CardContent className="py-12 text-center">
+                <CheckCircle className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="font-semibold text-lg mb-2">No confirmed bookings</h3>
+                <p className="text-muted-foreground">Accept pending requests to see them here.</p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="completed" className="mt-6">
+          {completedBookings.length > 0 ? (
+            <div className="grid gap-4">
+              {completedBookings.map((booking) => (
+                <BookingCard key={booking.id} booking={booking} />
+              ))}
+            </div>
+          ) : (
+            <Card className="border-border">
+              <CardContent className="py-12 text-center">
+                <CheckCircle className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="font-semibold text-lg mb-2">No completed bookings</h3>
+                <p className="text-muted-foreground">Completed jobs will appear here.</p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+      </Tabs>
+
+      {/* Booking Details Dialog */}
+      <Dialog open={!!selectedBooking} onOpenChange={() => setSelectedBooking(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Booking Details</DialogTitle>
+            <DialogDescription>
+              Review the booking details and take action.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedBooking && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Service</span>
+                <span className="font-medium">{selectedBooking.service_type}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Date</span>
+                <span className="font-medium">
+                  {format(new Date(selectedBooking.scheduled_date), "MMMM d, yyyy")}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Time</span>
+                <span className="font-medium">{selectedBooking.scheduled_time}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Duration</span>
+                <span className="font-medium">{selectedBooking.duration_hours} hours</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Price</span>
+                <span className="font-bold text-lg">${Number(selectedBooking.service_price).toFixed(0)}</span>
+              </div>
+              {selectedBooking.special_instructions && (
+                <div>
+                  <span className="text-muted-foreground block mb-1">Special Instructions</span>
+                  <p className="text-sm bg-muted p-3 rounded-lg">
+                    {selectedBooking.special_instructions}
+                  </p>
+                </div>
+              )}
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Status</span>
+                <Badge className={getStatusBadge(selectedBooking.status)}>
+                  {selectedBooking.status.replace("_", " ")}
+                </Badge>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            {selectedBooking?.status === "pending" && (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => handleDeclineBooking(selectedBooking.id)}
+                  disabled={actionLoading}
+                >
+                  <XCircle className="mr-2 h-4 w-4" />
+                  Decline
+                </Button>
+                <Button
+                  onClick={() => handleAcceptBooking(selectedBooking.id)}
+                  disabled={actionLoading}
+                >
+                  <CheckCircle className="mr-2 h-4 w-4" />
+                  Accept
+                </Button>
+              </>
+            )}
+            {selectedBooking?.status === "confirmed" && (
+              <Button
+                onClick={() => handleCompleteBooking(selectedBooking.id)}
+                disabled={actionLoading}
+              >
+                <CheckCircle className="mr-2 h-4 w-4" />
+                Mark Complete
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default CleanerBookingRequests;

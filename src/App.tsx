@@ -6,8 +6,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import Search from "./pages/Search";
-import CleanerProfile from "./pages/CleanerProfile";
+import CleanerPublicProfile from "./pages/CleanerProfile";
 import Auth from "./pages/Auth";
+import ForCleaners from "./pages/ForCleaners";
 import DashboardLayout from "./components/dashboard/DashboardLayout";
 import DashboardOverview from "./pages/dashboard/DashboardOverview";
 import UpcomingBookings from "./pages/dashboard/UpcomingBookings";
@@ -15,6 +16,13 @@ import BookingHistory from "./pages/dashboard/BookingHistory";
 import Addresses from "./pages/dashboard/Addresses";
 import Profile from "./pages/dashboard/Profile";
 import Settings from "./pages/dashboard/Settings";
+import CleanerDashboardLayout from "./components/cleaner-dashboard/CleanerDashboardLayout";
+import CleanerDashboardOverview from "./pages/cleaner-dashboard/CleanerDashboardOverview";
+import CleanerBookingRequests from "./pages/cleaner-dashboard/CleanerBookingRequests";
+import CleanerSchedule from "./pages/cleaner-dashboard/CleanerSchedule";
+import CleanerProfile from "./pages/cleaner-dashboard/CleanerProfile";
+import CleanerEarnings from "./pages/cleaner-dashboard/CleanerEarnings";
+import CleanerSettings from "./pages/cleaner-dashboard/CleanerSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,8 +37,9 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/search" element={<Search />} />
-            <Route path="/cleaner/:id" element={<CleanerProfile />} />
+            <Route path="/cleaner/:id" element={<CleanerPublicProfile />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/for-cleaners" element={<ForCleaners />} />
             
             {/* Customer Dashboard Routes */}
             <Route path="/dashboard" element={<DashboardLayout />}>
@@ -40,6 +49,16 @@ const App = () => (
               <Route path="addresses" element={<Addresses />} />
               <Route path="profile" element={<Profile />} />
               <Route path="settings" element={<Settings />} />
+            </Route>
+
+            {/* Cleaner Dashboard Routes */}
+            <Route path="/cleaner" element={<CleanerDashboardLayout />}>
+              <Route path="dashboard" element={<CleanerDashboardOverview />} />
+              <Route path="bookings" element={<CleanerBookingRequests />} />
+              <Route path="schedule" element={<CleanerSchedule />} />
+              <Route path="profile" element={<CleanerProfile />} />
+              <Route path="earnings" element={<CleanerEarnings />} />
+              <Route path="settings" element={<CleanerSettings />} />
             </Route>
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

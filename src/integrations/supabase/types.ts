@@ -115,6 +115,63 @@ export type Database = {
           },
         ]
       }
+      cleaner_profiles: {
+        Row: {
+          bio: string | null
+          business_name: string
+          created_at: string
+          gallery_images: string[] | null
+          hourly_rate: number
+          id: string
+          instant_booking: boolean
+          is_active: boolean
+          is_verified: boolean
+          profile_image: string | null
+          response_time: string | null
+          service_areas: string[]
+          services: string[]
+          updated_at: string
+          user_id: string
+          years_experience: number | null
+        }
+        Insert: {
+          bio?: string | null
+          business_name: string
+          created_at?: string
+          gallery_images?: string[] | null
+          hourly_rate?: number
+          id?: string
+          instant_booking?: boolean
+          is_active?: boolean
+          is_verified?: boolean
+          profile_image?: string | null
+          response_time?: string | null
+          service_areas?: string[]
+          services?: string[]
+          updated_at?: string
+          user_id: string
+          years_experience?: number | null
+        }
+        Update: {
+          bio?: string | null
+          business_name?: string
+          created_at?: string
+          gallery_images?: string[] | null
+          hourly_rate?: number
+          id?: string
+          instant_booking?: boolean
+          is_active?: boolean
+          is_verified?: boolean
+          profile_image?: string | null
+          response_time?: string | null
+          service_areas?: string[]
+          services?: string[]
+          updated_at?: string
+          user_id?: string
+          years_experience?: number | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
