@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, Mail, Lock, User, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, Loader2, Briefcase, Home } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -12,7 +12,10 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -24,6 +27,7 @@ const signupSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   confirmPassword: z.string(),
+  accountType: z.enum(["customer", "cleaner"]),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -54,7 +58,7 @@ const Auth = () => {
 
   const signupForm = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
-    defaultValues: { fullName: "", email: "", password: "", confirmPassword: "" },
+    defaultValues: { fullName: "", email: "", password: "", confirmPassword: "", accountType: "customer" },
   });
 
   const handleLogin = async (data: LoginFormData) => {
@@ -81,7 +85,7 @@ const Auth = () => {
 
   const handleSignup = async (data: SignupFormData) => {
     setIsLoading(true);
-    const { error } = await signUp(data.email, data.password, data.fullName);
+    const { error } = await signUp(data.email, data.password, data.fullName, data.accountType);
     setIsLoading(false);
 
     if (error) {
@@ -202,6 +206,68 @@ const Auth = () => {
                 <TabsContent value="signup" className="mt-6">
                   <Form {...signupForm}>
                     <form onSubmit={signupForm.handleSubmit(handleSignup)} className="space-y-4">
+                      {/* Account Type Selection */}
+                      <FormField
+                        control={signupForm.control}
+                        name="accountType"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>I want to</FormLabel>
+                            <FormControl>
+                              <RadioGroup
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                                className="grid grid-cols-2 gap-3"
+                              >
+                                <div>
+                                  <RadioGroupItem
+                                    value="customer"
+                                    id="customer"
+                                    className="peer sr-only"
+                                  />
+                                  <Label
+                                    htmlFor="customer"
+                                    className={cn(
+                                      "flex flex-col items-center justify-center rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer transition-all",
+                                      field.value === "customer" && "border-primary bg-primary/5"
+                                    )}
+                                  >
+                                    <Home className={cn(
+                                      "h-6 w-6 mb-2",
+                                      field.value === "customer" ? "text-primary" : "text-muted-foreground"
+                                    )} />
+                                    <span className="font-medium">Find Cleaners</span>
+                                    <span className="text-xs text-muted-foreground">Book cleaning services</span>
+                                  </Label>
+                                </div>
+                                <div>
+                                  <RadioGroupItem
+                                    value="cleaner"
+                                    id="cleaner"
+                                    className="peer sr-only"
+                                  />
+                                  <Label
+                                    htmlFor="cleaner"
+                                    className={cn(
+                                      "flex flex-col items-center justify-center rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer transition-all",
+                                      field.value === "cleaner" && "border-primary bg-primary/5"
+                                    )}
+                                  >
+                                    <Briefcase className={cn(
+                                      "h-6 w-6 mb-2",
+                                      field.value === "cleaner" ? "text-primary" : "text-muted-foreground"
+                                    )} />
+                                    <span className="font-medium">Offer Services</span>
+                                    <span className="text-xs text-muted-foreground">Become a cleaner</span>
+                                  </Label>
+                                </div>
+                              </RadioGroup>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
                       <FormField
                         control={signupForm.control}
                         name="fullName"
