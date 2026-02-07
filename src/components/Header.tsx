@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Search, User, LogOut, LayoutDashboard } from "lucide-react";
+import { Menu, X, Search, User, LogOut, LayoutDashboard, Briefcase } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   DropdownMenu,
@@ -20,6 +20,7 @@ const Header = () => {
   const navLinks = [
     { label: "Find Cleaners", href: "/search" },
     { label: "How It Works", href: "/#how-it-works" },
+    { label: "For Cleaners", href: "/for-cleaners" },
   ];
 
   const getInitials = (email: string) => {
@@ -75,7 +76,13 @@ const Header = () => {
                       <DropdownMenuItem asChild>
                         <Link to="/dashboard" className="flex items-center gap-2">
                           <LayoutDashboard className="h-4 w-4" />
-                          Dashboard
+                          My Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/cleaner/dashboard" className="flex items-center gap-2">
+                          <Briefcase className="h-4 w-4" />
+                          Cleaner Portal
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
