@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import ServiceCategories from "@/components/ServiceCategories";
+import CleanerOfTheWeek from "@/components/CleanerOfTheWeek";
 import SponsoredSpotlight from "@/components/SponsoredSpotlight";
 import FeaturedCleaners from "@/components/FeaturedCleaners";
 import HowItWorks from "@/components/HowItWorks";
@@ -15,6 +16,7 @@ const Index = () => {
       <main>
         <Hero />
         <ServiceCategories />
+        <CleanerOfTheWeek />
         <SponsoredSpotlight variant="homepage" limit={8} />
         <FeaturedCleaners />
         <HowItWorks />
