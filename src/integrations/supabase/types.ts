@@ -366,6 +366,65 @@ export type Database = {
         }
         Relationships: []
       }
+      sponsored_listings: {
+        Row: {
+          cleaner_profile_id: string
+          created_at: string
+          id: string
+          is_sponsored: boolean
+          sponsored_book_clicks: number
+          sponsored_end: string | null
+          sponsored_note: string | null
+          sponsored_priority: number
+          sponsored_quote_clicks: number
+          sponsored_start: string | null
+          sponsored_status: Database["public"]["Enums"]["sponsored_status"]
+          sponsored_views_count: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cleaner_profile_id: string
+          created_at?: string
+          id?: string
+          is_sponsored?: boolean
+          sponsored_book_clicks?: number
+          sponsored_end?: string | null
+          sponsored_note?: string | null
+          sponsored_priority?: number
+          sponsored_quote_clicks?: number
+          sponsored_start?: string | null
+          sponsored_status?: Database["public"]["Enums"]["sponsored_status"]
+          sponsored_views_count?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cleaner_profile_id?: string
+          created_at?: string
+          id?: string
+          is_sponsored?: boolean
+          sponsored_book_clicks?: number
+          sponsored_end?: string | null
+          sponsored_note?: string | null
+          sponsored_priority?: number
+          sponsored_quote_clicks?: number
+          sponsored_start?: string | null
+          sponsored_status?: Database["public"]["Enums"]["sponsored_status"]
+          sponsored_views_count?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sponsored_listings_cleaner_profile_id_fkey"
+            columns: ["cleaner_profile_id"]
+            isOneToOne: true
+            referencedRelation: "cleaner_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscription_payments: {
         Row: {
           amount: number
@@ -594,6 +653,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_sponsored_clicks: {
+        Args: { click_type: string; listing_id: string }
+        Returns: undefined
+      }
+      increment_sponsored_views: {
+        Args: { listing_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "customer" | "cleaner" | "company" | "admin"
@@ -604,6 +671,7 @@ export type Database = {
         | "completed"
         | "cancelled"
       payment_status: "pending" | "verified" | "rejected"
+      sponsored_status: "inactive" | "requested" | "active" | "expired"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -740,6 +808,7 @@ export const Constants = {
         "cancelled",
       ],
       payment_status: ["pending", "verified", "rejected"],
+      sponsored_status: ["inactive", "requested", "active", "expired"],
     },
   },
 } as const

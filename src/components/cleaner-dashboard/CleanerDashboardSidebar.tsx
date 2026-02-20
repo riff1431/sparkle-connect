@@ -6,7 +6,8 @@ import {
   Settings, 
   ClipboardList,
   LogOut,
-  Crown
+  Crown,
+  Zap
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
@@ -29,6 +30,7 @@ const menuItems = [
   { title: "Booking Requests", url: "/cleaner/bookings", icon: ClipboardList },
   { title: "My Schedule", url: "/cleaner/schedule", icon: Calendar },
   { title: "Membership", url: "/cleaner/subscription", icon: Crown },
+  { title: "Sponsored Spotlight", url: "/cleaner/sponsorship", icon: Zap },
   { title: "My Profile", url: "/cleaner/profile", icon: User },
   { title: "Earnings", url: "/cleaner/earnings", icon: DollarSign },
   { title: "Settings", url: "/cleaner/settings", icon: Settings },

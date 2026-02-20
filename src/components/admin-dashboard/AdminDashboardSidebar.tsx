@@ -9,7 +9,8 @@ import {
   Home,
   CreditCard,
   BadgeCheck,
-  Crown
+  Crown,
+  Zap
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
@@ -32,6 +33,7 @@ const menuItems = [
   { title: "Users", url: "/admin/users", icon: Users },
   { title: "Cleaners", url: "/admin/cleaners", icon: Briefcase },
   { title: "Bookings", url: "/admin/bookings", icon: CalendarCheck },
+  { title: "Sponsored Spotlight", url: "/admin/sponsored", icon: Zap },
   { title: "Subscription Plans", url: "/admin/subscriptions", icon: Crown },
   { title: "Subscription Payments", url: "/admin/subscription-verification", icon: BadgeCheck },
   { title: "Payment Gateway", url: "/admin/payment-gateway", icon: CreditCard },
