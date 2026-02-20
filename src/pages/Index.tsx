@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import ServiceCategories from "@/components/ServiceCategories";
+import SponsoredSpotlight from "@/components/SponsoredSpotlight";
 import FeaturedCleaners from "@/components/FeaturedCleaners";
 import HowItWorks from "@/components/HowItWorks";
 import TrustSection from "@/components/TrustSection";
@@ -14,6 +15,7 @@ const Index = () => {
       <main>
         <Hero />
         <ServiceCategories />
+        <SponsoredSpotlight variant="homepage" limit={8} />
         <FeaturedCleaners />
         <HowItWorks />
         <TrustSection />

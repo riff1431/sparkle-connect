@@ -35,6 +35,8 @@ import AdminPaymentVerification from "./pages/admin-dashboard/AdminPaymentVerifi
 import AdminSettings from "./pages/admin-dashboard/AdminSettings";
 import AdminSubscriptionPlans from "./pages/admin-dashboard/AdminSubscriptionPlans";
 import AdminSubscriptionVerification from "./pages/admin-dashboard/AdminSubscriptionVerification";
+import AdminSponsoredListings from "./pages/admin-dashboard/AdminSponsoredListings";
+import CleanerSponsorship from "./pages/cleaner-dashboard/CleanerSponsorship";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -70,6 +72,7 @@ const App = () => (
               <Route path="bookings" element={<CleanerBookingRequests />} />
               <Route path="schedule" element={<CleanerSchedule />} />
               <Route path="subscription" element={<CleanerSubscription />} />
+              <Route path="sponsorship" element={<CleanerSponsorship />} />
               <Route path="profile" element={<CleanerProfile />} />
               <Route path="earnings" element={<CleanerEarnings />} />
               <Route path="settings" element={<CleanerSettings />} />
@@ -83,6 +86,7 @@ const App = () => (
               <Route path="bookings" element={<AdminBookings />} />
               <Route path="subscriptions" element={<AdminSubscriptionPlans />} />
               <Route path="subscription-verification" element={<AdminSubscriptionVerification />} />
+              <Route path="sponsored" element={<AdminSponsoredListings />} />
               <Route path="payment-gateway" element={<AdminPaymentGateway />} />
               <Route path="payment-verification" element={<AdminPaymentVerification />} />
               <Route path="settings" element={<AdminSettings />} />
