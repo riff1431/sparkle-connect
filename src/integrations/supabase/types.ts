@@ -115,6 +115,47 @@ export type Database = {
           },
         ]
       }
+      cleaner_of_the_week: {
+        Row: {
+          cleaner_profile_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          note: string | null
+          updated_at: string
+          week_end: string
+          week_start: string
+        }
+        Insert: {
+          cleaner_profile_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          note?: string | null
+          updated_at?: string
+          week_end: string
+          week_start: string
+        }
+        Update: {
+          cleaner_profile_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          note?: string | null
+          updated_at?: string
+          week_end?: string
+          week_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cleaner_of_the_week_cleaner_profile_id_fkey"
+            columns: ["cleaner_profile_id"]
+            isOneToOne: false
+            referencedRelation: "cleaner_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cleaner_profiles: {
         Row: {
           bio: string | null

@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import SearchFilters, { FilterState } from "@/components/SearchFilters";
 import CleanerCard, { Cleaner } from "@/components/CleanerCard";
 import SponsoredSpotlight from "@/components/SponsoredSpotlight";
+import CleanerOfTheWeek from "@/components/CleanerOfTheWeek";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -271,6 +272,8 @@ const Search = () => {
 
           {/* Results */}
           <div className="flex-1 min-w-0">
+            {/* Cleaner of the Week pinned above sponsored */}
+            <CleanerOfTheWeek />
             {/* Sponsored Spotlight pinned above results */}
             <SponsoredSpotlight variant="search" limit={3} />
             {/* Desktop Sort & Results Header */}
