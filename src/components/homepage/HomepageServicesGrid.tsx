@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Star, Clock, MapPin, ChevronRight, Briefcase } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,20 +9,26 @@ import { useQuery } from "@tanstack/react-query";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { motion } from "framer-motion";
 
+const PAGE_SIZE = 6;
+
 const useHomepageServices = () => {
-  return useQuery({
-    queryKey: ["homepage-services"],
+  const [page, setPage] = useState(1);
+
+  const query = useQuery({
+    queryKey: ["homepage-services", page],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error, count } = await supabase
         .from("service_listings")
-        .select("*, cleaner_profiles(business_name, profile_image, is_verified, service_areas)")
+        .select("*, cleaner_profiles(business_name, profile_image, is_verified, service_areas)", { count: "exact" })
         .eq("is_active", true)
         .order("views_count", { ascending: false })
-        .limit(6);
+        .range(0, page * PAGE_SIZE - 1);
       if (error) throw error;
-      return data;
+      return { data, count };
     },
   });
+
+  return { ...query, page, setPage };
 };
 
 const ServiceCard = ({ service }: { service: any }) => (
@@ -88,10 +95,13 @@ const ServiceCard = ({ service }: { service: any }) => (
 );
 
 const HomepageServicesGrid = () => {
-  const { data: services, isLoading } = useHomepageServices();
+  const { data, isLoading, page, setPage } = useHomepageServices();
+  const services = data?.data;
+  const totalCount = data?.count ?? 0;
+  const hasMore = services ? services.length < totalCount : false;
   const revealRef = useScrollReveal<HTMLDivElement>({ y: 40 });
 
-  if (isLoading) {
+  if (isLoading && !services) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-7 w-44" />
@@ -129,6 +139,18 @@ const HomepageServicesGrid = () => {
           <ServiceCard key={service.id} service={service} />
         ))}
       </div>
+      {hasMore && (
+        <div className="flex justify-center pt-2">
+          <Button
+            variant="outline"
+            onClick={() => setPage(page + 1)}
+            disabled={isLoading}
+            className="px-6"
+          >
+            {isLoading ? "Loading..." : "Load More"}
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
