@@ -19,107 +19,108 @@ const Header = () => {
 
   const navLinks = [
     { label: "Find Cleaners", href: "/search" },
-    { label: "How It Works", href: "/#how-it-works" },
-    { label: "For Cleaners", href: "/for-cleaners" },
+    { label: "Post a Job", href: "/for-cleaners" },
+    { label: "My Bookings", href: "/dashboard/upcoming-bookings" },
+    { label: "Reviews", href: "/#how-it-works" },
   ];
 
   const getInitials = (email: string) => {
     return email.charAt(0).toUpperCase();
   };
 
+  const getUserName = () => {
+    if (!user) return "";
+    const name = user.user_metadata?.full_name;
+    if (name) return name;
+    return user.email?.split("@")[0] || "User";
+  };
+
   return (
-    <header className="sticky top-0 z-50 w-full bg-card/95 backdrop-blur-md border-b border-border shadow-sm">
+    <header className="sticky top-0 z-50 w-full bg-card border-b border-border shadow-sm">
       <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between lg:h-20">
+        <div className="flex h-14 items-center justify-between lg:h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
-            <img src={logo} alt="The Cleaning Network" className="h-12 w-auto lg:h-14" />
+          <Link to="/" className="flex items-center shrink-0">
+            <img src={logo} alt="The Cleaning Network" className="h-10 w-auto lg:h-12" />
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-8">
+          {/* Center Navigation */}
+          <nav className="hidden lg:flex items-center gap-1">
             {navLinks.map((link) => (
               <Link
                 key={link.label}
                 to={link.href}
-                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+                className="px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-primary transition-colors rounded-md hover:bg-muted"
               >
                 {link.label}
               </Link>
             ))}
           </nav>
 
-          {/* Desktop Actions */}
-          <div className="hidden lg:flex items-center gap-4">
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/search">
-                <Search className="h-4 w-4 mr-2" />
-                Search
-              </Link>
-            </Button>
-            
+          {/* Right Actions */}
+          <div className="hidden lg:flex items-center gap-2">
             {!loading && (
               <>
                 {user ? (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" className="gap-2">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-                            {getInitials(user.email || "U")}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="hidden sm:inline">Account</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48">
-                      {role === "admin" && (
-                        <>
-                          <DropdownMenuItem asChild>
-                            <Link to="/admin/dashboard" className="flex items-center gap-2 text-destructive">
-                              <Shield className="h-4 w-4" />
-                              Admin Panel
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                        </>
-                      )}
-                      <DropdownMenuItem asChild>
-                        <Link to="/dashboard" className="flex items-center gap-2">
-                          <LayoutDashboard className="h-4 w-4" />
-                          My Dashboard
+                  <div className="flex items-center gap-2">
+                    {role === "admin" && (
+                      <Button variant="ghost" size="sm" asChild className="text-destructive">
+                        <Link to="/admin/dashboard">
+                          <Shield className="h-4 w-4 mr-1" />
+                          Admin
                         </Link>
-                      </DropdownMenuItem>
-                      {role === "cleaner" && (
+                      </Button>
+                    )}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button className="flex items-center gap-2 px-2 py-1 rounded-md hover:bg-muted transition-colors">
+                          <Avatar className="h-7 w-7">
+                            <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                              {getInitials(user.email || "U")}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="text-sm font-medium text-foreground">{getUserName()}</span>
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48">
                         <DropdownMenuItem asChild>
-                          <Link to="/cleaner/dashboard" className="flex items-center gap-2">
-                            <Briefcase className="h-4 w-4" />
-                            Cleaner Portal
+                          <Link to="/dashboard" className="flex items-center gap-2">
+                            <LayoutDashboard className="h-4 w-4" />
+                            My Dashboard
                           </Link>
                         </DropdownMenuItem>
-                      )}
-                      <DropdownMenuItem asChild>
-                        <Link to="/dashboard/profile" className="flex items-center gap-2">
-                          <User className="h-4 w-4" />
-                          Profile
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={signOut} className="flex items-center gap-2 text-destructive">
-                        <LogOut className="h-4 w-4" />
-                        Sign Out
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                        {role === "cleaner" && (
+                          <DropdownMenuItem asChild>
+                            <Link to="/cleaner/dashboard" className="flex items-center gap-2">
+                              <Briefcase className="h-4 w-4" />
+                              Cleaner Portal
+                            </Link>
+                          </DropdownMenuItem>
+                        )}
+                        <DropdownMenuItem asChild>
+                          <Link to="/dashboard/profile" className="flex items-center gap-2">
+                            <User className="h-4 w-4" />
+                            Profile
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={signOut} className="flex items-center gap-2 text-destructive">
+                          <LogOut className="h-4 w-4" />
+                          Sign Out
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 ) : (
-                  <>
-                    <Button variant="outline" size="sm" asChild>
-                      <Link to="/auth">Log In</Link>
+                  <div className="flex items-center gap-1">
+                    <Button variant="ghost" size="sm" asChild className="text-sm">
+                      <Link to="/auth">Log in</Link>
                     </Button>
-                    <Button variant="cta" size="sm" asChild>
+                    <span className="text-muted-foreground text-sm">·</span>
+                    <Button variant="ghost" size="sm" asChild className="text-primary text-sm font-semibold">
                       <Link to="/auth">Sign Up</Link>
                     </Button>
-                  </>
+                  </div>
                 )}
               </>
             )}
@@ -137,7 +138,7 @@ const Header = () => {
         {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="lg:hidden py-4 border-t border-border animate-fade-in">
-            <nav className="flex flex-col gap-2">
+            <nav className="flex flex-col gap-1">
               {navLinks.map((link) => (
                 <Link
                   key={link.label}
