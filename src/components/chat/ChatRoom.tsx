@@ -50,7 +50,18 @@ const ChatRoom = ({ conversationId, onBack, isAdmin }: ChatRoomProps) => {
         .eq("id", partnerId)
         .single();
 
-      return profile;
+      // Check if partner is a cleaner — use business name if available
+      const { data: cleanerProfile } = await supabase
+        .from("cleaner_profiles")
+        .select("business_name, profile_image")
+        .eq("user_id", partnerId)
+        .maybeSingle();
+
+      return {
+        id: partnerId,
+        full_name: cleanerProfile?.business_name || profile?.full_name || "Unknown",
+        avatar_url: cleanerProfile?.profile_image || profile?.avatar_url || null,
+      };
     },
   });
 
