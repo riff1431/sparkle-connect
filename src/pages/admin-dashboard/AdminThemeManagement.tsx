@@ -7,7 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
-import { Paintbrush, Image, Upload, Loader2, RotateCcw, Save, Trash2 } from "lucide-react";
+import { Paintbrush, Image, Upload, Loader2, RotateCcw, Save, Trash2, Type } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
 
 interface ThemeSetting {
   id: string;
@@ -260,6 +261,36 @@ const AdminThemeManagement = () => {
     );
   };
 
+  const renderRangeInput = (setting: ThemeSetting) => {
+    const value = parseInt(getCurrentValue(setting) || "16", 10);
+
+    return (
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">{setting.label}</Label>
+        {setting.description && (
+          <p className="text-xs text-muted-foreground">{setting.description}</p>
+        )}
+        <div className="flex items-center gap-4">
+          <Slider
+            value={[value]}
+            min={10}
+            max={72}
+            step={1}
+            onValueChange={([v]) => handleChange(setting.setting_key, String(v))}
+            className="flex-1"
+          />
+          <span className="text-sm font-mono w-12 text-right">{value}px</span>
+        </div>
+        <p
+          className="p-3 rounded-lg border border-border bg-muted/50 mt-1"
+          style={{ fontSize: `${value}px` }}
+        >
+          Preview text at {value}px
+        </p>
+      </div>
+    );
+  };
+
   const renderSetting = (setting: ThemeSetting) => {
     switch (setting.setting_type) {
       case "color":
@@ -270,6 +301,8 @@ const AdminThemeManagement = () => {
         return renderSelectInput(setting);
       case "font":
         return renderFontInput(setting);
+      case "range":
+        return renderRangeInput(setting);
       default:
         return (
           <div className="space-y-2">
@@ -317,6 +350,7 @@ const AdminThemeManagement = () => {
       <Tabs defaultValue="branding" className="space-y-4">
         <TabsList>
           <TabsTrigger value="branding">Branding</TabsTrigger>
+          <TabsTrigger value="typography">Typography</TabsTrigger>
           <TabsTrigger value="colors">Colors</TabsTrigger>
           <TabsTrigger value="images">Images</TabsTrigger>
         </TabsList>
@@ -334,6 +368,27 @@ const AdminThemeManagement = () => {
               {getSettingsByCategory("branding").map((setting) => (
                 <div key={setting.id}>{renderSetting(setting)}</div>
               ))}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="typography">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Type className="h-5 w-5 text-primary" />
+                Typography
+              </CardTitle>
+              <CardDescription>
+                Set fonts and sizes for headings, body text, and small text across the entire site
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {getSettingsByCategory("typography").map((setting) => (
+                  <div key={setting.id}>{renderSetting(setting)}</div>
+                ))}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
