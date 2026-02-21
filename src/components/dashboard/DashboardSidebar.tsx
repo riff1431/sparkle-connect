@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUnreadMessages } from "@/hooks/useUnreadMessages";
+import { Badge } from "@/components/ui/badge";
 import {
   Sidebar,
   SidebarContent,
@@ -47,6 +49,7 @@ const DashboardSidebar = () => {
   const collapsed = state === "collapsed";
   const location = useLocation();
   const { signOut } = useAuth();
+  const unreadCount = useUnreadMessages();
 
   const isActive = (path: string) => {
     if (path === "/dashboard") {
@@ -78,7 +81,12 @@ const DashboardSidebar = () => {
                       activeClassName="bg-primary/10 text-primary font-medium"
                     >
                       <item.icon className="h-4 w-4 shrink-0" />
-                      <span>{item.title}</span>
+                      <span className="flex-1">{item.title}</span>
+                      {item.title === "Messages" && unreadCount > 0 && (
+                        <Badge variant="destructive" className="ml-auto h-5 min-w-5 px-1.5 text-[10px] justify-center">
+                          {unreadCount > 99 ? "99+" : unreadCount}
+                        </Badge>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

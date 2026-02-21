@@ -27,6 +27,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
+import { useUnreadMessages } from "@/hooks/useUnreadMessages";
+import { Badge } from "@/components/ui/badge";
 
 const menuItems = [
   { title: "Overview", url: "/cleaner/dashboard", icon: LayoutDashboard },
@@ -46,6 +48,7 @@ const CleanerDashboardSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { signOut } = useAuth();
+  const unreadCount = useUnreadMessages();
 
   const handleSignOut = async () => {
     await signOut();
@@ -75,7 +78,12 @@ const CleanerDashboardSidebar = () => {
                       )}
                     >
                       <item.icon className="h-5 w-5" />
-                      <span>{item.title}</span>
+                      <span className="flex-1">{item.title}</span>
+                      {item.title === "Messages" && unreadCount > 0 && (
+                        <Badge variant="destructive" className="ml-auto h-5 min-w-5 px-1.5 text-[10px] justify-center">
+                          {unreadCount > 99 ? "99+" : unreadCount}
+                        </Badge>
+                      )}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
