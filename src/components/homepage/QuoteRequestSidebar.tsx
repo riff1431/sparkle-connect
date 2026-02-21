@@ -131,7 +131,7 @@ const QuoteRequestSidebar = () => {
   }, [address, quoteType, services, preferredDate, preferredTime, notes, user, toast]);
 
   return (
-    <div ref={revealRef} style={{ opacity: 0 }}>
+    <div ref={revealRef}>
       <div className="glass-strong rounded-xl shadow-card p-5 transition-shadow duration-300 hover:shadow-card-hover">
         <h3 className="font-heading font-bold text-foreground text-lg mb-4">
           Request a Free Quote

@@ -21,18 +21,18 @@ const Index = () => {
           <SearchFilterBar />
 
           {/* Main 2-Column Layout */}
-          <div className="container mx-auto px-4 py-6">
-            <div className="grid lg:grid-cols-[1fr_320px] gap-6">
+          <div className="container mx-auto px-4 py-4 sm:py-6">
+            <div className="grid lg:grid-cols-[1fr_320px] gap-4 sm:gap-6">
               {/* Left Column */}
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 <CleanerOfTheWeekCard />
                 <CategoryChipsRow />
                 <SponsoredSpotlightSection />
                 <HomepageServicesGrid />
               </div>
 
-              {/* Right Sidebar */}
-              <div className="space-y-6">
+              {/* Right Sidebar - stacks below on mobile */}
+              <div className="space-y-4 sm:space-y-6">
                 <QuoteRequestSidebar />
                 <MapPreviewCard />
               </div>

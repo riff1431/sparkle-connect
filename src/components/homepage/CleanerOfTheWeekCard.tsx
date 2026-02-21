@@ -49,15 +49,15 @@ const CleanerOfTheWeekCard = () => {
         <img src={bgCleanerWeek} alt="" className="absolute inset-0 w-full h-full object-cover" />
         <div className="relative">
           {/* Top Tab Banner */}
-          <div className="flex items-stretch">
+          <div className="flex flex-col sm:flex-row items-stretch">
             {/* Gold Tab */}
-            <div className="relative flex items-center gap-2 px-5 py-2.5 text-white font-bold text-sm tracking-wide shadow-sm overflow-hidden">
+            <div className="relative flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 text-white font-bold text-xs sm:text-sm tracking-wide shadow-sm overflow-hidden">
               <img src={bgGoldRibbon} alt="" className="absolute inset-0 w-full h-full object-cover" />
               <Crown className="h-4 w-4 fill-current relative z-10" />
               <span className="relative z-10">Cleaner of the Week</span>
             </div>
             {/* Info Strip */}
-            <div className="flex items-center gap-3 px-4 py-2.5 glass-subtle text-muted-foreground text-sm flex-1 border-b border-border/30">
+            <div className="hidden sm:flex items-center gap-3 px-4 py-2.5 glass-subtle text-muted-foreground text-sm flex-1 border-b border-border/30">
               <span className="font-semibold text-foreground/80">sponsored Spotlight✨</span>
               <div className="flex items-center gap-0.5">
                 {[...Array(5)].map((_, i) => (
@@ -77,14 +77,14 @@ const CleanerOfTheWeekCard = () => {
           </div>
 
           {/* Card Body */}
-          <div className="p-5 flex gap-5">
+          <div className="p-4 sm:p-5 flex flex-col sm:flex-row gap-4 sm:gap-5">
             {/* Cleaner Image */}
             <motion.div
               className="shrink-0"
               whileHover={{ scale: 1.03 }}
               transition={{ type: "spring", stiffness: 300 }}
             >
-              <div className="w-36 h-44 rounded-xl overflow-hidden shadow-md border-2 border-white/80 ring-1 ring-border/30 transition-shadow duration-300 hover:shadow-xl">
+              <div className="w-28 h-32 sm:w-36 sm:h-44 rounded-xl overflow-hidden shadow-md border-2 border-white/80 ring-1 ring-border/30 transition-shadow duration-300 hover:shadow-xl">
                 <img
                   src={profile.profile_image || "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=300&h=400&fit=crop"}
                   alt={profile.business_name}
@@ -95,7 +95,7 @@ const CleanerOfTheWeekCard = () => {
 
             {/* Details */}
             <div className="flex-1 min-w-0 flex flex-col justify-center">
-              <h3 className="font-heading text-xl font-bold text-foreground mb-1.5">
+              <h3 className="font-heading text-lg sm:text-xl font-bold text-foreground mb-1.5">
                 {profile.business_name}
               </h3>
               <div className="flex items-center gap-2 mb-1.5">
@@ -118,14 +118,14 @@ const CleanerOfTheWeekCard = () => {
             </div>
 
             {/* CTA Buttons */}
-            <div className="shrink-0 flex flex-col gap-2.5 justify-center items-end">
+            <div className="shrink-0 flex flex-row sm:flex-col gap-2 sm:gap-2.5 justify-start sm:justify-center items-start sm:items-end">
               <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 400, damping: 15 }}>
-                <Button className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-bold px-7 py-2.5 rounded-lg shadow-sm hover:shadow-md text-sm transition-shadow">
+                <Button className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-bold px-5 sm:px-7 py-2 sm:py-2.5 rounded-lg shadow-sm hover:shadow-md text-xs sm:text-sm transition-shadow">
                   Request Quote
                 </Button>
               </motion.div>
               <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 400, damping: 15 }}>
-                <Button className="bg-primary hover:bg-primary-dark text-primary-foreground font-bold px-7 py-2.5 rounded-lg shadow-sm hover:shadow-md text-sm transition-shadow" asChild>
+                <Button className="bg-primary hover:bg-primary-dark text-primary-foreground font-bold px-5 sm:px-7 py-2 sm:py-2.5 rounded-lg shadow-sm hover:shadow-md text-xs sm:text-sm transition-shadow" asChild>
                   <Link to={`/cleaner/${profile.id}`}>
                     Book Now <ChevronRight className="h-4 w-4 ml-1" />
                   </Link>

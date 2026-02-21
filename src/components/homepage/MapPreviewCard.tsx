@@ -6,7 +6,7 @@ const MapPreviewCard = () => {
   const revealRef = useScrollReveal<HTMLDivElement>({ y: 30, delay: 0.3 });
 
   return (
-    <div ref={revealRef} style={{ opacity: 0 }}>
+    <div ref={revealRef}>
       <div className="glass-strong rounded-xl shadow-card overflow-hidden transition-shadow duration-300 hover:shadow-card-hover">
         {/* Map Image */}
         <div className="relative h-48 overflow-hidden">
