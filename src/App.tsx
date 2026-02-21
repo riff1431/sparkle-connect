@@ -17,6 +17,7 @@ import Addresses from "./pages/dashboard/Addresses";
 import Profile from "./pages/dashboard/Profile";
 import Settings from "./pages/dashboard/Settings";
 import Subscription from "./pages/dashboard/Subscription";
+import MyJobs from "./pages/dashboard/MyJobs";
 import CleanerDashboardLayout from "./components/cleaner-dashboard/CleanerDashboardLayout";
 import CleanerDashboardOverview from "./pages/cleaner-dashboard/CleanerDashboardOverview";
 import CleanerBookingRequests from "./pages/cleaner-dashboard/CleanerBookingRequests";
@@ -67,6 +68,7 @@ const App = () => (
               <Route path="upcoming" element={<UpcomingBookings />} />
               <Route path="history" element={<BookingHistory />} />
               <Route path="addresses" element={<Addresses />} />
+              <Route path="my-jobs" element={<MyJobs />} />
               <Route path="subscription" element={<Subscription />} />
               <Route path="profile" element={<Profile />} />
               <Route path="settings" element={<Settings />} />
