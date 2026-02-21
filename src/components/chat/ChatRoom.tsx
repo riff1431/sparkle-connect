@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Send, MessageSquare, Check, CheckCheck, Paperclip, X, FileText, Loader2, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, Send, MessageSquare, Check, CheckCheck, Paperclip, X, FileText, Loader2, Image as ImageIcon, CalendarDays, Clock4, DollarSign, MapPin, ClipboardList, StickyNote } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format, isToday, isYesterday } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
@@ -268,7 +268,9 @@ const ChatRoom = ({ conversationId, onBack, isAdmin }: ChatRoomProps) => {
                     <div
                       className={cn(
                         "max-w-[75%] rounded-2xl px-3.5 py-2 text-sm",
-                        isOwn
+                        isBookingDetailsMessage(msg.text)
+                          ? "p-0 bg-transparent"
+                          : isOwn
                           ? "bg-primary text-primary-foreground rounded-br-md"
                           : "bg-muted text-foreground rounded-bl-md"
                       )}
@@ -277,12 +279,19 @@ const ChatRoom = ({ conversationId, onBack, isAdmin }: ChatRoomProps) => {
                       {msg.attachment_url && (
                         <MessageAttachment url={msg.attachment_url} isOwn={isOwn} />
                       )}
-                      {/* Text — hide if it's just the auto-generated file name */}
-                      {msg.text && !msg.text.startsWith("📎 ") && (
-                        <p className="break-words whitespace-pre-wrap">{msg.text}</p>
-                      )}
-                      {msg.text && msg.text.startsWith("📎 ") && !msg.attachment_url && (
-                        <p className="break-words whitespace-pre-wrap">{msg.text}</p>
+                      {/* Booking details card */}
+                      {isBookingDetailsMessage(msg.text) ? (
+                        <BookingDetailsCard text={msg.text} />
+                      ) : (
+                        <>
+                          {/* Text — hide if it's just the auto-generated file name */}
+                          {msg.text && !msg.text.startsWith("📎 ") && (
+                            <p className="break-words whitespace-pre-wrap">{msg.text}</p>
+                          )}
+                          {msg.text && msg.text.startsWith("📎 ") && !msg.attachment_url && (
+                            <p className="break-words whitespace-pre-wrap">{msg.text}</p>
+                          )}
+                        </>
                       )}
                       <div
                         className={cn(
@@ -434,5 +443,91 @@ function formatDateLabel(dateStr: string) {
   if (isYesterday(d)) return "Yesterday";
   return format(d, "MMM d, yyyy");
 }
+
+/** Detects if a message is a booking details card */
+function isBookingDetailsMessage(text: string): boolean {
+  return text.startsWith("📋 **Booking Details**");
+}
+
+/** Parses and renders booking details as a styled card */
+const BookingDetailsCard = ({ text }: { text: string }) => {
+  const lines = text.split("\n").filter(Boolean);
+
+  const extract = (prefix: string) => {
+    const line = lines.find((l) => l.includes(prefix));
+    return line ? line.split(prefix)[1]?.trim() : null;
+  };
+
+  const service = extract("🧹 Service: ");
+  const date = extract("📅 Date: ");
+  const time = extract("🕐 Time: ");
+  const total = extract("💰 Total: ");
+  const address = extract("📍 ");
+  const notes = extract("📝 Notes: ");
+
+  return (
+    <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden w-64 sm:w-72">
+      <div className="bg-primary px-4 py-2.5">
+        <div className="flex items-center gap-2">
+          <ClipboardList className="h-4 w-4 text-primary-foreground" />
+          <span className="text-sm font-semibold text-primary-foreground">Booking Details</span>
+        </div>
+      </div>
+      <div className="p-3 space-y-2.5 text-sm">
+        {service && (
+          <div className="flex items-start gap-2.5">
+            <ClipboardList className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+            <div>
+              <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wide">Service</p>
+              <p className="font-semibold text-foreground">{service}</p>
+            </div>
+          </div>
+        )}
+        {date && (
+          <div className="flex items-start gap-2.5">
+            <CalendarDays className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+            <div>
+              <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wide">Date</p>
+              <p className="font-medium text-foreground">{date}</p>
+            </div>
+          </div>
+        )}
+        {time && (
+          <div className="flex items-start gap-2.5">
+            <Clock4 className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+            <div>
+              <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wide">Time</p>
+              <p className="font-medium text-foreground">{time}</p>
+            </div>
+          </div>
+        )}
+        {address && (
+          <div className="flex items-start gap-2.5">
+            <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+            <div>
+              <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wide">Location</p>
+              <p className="font-medium text-foreground">{address}</p>
+            </div>
+          </div>
+        )}
+        {notes && (
+          <div className="flex items-start gap-2.5">
+            <StickyNote className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+            <div>
+              <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wide">Notes</p>
+              <p className="text-muted-foreground">{notes}</p>
+            </div>
+          </div>
+        )}
+        {total && (
+          <div className="mt-1 pt-2 border-t border-border flex items-center justify-between">
+            <span className="text-muted-foreground font-medium">Total</span>
+            <span className="text-lg font-bold text-primary">{total}</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 export default ChatRoom;
