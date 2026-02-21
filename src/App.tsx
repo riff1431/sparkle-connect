@@ -57,10 +57,11 @@ import CleanerMessages from "./pages/cleaner-dashboard/CleanerMessages";
 import AdminMessages from "./pages/admin-dashboard/AdminMessages";
 import AdminQuoteRequests from "./pages/admin-dashboard/AdminQuoteRequests";
 import NotFound from "./pages/NotFound";
-
+import { useMessageNotifications } from "@/hooks/useMessageNotifications";
 const queryClient = new QueryClient();
 
 const AnimatedApp = () => {
+  useMessageNotifications();
   return (
     <PageTransition>
       <Routes>
