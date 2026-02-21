@@ -188,7 +188,7 @@ const ServiceDetail = () => {
 
       setShowConfirmDialog(false);
       toast({ title: "Service Booked!", description: "Your booking has been placed. The cleaner will confirm shortly." });
-      navigate("/dashboard/upcoming-bookings");
+      navigate("/dashboard/upcoming");
     } catch (err: any) {
       toast({ title: "Booking failed", description: err.message || "Something went wrong.", variant: "destructive" });
     } finally {
