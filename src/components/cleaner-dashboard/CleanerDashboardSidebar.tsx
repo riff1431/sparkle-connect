@@ -10,6 +10,7 @@ import {
   Zap,
   ShoppingBag,
   FileQuestion,
+  FileText,
   MessageSquare,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -40,6 +41,7 @@ const menuItems = [
   { title: "Membership", url: "/cleaner/subscription", icon: Crown },
   { title: "Sponsored Spotlight", url: "/cleaner/sponsorship", icon: Zap },
   { title: "My Profile", url: "/cleaner/profile", icon: User },
+  { title: "Invoices", url: "/cleaner/invoices", icon: FileText },
   { title: "Earnings", url: "/cleaner/earnings", icon: DollarSign },
   { title: "Settings", url: "/cleaner/settings", icon: Settings },
 ];
