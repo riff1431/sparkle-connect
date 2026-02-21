@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { trackSponsoredClick } from "@/hooks/useSponsoredListings";
+import { motion } from "framer-motion";
 import bgSponsored from "@/assets/bg-sponsored.png";
 
 interface SponsoredCleaner {
@@ -22,16 +23,24 @@ const SponsoredSpotlightCard = ({ cleaner, listingId }: { cleaner: SponsoredClea
   const handleBookClick = () => trackSponsoredClick(listingId, "book");
 
   return (
-    <div className="rounded-2xl border border-border shadow-lg overflow-hidden relative transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+    <motion.div
+      className="rounded-2xl border border-border/50 shadow-lg overflow-hidden relative transition-shadow duration-300 hover:shadow-xl"
+      whileHover={{ y: -3 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+    >
       <img src={bgSponsored} alt="" className="absolute inset-0 w-full h-full object-cover" />
       <div className="p-5 relative">
         <div className="flex gap-5">
           {/* Image */}
-          <div className="shrink-0">
-            <div className="w-24 h-28 rounded-xl overflow-hidden shadow-md border-2 border-white ring-1 ring-border">
+          <motion.div
+            className="shrink-0"
+            whileHover={{ scale: 1.03 }}
+            transition={{ type: "spring", stiffness: 300 }}
+          >
+            <div className="w-24 h-28 rounded-xl overflow-hidden shadow-md border-2 border-white/80 ring-1 ring-border/30">
               <img src={cleaner.image} alt={cleaner.name} className="w-full h-full object-cover" />
             </div>
-          </div>
+          </motion.div>
 
           {/* Info */}
           <div className="flex-1 min-w-0 flex flex-col justify-center">
@@ -67,24 +76,28 @@ const SponsoredSpotlightCard = ({ cleaner, listingId }: { cleaner: SponsoredClea
 
           {/* CTAs */}
           <div className="shrink-0 flex flex-col gap-2.5 justify-center">
-            <Button
-              className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-bold px-6 py-2 rounded-lg shadow-sm text-sm"
-              onClick={handleQuoteClick}
-            >
-              Request Quote
-            </Button>
-            <Button
-              className="bg-primary hover:bg-primary-dark text-primary-foreground font-bold px-6 py-2 rounded-lg shadow-sm text-sm"
-              asChild
-              onClick={handleBookClick}
-            >
-              <Link to={`/cleaner/${cleaner.id}`}>Book Now</Link>
-            </Button>
+            <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
+              <Button
+                className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-bold px-6 py-2 rounded-lg shadow-sm text-sm"
+                onClick={handleQuoteClick}
+              >
+                Request Quote
+              </Button>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
+              <Button
+                className="bg-primary hover:bg-primary-dark text-primary-foreground font-bold px-6 py-2 rounded-lg shadow-sm text-sm"
+                asChild
+                onClick={handleBookClick}
+              >
+                <Link to={`/cleaner/${cleaner.id}`}>Book Now</Link>
+              </Button>
+            </motion.div>
           </div>
         </div>
 
         {/* Bottom Stats Bar */}
-        <div className="mt-4 pt-3 border-t border-border/60 flex items-center gap-4 flex-wrap">
+        <div className="mt-4 pt-3 border-t border-border/40 flex items-center gap-4 flex-wrap">
           <span className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
             <Clock className="h-3.5 w-3.5" />
             Starting at <span className="text-foreground font-bold">${cleaner.startingPrice}</span>
@@ -97,17 +110,19 @@ const SponsoredSpotlightCard = ({ cleaner, listingId }: { cleaner: SponsoredClea
             <Eye className="h-3.5 w-3.5" />
             Visit
           </span>
-          <Button
-            variant="outline"
-            size="sm"
-            className="ml-auto border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground font-semibold text-xs px-4 rounded-lg"
-            onClick={handleQuoteClick}
-          >
-            Request Quote <ChevronRight className="h-3.5 w-3.5 ml-1" />
-          </Button>
+          <motion.div className="ml-auto" whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground font-semibold text-xs px-4 rounded-lg"
+              onClick={handleQuoteClick}
+            >
+              Request Quote <ChevronRight className="h-3.5 w-3.5 ml-1" />
+            </Button>
+          </motion.div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
