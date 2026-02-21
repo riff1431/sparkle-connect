@@ -11,6 +11,7 @@ import {
   Info,
   MessageSquare,
   Loader2,
+  Eye,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,6 +30,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import {
   Tooltip,
   TooltipContent,
@@ -65,6 +74,7 @@ const UpcomingBookings = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [chattingBookingId, setChattingBookingId] = useState<string | null>(null);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const { 
     settings, 
     formatCurrency, 
@@ -362,8 +372,9 @@ const UpcomingBookings = () => {
                       )}
 
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
-                          Reschedule
+                        <Button variant="outline" size="sm" onClick={() => setSelectedBooking(booking)}>
+                          <Eye className="h-4 w-4 mr-1" />
+                          View Details
                         </Button>
                         
                         {cancellationAllowed ? (
@@ -436,6 +447,106 @@ const UpcomingBookings = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Booking Details Dialog */}
+      <Dialog open={!!selectedBooking} onOpenChange={() => setSelectedBooking(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Booking Details</DialogTitle>
+            <DialogDescription>
+              Review your booking information.
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedBooking && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Service</span>
+                <span className="font-medium">{selectedBooking.service_type}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Date</span>
+                <span className="font-medium">
+                  {format(new Date(selectedBooking.scheduled_date), "EEEE, MMMM d, yyyy")}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Time</span>
+                <span className="font-medium">{selectedBooking.scheduled_time}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Duration</span>
+                <span className="font-medium">{selectedBooking.duration_hours} hours</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Price</span>
+                <span className="font-bold text-lg">{formatCurrency(selectedBooking.service_price)}</span>
+              </div>
+              {selectedBooking.cleaner_name && (
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Cleaner</span>
+                  <span className="font-medium">{selectedBooking.cleaner_name}</span>
+                </div>
+              )}
+              {selectedBooking.addresses && (
+                <div>
+                  <span className="text-muted-foreground block mb-1">Address</span>
+                  <p className="text-sm bg-muted p-3 rounded-lg">
+                    {selectedBooking.addresses.label}: {selectedBooking.addresses.street_address}, {selectedBooking.addresses.city}, {selectedBooking.addresses.province} {selectedBooking.addresses.postal_code}
+                  </p>
+                </div>
+              )}
+              {selectedBooking.special_instructions && (
+                <div>
+                  <span className="text-muted-foreground block mb-1">Special Instructions</span>
+                  <p className="text-sm bg-muted p-3 rounded-lg">
+                    {selectedBooking.special_instructions}
+                  </p>
+                </div>
+              )}
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Status</span>
+                {getStatusBadge(selectedBooking.status)}
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            {selectedBooking?.cleaner_id && selectedBooking?.status !== "cancelled" && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  const booking = selectedBooking!;
+                  setSelectedBooking(null);
+                  handleStartChat(booking);
+                }}
+                disabled={chattingBookingId === selectedBooking?.id}
+              >
+                {chattingBookingId === selectedBooking?.id ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <MessageSquare className="mr-2 h-4 w-4" />
+                )}
+                Chat
+              </Button>
+            )}
+            {selectedBooking && canCancel(selectedBooking) && (
+              <Button
+                variant="outline"
+                className="text-destructive hover:text-destructive"
+                onClick={() => {
+                  const id = selectedBooking.id;
+                  setSelectedBooking(null);
+                  handleCancelBooking(id);
+                }}
+              >
+                <X className="mr-2 h-4 w-4" />
+                Cancel Booking
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
