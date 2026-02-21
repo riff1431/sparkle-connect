@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { useActiveCleanerOfTheWeek } from "@/hooks/useCleanerOfTheWeek";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "react-router-dom";
+import bgCleanerWeek from "@/assets/bg-cleaner-week.png";
+import bgGoldRibbon from "@/assets/bg-gold-ribbon.png";
 
 const CleanerOfTheWeekCard = () => {
   const { data, isLoading } = useActiveCleanerOfTheWeek();
@@ -36,13 +38,17 @@ const CleanerOfTheWeekCard = () => {
   const reviewCount = 55; // placeholder
 
   return (
-    <div className="rounded-2xl border border-border shadow-lg overflow-hidden bg-gradient-to-br from-sky-50/80 via-white to-blue-50/60">
+    <div className="rounded-2xl border border-border shadow-lg overflow-hidden relative">
+      {/* Background Image */}
+      <img src={bgCleanerWeek} alt="" className="absolute inset-0 w-full h-full object-cover" />
+      <div className="relative">
       {/* Top Tab Banner */}
       <div className="flex items-stretch">
         {/* Gold Tab */}
-        <div className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-400 to-yellow-500 text-white font-bold text-sm tracking-wide shadow-sm">
-          <Crown className="h-4 w-4 fill-current" />
-          Cleaner of the Week
+        <div className="relative flex items-center gap-2 px-5 py-2.5 text-white font-bold text-sm tracking-wide shadow-sm overflow-hidden">
+          <img src={bgGoldRibbon} alt="" className="absolute inset-0 w-full h-full object-cover" />
+          <Crown className="h-4 w-4 fill-current relative z-10" />
+          <span className="relative z-10">Cleaner of the Week</span>
         </div>
         {/* Info Strip */}
         <div className="flex items-center gap-3 px-4 py-2.5 bg-gradient-to-r from-slate-100 to-slate-50 text-muted-foreground text-sm flex-1 border-b border-border">
@@ -119,6 +125,7 @@ const CleanerOfTheWeekCard = () => {
           </span>
         </div>
       </div>
+    </div>
     </div>
   );
 };
