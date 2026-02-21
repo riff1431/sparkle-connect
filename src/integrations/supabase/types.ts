@@ -213,6 +213,104 @@ export type Database = {
         }
         Relationships: []
       }
+      job_applications: {
+        Row: {
+          applicant_id: string
+          cover_message: string | null
+          created_at: string
+          id: string
+          job_id: string
+          proposed_rate: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          applicant_id: string
+          cover_message?: string | null
+          created_at?: string
+          id?: string
+          job_id: string
+          proposed_rate?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          applicant_id?: string
+          cover_message?: string | null
+          created_at?: string
+          id?: string
+          job_id?: string
+          proposed_rate?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_applications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      jobs: {
+        Row: {
+          applications_count: number
+          budget_max: number | null
+          budget_min: number | null
+          created_at: string
+          description: string
+          duration_hours: number | null
+          id: string
+          location: string
+          preferred_date: string | null
+          preferred_time: string | null
+          service_type: string
+          status: string
+          title: string
+          updated_at: string
+          urgency: string
+          user_id: string
+        }
+        Insert: {
+          applications_count?: number
+          budget_max?: number | null
+          budget_min?: number | null
+          created_at?: string
+          description: string
+          duration_hours?: number | null
+          id?: string
+          location: string
+          preferred_date?: string | null
+          preferred_time?: string | null
+          service_type?: string
+          status?: string
+          title: string
+          updated_at?: string
+          urgency?: string
+          user_id: string
+        }
+        Update: {
+          applications_count?: number
+          budget_max?: number | null
+          budget_min?: number | null
+          created_at?: string
+          description?: string
+          duration_hours?: number | null
+          id?: string
+          location?: string
+          preferred_date?: string | null
+          preferred_time?: string | null
+          service_type?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          urgency?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       payment_records: {
         Row: {
           amount: number
