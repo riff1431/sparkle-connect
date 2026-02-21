@@ -56,6 +56,7 @@ import CustomerMessages from "./pages/dashboard/Messages";
 import CleanerMessages from "./pages/cleaner-dashboard/CleanerMessages";
 import AdminMessages from "./pages/admin-dashboard/AdminMessages";
 import AdminQuoteRequests from "./pages/admin-dashboard/AdminQuoteRequests";
+import AdminNotifications from "./pages/admin-dashboard/AdminNotifications";
 import NotFound from "./pages/NotFound";
 import { useMessageNotifications } from "@/hooks/useMessageNotifications";
 const queryClient = new QueryClient();
@@ -123,6 +124,7 @@ const AnimatedApp = () => {
           <Route path="service-listings" element={<AdminServiceListings />} />
           <Route path="quotes" element={<AdminQuoteRequests />} />
           <Route path="messages" element={<AdminMessages />} />
+          <Route path="notifications" element={<AdminNotifications />} />
         </Route>
         
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
