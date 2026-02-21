@@ -2,9 +2,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import GlobalFontProvider from "@/components/GlobalFontProvider";
+import PageTransition from "@/components/PageTransition";
 import Index from "./pages/Index";
 import Search from "./pages/Search";
 import CleanerPublicProfile from "./pages/CleanerProfile";
@@ -56,6 +57,74 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+const AnimatedApp = () => {
+  return (
+    <PageTransition>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/search" element={<Search />} />
+        <Route path="/cleaner/:id" element={<CleanerPublicProfile />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/for-cleaners" element={<ForCleaners />} />
+        <Route path="/reviews" element={<Reviews />} />
+        <Route path="/jobs" element={<Jobs />} />
+        <Route path="/jobs/:id" element={<JobDetail />} />
+        <Route path="/services" element={<FindServices />} />
+        <Route path="/services/:id" element={<ServiceDetail />} />
+        
+        {/* Customer Dashboard Routes */}
+        <Route path="/dashboard" element={<DashboardLayout />}>
+          <Route index element={<DashboardOverview />} />
+          <Route path="upcoming" element={<UpcomingBookings />} />
+          <Route path="history" element={<BookingHistory />} />
+          <Route path="addresses" element={<Addresses />} />
+          <Route path="my-jobs" element={<MyJobs />} />
+          <Route path="quotes" element={<MyQuotes />} />
+          <Route path="subscription" element={<Subscription />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="settings" element={<Settings />} />
+        </Route>
+
+        {/* Cleaner Dashboard Routes */}
+        <Route path="/cleaner" element={<CleanerDashboardLayout />}>
+          <Route path="dashboard" element={<CleanerDashboardOverview />} />
+          <Route path="bookings" element={<CleanerBookingRequests />} />
+          <Route path="schedule" element={<CleanerSchedule />} />
+          <Route path="subscription" element={<CleanerSubscription />} />
+          <Route path="sponsorship" element={<CleanerSponsorship />} />
+          <Route path="profile" element={<CleanerProfile />} />
+          <Route path="earnings" element={<CleanerEarnings />} />
+          <Route path="settings" element={<CleanerSettings />} />
+          <Route path="services" element={<CleanerServiceListings />} />
+          <Route path="quotes" element={<CleanerQuoteRequests />} />
+        </Route>
+
+        {/* Admin Dashboard Routes */}
+        <Route path="/admin" element={<AdminDashboardLayout />}>
+          <Route path="dashboard" element={<AdminDashboardOverview />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="cleaners" element={<AdminCleaners />} />
+          <Route path="bookings" element={<AdminBookings />} />
+          <Route path="subscriptions" element={<AdminSubscriptionPlans />} />
+          <Route path="subscription-verification" element={<AdminSubscriptionVerification />} />
+          <Route path="sponsored" element={<AdminSponsoredListings />} />
+          <Route path="cleaner-of-the-week" element={<AdminCleanerOfTheWeek />} />
+          <Route path="jobs" element={<AdminJobs />} />
+          <Route path="payment-gateway" element={<AdminPaymentGateway />} />
+          <Route path="payment-verification" element={<AdminPaymentVerification />} />
+          <Route path="settings" element={<AdminSettings />} />
+          <Route path="theme" element={<AdminThemeManagement />} />
+          <Route path="service-listings" element={<AdminServiceListings />} />
+          <Route path="quotes" element={<AdminQuoteRequests />} />
+        </Route>
+        
+        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </PageTransition>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -64,67 +133,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/search" element={<Search />} />
-            <Route path="/cleaner/:id" element={<CleanerPublicProfile />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/for-cleaners" element={<ForCleaners />} />
-            <Route path="/reviews" element={<Reviews />} />
-            <Route path="/jobs" element={<Jobs />} />
-            <Route path="/jobs/:id" element={<JobDetail />} />
-            <Route path="/services" element={<FindServices />} />
-            <Route path="/services/:id" element={<ServiceDetail />} />
-            
-            {/* Customer Dashboard Routes */}
-            <Route path="/dashboard" element={<DashboardLayout />}>
-              <Route index element={<DashboardOverview />} />
-              <Route path="upcoming" element={<UpcomingBookings />} />
-              <Route path="history" element={<BookingHistory />} />
-              <Route path="addresses" element={<Addresses />} />
-              <Route path="my-jobs" element={<MyJobs />} />
-              <Route path="quotes" element={<MyQuotes />} />
-              <Route path="subscription" element={<Subscription />} />
-              <Route path="profile" element={<Profile />} />
-              <Route path="settings" element={<Settings />} />
-            </Route>
-
-            {/* Cleaner Dashboard Routes */}
-            <Route path="/cleaner" element={<CleanerDashboardLayout />}>
-              <Route path="dashboard" element={<CleanerDashboardOverview />} />
-              <Route path="bookings" element={<CleanerBookingRequests />} />
-              <Route path="schedule" element={<CleanerSchedule />} />
-              <Route path="subscription" element={<CleanerSubscription />} />
-              <Route path="sponsorship" element={<CleanerSponsorship />} />
-              <Route path="profile" element={<CleanerProfile />} />
-              <Route path="earnings" element={<CleanerEarnings />} />
-              <Route path="settings" element={<CleanerSettings />} />
-              <Route path="services" element={<CleanerServiceListings />} />
-              <Route path="quotes" element={<CleanerQuoteRequests />} />
-            </Route>
-
-            {/* Admin Dashboard Routes */}
-            <Route path="/admin" element={<AdminDashboardLayout />}>
-              <Route path="dashboard" element={<AdminDashboardOverview />} />
-              <Route path="users" element={<AdminUsers />} />
-              <Route path="cleaners" element={<AdminCleaners />} />
-              <Route path="bookings" element={<AdminBookings />} />
-              <Route path="subscriptions" element={<AdminSubscriptionPlans />} />
-              <Route path="subscription-verification" element={<AdminSubscriptionVerification />} />
-              <Route path="sponsored" element={<AdminSponsoredListings />} />
-              <Route path="cleaner-of-the-week" element={<AdminCleanerOfTheWeek />} />
-              <Route path="jobs" element={<AdminJobs />} />
-              <Route path="payment-gateway" element={<AdminPaymentGateway />} />
-              <Route path="payment-verification" element={<AdminPaymentVerification />} />
-              <Route path="settings" element={<AdminSettings />} />
-              <Route path="theme" element={<AdminThemeManagement />} />
-              <Route path="service-listings" element={<AdminServiceListings />} />
-              <Route path="quotes" element={<AdminQuoteRequests />} />
-            </Route>
-            
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <AnimatedApp />
         </BrowserRouter>
       </TooltipProvider>
       </GlobalFontProvider>
