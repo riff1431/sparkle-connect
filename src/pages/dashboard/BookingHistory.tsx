@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import {
   CalendarDays,
@@ -8,6 +8,8 @@ import {
   XCircle,
   Star,
   RotateCcw,
+  MessageSquare,
+  Loader2,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,6 +24,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { usePlatformSettings } from "@/hooks/usePlatformSettings";
 
 interface Booking {
   id: string;
@@ -29,18 +33,27 @@ interface Booking {
   service_price: number;
   scheduled_date: string;
   scheduled_time: string;
+  duration_hours: number;
   status: string;
   cleaner_name: string | null;
+  cleaner_id: string | null;
+  special_instructions: string | null;
   addresses: {
+    label: string;
+    street_address: string;
     city: string;
   } | null;
 }
 
 const BookingHistory = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const { formatCurrency } = usePlatformSettings();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
+  const [chattingBookingId, setChattingBookingId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -55,9 +68,14 @@ const BookingHistory = () => {
             service_price,
             scheduled_date,
             scheduled_time,
+            duration_hours,
             status,
             cleaner_name,
+            cleaner_id,
+            special_instructions,
             addresses (
+              label,
+              street_address,
               city
             )
           `)
@@ -81,6 +99,74 @@ const BookingHistory = () => {
 
     fetchBookings();
   }, [user, filter]);
+
+  const handleStartChat = async (booking: Booking) => {
+    if (!user || !booking.cleaner_id) {
+      toast({ variant: "destructive", title: "Cannot start chat", description: "No cleaner assigned to this booking." });
+      return;
+    }
+
+    setChattingBookingId(booking.id);
+    try {
+      const { data: existing } = await supabase
+        .from("conversations")
+        .select("id")
+        .eq("customer_id", user.id)
+        .eq("provider_id", booking.cleaner_id)
+        .maybeSingle();
+
+      let conversationId: string;
+
+      if (existing) {
+        conversationId = existing.id;
+      } else {
+        const { data: newConvo, error } = await supabase
+          .from("conversations")
+          .insert({ customer_id: user.id, provider_id: booking.cleaner_id })
+          .select("id")
+          .single();
+        if (error) throw error;
+        conversationId = newConvo.id;
+      }
+
+      // Send booking details as first message if conversation is empty
+      const { data: msgs } = await supabase
+        .from("messages")
+        .select("id")
+        .eq("conversation_id", conversationId)
+        .limit(1);
+
+      if (!msgs || msgs.length === 0) {
+        const dateStr = format(new Date(booking.scheduled_date), "EEEE, MMMM d, yyyy");
+        const addressStr = booking.addresses
+          ? `📍 ${booking.addresses.label}: ${booking.addresses.street_address}, ${booking.addresses.city}`
+          : "";
+
+        const bookingMessage = [
+          `📋 **Booking Details**`,
+          `🧹 Service: ${booking.service_type}`,
+          `📅 Date: ${dateStr}`,
+          `🕐 Time: ${booking.scheduled_time} • ${booking.duration_hours} hours`,
+          `💰 Total: ${formatCurrency(booking.service_price)}`,
+          addressStr,
+          booking.special_instructions ? `📝 Notes: ${booking.special_instructions}` : "",
+        ].filter(Boolean).join("\n");
+
+        await supabase.from("messages").insert({
+          conversation_id: conversationId,
+          sender_id: user.id,
+          text: bookingMessage,
+        });
+      }
+
+      navigate(`/dashboard/messages?conversation=${conversationId}`);
+    } catch (error) {
+      console.error("Error starting chat:", error);
+      toast({ variant: "destructive", title: "Error", description: "Failed to start chat." });
+    } finally {
+      setChattingBookingId(null);
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -164,6 +250,22 @@ const BookingHistory = () => {
                       <div className="font-semibold text-lg">${booking.service_price}</div>
                     </div>
                     <div className="flex gap-2">
+                      {booking.cleaner_id && booking.status !== "cancelled" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-primary hover:text-primary"
+                          disabled={chattingBookingId === booking.id}
+                          onClick={() => handleStartChat(booking)}
+                        >
+                          {chattingBookingId === booking.id ? (
+                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          ) : (
+                            <MessageSquare className="h-4 w-4 mr-1" />
+                          )}
+                          Chat
+                        </Button>
+                      )}
                       {booking.status === "completed" && (
                         <Button variant="outline" size="sm">
                           <Star className="h-4 w-4 mr-1" />
