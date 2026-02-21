@@ -144,6 +144,37 @@ const ServiceDetail = () => {
     },
   });
 
+  // Fetch reviews for this cleaner
+  const { data: cleanerReviews = [] } = useQuery({
+    queryKey: ["service-reviews", listing?.cleaner_profile_id],
+    enabled: !!listing?.cleaner_profile_id,
+    queryFn: async () => {
+      const { data: reviews, error } = await supabase
+        .from("reviews")
+        .select("*")
+        .eq("cleaner_profile_id", listing!.cleaner_profile_id)
+        .order("created_at", { ascending: false })
+        .limit(10);
+      if (error) throw error;
+
+      const reviewerIds = [...new Set((reviews || []).map((r) => r.reviewer_id))];
+      if (reviewerIds.length === 0) return [];
+
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, full_name, avatar_url")
+        .in("id", reviewerIds);
+
+      const profileMap = new Map((profiles || []).map((p) => [p.id, p]));
+
+      return (reviews || []).map((r) => ({
+        ...r,
+        reviewer_name: profileMap.get(r.reviewer_id)?.full_name || null,
+        reviewer_avatar: profileMap.get(r.reviewer_id)?.avatar_url || null,
+      }));
+    },
+  });
+
   const getPriceLabel = (type: string, price: number) => {
     switch (type) {
       case "hourly": return `$${price}/hr`;
@@ -505,6 +536,83 @@ const ServiceDetail = () => {
                   View Profile
                 </Button>
               </div>
+            </motion.div>
+
+            {/* Customer Reviews Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.35 }}
+            >
+              <Separator className="mb-8" />
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="font-heading font-bold text-lg text-foreground flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5 text-primary" />
+                  Customer Reviews
+                  {listing.cleaner_reviews_count > 0 && (
+                    <span className="text-sm font-normal text-muted-foreground">({listing.cleaner_reviews_count})</span>
+                  )}
+                </h2>
+                {listing.cleaner_rating > 0 && (
+                  <div className="flex items-center gap-1.5">
+                    <Star className="h-4 w-4 fill-accent text-accent" />
+                    <span className="font-bold text-foreground text-sm">{listing.cleaner_rating.toFixed(1)}</span>
+                  </div>
+                )}
+              </div>
+
+              {cleanerReviews.length === 0 ? (
+                <div className="text-center py-10 rounded-2xl bg-muted/30 border border-border/40">
+                  <Star className="h-8 w-8 text-muted-foreground/30 mx-auto mb-3" />
+                  <p className="text-sm font-medium text-foreground">No reviews yet</p>
+                  <p className="text-xs text-muted-foreground mt-1">Be the first to review after booking!</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {cleanerReviews.map((review) => (
+                    <div key={review.id} className="flex items-start gap-3 p-4 rounded-xl bg-card border border-border/60">
+                      <Avatar className="h-9 w-9 shrink-0">
+                        <AvatarImage src={review.reviewer_avatar || undefined} />
+                        <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+                          {(review.reviewer_name || "U").charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-semibold text-sm text-foreground">{review.reviewer_name || "Anonymous"}</span>
+                          <span className="text-[11px] text-muted-foreground shrink-0">
+                            {new Date(review.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                          </span>
+                        </div>
+                        <div className="flex gap-0.5 mt-1">
+                          {[1, 2, 3, 4, 5].map((s) => (
+                            <Star
+                              key={s}
+                              className={cn(
+                                "h-3.5 w-3.5",
+                                s <= review.rating ? "fill-accent text-accent" : "text-muted-foreground/20"
+                              )}
+                            />
+                          ))}
+                        </div>
+                        {review.comment && (
+                          <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{review.comment}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+
+                  {listing.cleaner_reviews_count > cleanerReviews.length && (
+                    <Button
+                      variant="ghost"
+                      className="w-full text-primary"
+                      onClick={() => navigate("/reviews")}
+                    >
+                      View All Reviews <ChevronRight className="h-4 w-4 ml-1" />
+                    </Button>
+                  )}
+                </div>
+              )}
             </motion.div>
           </div>
 
