@@ -39,6 +39,7 @@ import AdminSubscriptionVerification from "./pages/admin-dashboard/AdminSubscrip
 import AdminSponsoredListings from "./pages/admin-dashboard/AdminSponsoredListings";
 import AdminCleanerOfTheWeek from "./pages/admin-dashboard/AdminCleanerOfTheWeek";
 import AdminThemeManagement from "./pages/admin-dashboard/AdminThemeManagement";
+import AdminJobs from "./pages/admin-dashboard/AdminJobs";
 import CleanerSponsorship from "./pages/cleaner-dashboard/CleanerSponsorship";
 import Reviews from "./pages/Reviews";
 import Jobs from "./pages/Jobs";
@@ -96,6 +97,7 @@ const App = () => (
               <Route path="subscription-verification" element={<AdminSubscriptionVerification />} />
               <Route path="sponsored" element={<AdminSponsoredListings />} />
               <Route path="cleaner-of-the-week" element={<AdminCleanerOfTheWeek />} />
+              <Route path="jobs" element={<AdminJobs />} />
               <Route path="payment-gateway" element={<AdminPaymentGateway />} />
               <Route path="payment-verification" element={<AdminPaymentVerification />} />
               <Route path="settings" element={<AdminSettings />} />

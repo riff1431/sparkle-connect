@@ -34,6 +34,7 @@ const menuItems = [
   { title: "Users", url: "/admin/users", icon: Users },
   { title: "Cleaners", url: "/admin/cleaners", icon: Briefcase },
   { title: "Bookings", url: "/admin/bookings", icon: CalendarCheck },
+  { title: "Jobs", url: "/admin/jobs", icon: Briefcase },
   { title: "Cleaner of the Week", url: "/admin/cleaner-of-the-week", icon: Crown },
   { title: "Sponsored Spotlight", url: "/admin/sponsored", icon: Zap },
   { title: "Subscription Plans", url: "/admin/subscriptions", icon: Crown },
