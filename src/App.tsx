@@ -40,6 +40,7 @@ import AdminCleanerOfTheWeek from "./pages/admin-dashboard/AdminCleanerOfTheWeek
 import AdminThemeManagement from "./pages/admin-dashboard/AdminThemeManagement";
 import CleanerSponsorship from "./pages/cleaner-dashboard/CleanerSponsorship";
 import Reviews from "./pages/Reviews";
+import Jobs from "./pages/Jobs";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -58,6 +59,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/for-cleaners" element={<ForCleaners />} />
             <Route path="/reviews" element={<Reviews />} />
+            <Route path="/jobs" element={<Jobs />} />
             
             {/* Customer Dashboard Routes */}
             <Route path="/dashboard" element={<DashboardLayout />}>

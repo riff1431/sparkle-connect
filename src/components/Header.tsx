@@ -19,7 +19,7 @@ const Header = () => {
 
   const navLinks = [
     { label: "Find Cleaners", href: "/search", icon: Search },
-    { label: "Post a Job", href: "/for-cleaners", icon: Briefcase },
+    { label: "Post a Job", href: "/jobs", icon: Briefcase },
     { label: "My Bookings", href: "/dashboard/upcoming", icon: CalendarDays },
     { label: "Reviews", href: "/reviews", icon: Star },
   ];
