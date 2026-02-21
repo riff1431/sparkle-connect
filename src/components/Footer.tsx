@@ -1,8 +1,22 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from "lucide-react";
-import logo from "@/assets/logo.jpeg";
+import { supabase } from "@/integrations/supabase/client";
+import defaultLogo from "@/assets/logo.jpeg";
 
 const Footer = () => {
+  const [logo, setLogo] = useState(defaultLogo);
+
+  useEffect(() => {
+    supabase
+      .from("theme_settings")
+      .select("setting_value")
+      .eq("setting_key", "logo_url")
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.setting_value) setLogo(data.setting_value);
+      });
+  }, []);
   const footerLinks = {
     forCustomers: [
       { label: "Find Cleaners", href: "/search" },

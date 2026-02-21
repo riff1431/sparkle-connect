@@ -15,6 +15,7 @@ import {
   ShoppingBag,
   FileQuestion
 } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Sidebar,
@@ -30,6 +31,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import defaultLogo from "@/assets/logo-new.png";
 
 const menuItems = [
   { title: "Overview", url: "/admin/dashboard", icon: LayoutDashboard },
@@ -53,6 +56,18 @@ const AdminDashboardSidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { signOut } = useAuth();
+  const [logo, setLogo] = useState(defaultLogo);
+
+  useEffect(() => {
+    supabase
+      .from("theme_settings")
+      .select("setting_value")
+      .eq("setting_key", "logo_url")
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.setting_value) setLogo(data.setting_value);
+      });
+  }, []);
 
   const handleSignOut = async () => {
     await signOut();
@@ -62,6 +77,9 @@ const AdminDashboardSidebar = () => {
   return (
     <Sidebar className="border-r border-border">
       <SidebarContent className="pt-4">
+        <div className="px-4 mb-4">
+          <img src={logo} alt="Logo" className="h-10 w-auto rounded" />
+        </div>
         <SidebarGroup>
           <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-4 mb-2 flex items-center gap-2">
             <Shield className="h-4 w-4 text-destructive" />
