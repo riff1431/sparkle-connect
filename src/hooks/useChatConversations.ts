@@ -42,6 +42,16 @@ export function useChatConversations() {
         .select("id, full_name, avatar_url")
         .in("id", uniqueIds);
 
+      // Also fetch cleaner business names for providers
+      const { data: cleanerProfiles } = await supabase
+        .from("cleaner_profiles")
+        .select("user_id, business_name, profile_image")
+        .in("user_id", uniqueIds);
+
+      const cleanerMap = new Map(
+        (cleanerProfiles || []).map((cp) => [cp.user_id, cp])
+      );
+
       const profileMap = new Map(
         (profiles || []).map((p) => [p.id, p])
       );
@@ -62,10 +72,13 @@ export function useChatConversations() {
       return conversations.map((c): ConversationWithDetails => {
         const otherId = c.customer_id === user!.id ? c.provider_id : c.customer_id;
         const profile = profileMap.get(otherId);
+        const cleaner = cleanerMap.get(otherId);
+        const displayName = cleaner?.business_name || profile?.full_name || "Unknown";
+        const displayAvatar = cleaner?.profile_image || profile?.avatar_url || null;
         return {
           ...c,
-          other_user_name: profile?.full_name || "Unknown",
-          other_user_avatar: profile?.avatar_url || null,
+          other_user_name: displayName,
+          other_user_avatar: displayAvatar,
           unread_count: unreadMap.get(c.id) || 0,
         };
       });
