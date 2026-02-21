@@ -22,7 +22,7 @@ const SponsoredSpotlightSection = () => {
   }
 
   return (
-    <div ref={revealRef} className="space-y-4" style={{ opacity: 0 }}>
+    <div ref={revealRef} className="space-y-4">
       <div className="flex items-center gap-2.5">
         <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-amber-100">
           <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
