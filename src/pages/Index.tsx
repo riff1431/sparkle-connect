@@ -17,19 +17,21 @@ const Index = () => {
         <SearchFilterBar />
 
         {/* Main 2-Column Layout */}
-        <div className="container mx-auto px-4 py-6">
-          <div className="grid lg:grid-cols-[1fr_320px] gap-6">
-            {/* Left Column */}
-            <div className="space-y-6">
-              <CleanerOfTheWeekCard />
-              <CategoryChipsRow />
-              <SponsoredSpotlightSection />
-            </div>
+        <div className="bg-gradient-to-b from-sky-100/60 via-blue-50/50 to-sky-50/30 py-6">
+          <div className="container mx-auto px-4">
+            <div className="grid lg:grid-cols-[1fr_320px] gap-6">
+              {/* Left Column */}
+              <div className="space-y-6">
+                <CleanerOfTheWeekCard />
+                <CategoryChipsRow />
+                <SponsoredSpotlightSection />
+              </div>
 
-            {/* Right Sidebar */}
-            <div className="space-y-6">
-              <QuoteRequestSidebar />
-              <MapPreviewCard />
+              {/* Right Sidebar */}
+              <div className="space-y-6">
+                <QuoteRequestSidebar />
+                <MapPreviewCard />
+              </div>
             </div>
           </div>
         </div>
