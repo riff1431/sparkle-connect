@@ -621,18 +621,23 @@ const ServiceDetail = () => {
                 )}
               </div>
 
-              {selectedAddress && (
-                <>
-                  <Separator />
-                  <div className="flex items-start gap-2 text-sm">
-                    <MapPin className="h-4 w-4 text-primary mt-0.5" />
+              <Separator />
+              <div className="flex items-start gap-2 text-sm">
+                <MapPin className="h-4 w-4 text-primary mt-0.5" />
+                <div>
+                  <p className="text-muted-foreground text-xs">Address</p>
+                  {selectedAddress ? (
                     <div>
-                      <p className="text-muted-foreground text-xs">Address</p>
-                      <p className="font-medium">{selectedAddress.label} – {selectedAddress.street_address}, {selectedAddress.city}</p>
+                      <p className="font-medium">{selectedAddress.label}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {selectedAddress.street_address}, {selectedAddress.city}, {selectedAddress.province} {selectedAddress.postal_code}
+                      </p>
                     </div>
-                  </div>
-                </>
-              )}
+                  ) : (
+                    <p className="text-xs text-amber-600 font-medium">No address selected</p>
+                  )}
+                </div>
+              </div>
 
               {specialInstructions.trim() && (
                 <>
