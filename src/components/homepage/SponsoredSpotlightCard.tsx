@@ -27,7 +27,8 @@ const SponsoredSpotlightCard = ({ cleaner, listingId }: { cleaner: SponsoredClea
       className="rounded-2xl border border-border/50 shadow-lg overflow-hidden relative transition-shadow duration-300 hover:shadow-xl"
     >
       <img src={bgSponsored} alt="" className="absolute inset-0 w-full h-full object-cover" />
-      <div className="p-4 sm:p-5 relative">
+      <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px]" />
+      <div className="p-4 sm:p-5 relative z-10">
         <div className="flex flex-col sm:flex-row gap-4 sm:gap-5">
           {/* Image */}
           <motion.div
@@ -73,10 +74,10 @@ const SponsoredSpotlightCard = ({ cleaner, listingId }: { cleaner: SponsoredClea
           </div>
 
           {/* CTAs */}
-          <div className="shrink-0 flex flex-row sm:flex-col gap-2 sm:gap-2.5 justify-start sm:justify-center items-stretch">
+          <div className="shrink-0 flex flex-row sm:flex-col gap-2 sm:gap-2.5 sm:justify-center sm:items-end">
             <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 400, damping: 15 }}>
               <Button
-                className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-bold px-6 py-2 rounded-lg shadow-sm hover:shadow-md text-sm transition-shadow"
+                className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-bold px-6 py-2 rounded-lg shadow-sm hover:shadow-md text-sm transition-shadow w-full sm:w-auto"
                 onClick={handleQuoteClick}
               >
                 Request Quote
@@ -84,7 +85,7 @@ const SponsoredSpotlightCard = ({ cleaner, listingId }: { cleaner: SponsoredClea
             </motion.div>
             <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 400, damping: 15 }}>
               <Button
-                className="bg-primary hover:bg-primary-dark text-primary-foreground font-bold px-6 py-2 rounded-lg shadow-sm hover:shadow-md text-sm transition-shadow"
+                className="bg-primary hover:bg-primary-dark text-primary-foreground font-bold px-6 py-2 rounded-lg shadow-sm hover:shadow-md text-sm transition-shadow w-full sm:w-auto"
                 asChild
                 onClick={handleBookClick}
               >
@@ -104,10 +105,13 @@ const SponsoredSpotlightCard = ({ cleaner, listingId }: { cleaner: SponsoredClea
             <DollarSign className="h-3.5 w-3.5" />
             Consults at <span className="text-foreground font-bold">${cleaner.startingPrice}</span>
           </span>
-          <span className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+          <Link
+            to={`/cleaner/${cleaner.id}`}
+            className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium hover:text-primary transition-colors cursor-pointer"
+          >
             <Eye className="h-3.5 w-3.5" />
             Visit
-          </span>
+          </Link>
           <motion.div className="ml-auto" whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 400, damping: 15 }}>
             <Button
               variant="outline"
