@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { format, addDays } from "date-fns";
 import {
   Star,
@@ -56,8 +56,12 @@ import { usePlatformSettings } from "@/hooks/usePlatformSettings";
 import { PaymentMethod } from "@/hooks/usePaymentSettings";
 import PaymentMethodSelector from "@/components/booking/PaymentMethodSelector";
 import ServiceAreaMap from "@/components/maps/ServiceAreaMap";
-
-// Subscription tier display config for CleanerProfile
+import { useAuth } from "@/contexts/AuthContext";
+import { getOrCreateConversation } from "@/hooks/useChatConversations";
+import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
 const PROFILE_TIER_CONFIG = {
   premium: {
     label: "Premium Member",
@@ -198,7 +202,49 @@ We offer flexible scheduling, competitive pricing, and a 100% satisfaction guara
 
 const CleanerProfile = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const cleaner = mockCleanerData; // In real app, fetch by id
+  const [startingChat, setStartingChat] = useState(false);
+
+  // Fetch the cleaner profile's user_id so we can start a conversation
+  const { data: cleanerUserId } = useQuery({
+    queryKey: ["cleaner-user-id", id],
+    enabled: !!id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("cleaner_profiles")
+        .select("user_id")
+        .eq("id", id!)
+        .maybeSingle();
+      return data?.user_id || null;
+    },
+  });
+
+  const handleSendMessage = async () => {
+    if (!user) {
+      toast({ title: "Please sign in", description: "You need to be logged in to message a provider.", variant: "destructive" });
+      navigate("/auth");
+      return;
+    }
+    if (!cleanerUserId) {
+      toast({ title: "Provider not found", variant: "destructive" });
+      return;
+    }
+    if (user.id === cleanerUserId) {
+      toast({ title: "Cannot message yourself", variant: "destructive" });
+      return;
+    }
+    setStartingChat(true);
+    try {
+      const convId = await getOrCreateConversation(user.id, cleanerUserId);
+      navigate("/dashboard/messages", { state: { conversationId: convId } });
+    } catch (err: any) {
+      toast({ title: "Failed to start chat", description: err.message, variant: "destructive" });
+    } finally {
+      setStartingChat(false);
+    }
+  };
   
   // Platform settings hook
   const { 
@@ -818,9 +864,14 @@ const CleanerProfile = () => {
                   <CardTitle className="text-base">Need Help?</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <Button variant="outline" className="w-full gap-2">
-                    <MessageSquare className="h-4 w-4" />
-                    Send Message
+                  <Button
+                    variant="outline"
+                    className="w-full gap-2"
+                    disabled={startingChat}
+                    onClick={handleSendMessage}
+                  >
+                    {startingChat ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageSquare className="h-4 w-4" />}
+                    {startingChat ? "Starting Chat..." : "Send Message"}
                   </Button>
                   <Button variant="outline" className="w-full gap-2">
                     <Phone className="h-4 w-4" />
