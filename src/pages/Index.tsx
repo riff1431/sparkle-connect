@@ -14,11 +14,13 @@ const Index = () => {
       <Header />
       <main>
         <HomepageHero />
-        <SearchFilterBar />
 
-        {/* Main 2-Column Layout */}
-        <div className="bg-gradient-to-b from-sky-100/60 via-blue-50/50 to-sky-50/30 py-6">
-          <div className="container mx-auto px-4">
+        {/* Full blue gradient wash area */}
+        <div className="bg-gradient-to-b from-[hsl(210_60%_95%)] via-[hsl(210_50%_96%)] to-[hsl(210_40%_97%)]">
+          <SearchFilterBar />
+
+          {/* Main 2-Column Layout */}
+          <div className="container mx-auto px-4 py-6">
             <div className="grid lg:grid-cols-[1fr_320px] gap-6">
               {/* Left Column */}
               <div className="space-y-6">
