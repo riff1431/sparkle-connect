@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MapPin, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import heroBg from "@/assets/hero-bg.png";
+import bgHero from "@/assets/bg-hero.png";
 import heroCleaners from "@/assets/hero-cleaners.png";
 
 const categories = ["A+", "Airbnb", "Office", "Windeer", "Sunstruction", "Airbnb", "Construction", "Full Home", "Office"];
@@ -20,7 +20,7 @@ const HomepageHero = () => {
     <section className="relative overflow-hidden">
       {/* Background image */}
       <div className="absolute inset-0">
-        <img src={heroBg} alt="" className="w-full h-full object-cover" />
+        <img src={bgHero} alt="" className="w-full h-full object-cover" />
       </div>
 
       <div className="container mx-auto px-4 py-12 lg:py-16 relative">

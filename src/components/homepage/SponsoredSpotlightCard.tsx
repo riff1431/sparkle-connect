@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { trackSponsoredClick } from "@/hooks/useSponsoredListings";
+import bgSponsored from "@/assets/bg-sponsored.png";
 
 interface SponsoredCleaner {
   id: string;
@@ -21,8 +22,9 @@ const SponsoredSpotlightCard = ({ cleaner, listingId }: { cleaner: SponsoredClea
   const handleBookClick = () => trackSponsoredClick(listingId, "book");
 
   return (
-    <div className="rounded-2xl border border-border shadow-lg overflow-hidden bg-gradient-to-br from-white via-sky-50/30 to-blue-50/40">
-      <div className="p-5">
+    <div className="rounded-2xl border border-border shadow-lg overflow-hidden relative">
+      <img src={bgSponsored} alt="" className="absolute inset-0 w-full h-full object-cover" />
+      <div className="p-5 relative">
         <div className="flex gap-5">
           {/* Image */}
           <div className="shrink-0">
