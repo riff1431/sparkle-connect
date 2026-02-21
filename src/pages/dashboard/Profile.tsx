@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
+import ImageCropDialog from "@/components/ImageCropDialog";
 
 interface ProfileData {
   full_name: string | null;
@@ -24,6 +25,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     full_name: "",
@@ -58,9 +60,9 @@ const Profile = () => {
     fetchProfile();
   }, [user]);
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !user) return;
+    if (!file) return;
 
     if (!file.type.startsWith("image/")) {
       toast({ variant: "destructive", title: "Invalid file", description: "Please select an image file." });
@@ -71,34 +73,44 @@ const Profile = () => {
       return;
     }
 
+    const reader = new FileReader();
+    reader.onload = () => setCropImageSrc(reader.result as string);
+    reader.readAsDataURL(file);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleCroppedImage = async (blob: Blob) => {
+    if (!user) return;
+    setCropImageSrc(null);
     setUploadingImage(true);
     try {
-      const fileExt = file.name.split(".").pop();
-      const filePath = `${user.id}/avatar.${fileExt}`;
+      const filePath = `${user.id}/avatar.jpg`;
 
       const { error: uploadError } = await supabase.storage
         .from("avatars")
-        .upload(filePath, file, { upsert: true });
+        .upload(filePath, blob, { upsert: true, contentType: "image/jpeg" });
       if (uploadError) throw uploadError;
 
       const { data: { publicUrl } } = supabase.storage
         .from("avatars")
         .getPublicUrl(filePath);
 
+      // Append cache-buster so browser shows the new image
+      const freshUrl = `${publicUrl}?t=${Date.now()}`;
+
       const { error: updateError } = await supabase
         .from("profiles")
-        .update({ avatar_url: publicUrl })
+        .update({ avatar_url: freshUrl })
         .eq("id", user.id);
       if (updateError) throw updateError;
 
-      setProfile(prev => prev ? { ...prev, avatar_url: publicUrl } : null);
+      setProfile(prev => prev ? { ...prev, avatar_url: freshUrl } : null);
       toast({ title: "Photo updated", description: "Your profile photo has been updated." });
     } catch (error) {
       console.error("Error uploading image:", error);
       toast({ variant: "destructive", title: "Upload failed", description: "Failed to upload photo. Please try again." });
     } finally {
       setUploadingImage(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -206,7 +218,7 @@ const Profile = () => {
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={handleImageUpload}
+                onChange={handleFileSelect}
               />
               <Button
                 variant="outline"
@@ -225,6 +237,14 @@ const Profile = () => {
               </p>
             </div>
           </div>
+
+          <ImageCropDialog
+            open={!!cropImageSrc}
+            imageSrc={cropImageSrc || ""}
+            title="Crop Profile Photo"
+            onClose={() => setCropImageSrc(null)}
+            onCropComplete={handleCroppedImage}
+          />
 
           {/* Form Fields */}
           <div className="grid gap-4 md:grid-cols-2">

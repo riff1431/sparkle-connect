@@ -17,6 +17,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import ImageCropDialog from "@/components/ImageCropDialog";
 
 const SERVICE_OPTIONS = [
   "Home Cleaning",
@@ -51,6 +52,7 @@ const CleanerProfile = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
   const [profile, setProfile] = useState<CleanerProfile | null>(null);
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const [newArea, setNewArea] = useState("");
@@ -106,9 +108,9 @@ const CleanerProfile = () => {
     fetchProfile();
   }, [user]);
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !user) return;
+    if (!file) return;
 
     if (!file.type.startsWith("image/")) {
       toast.error("Please select an image file");
@@ -119,38 +121,45 @@ const CleanerProfile = () => {
       return;
     }
 
+    const reader = new FileReader();
+    reader.onload = () => setCropImageSrc(reader.result as string);
+    reader.readAsDataURL(file);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleCroppedImage = async (blob: Blob) => {
+    if (!user) return;
+    setCropImageSrc(null);
     setUploadingImage(true);
     try {
-      const fileExt = file.name.split(".").pop();
-      const filePath = `${user.id}/profile.${fileExt}`;
+      const filePath = `${user.id}/profile.jpg`;
 
       const { error: uploadError } = await supabase.storage
         .from("cleaner-profiles")
-        .upload(filePath, file, { upsert: true });
-
+        .upload(filePath, blob, { upsert: true, contentType: "image/jpeg" });
       if (uploadError) throw uploadError;
 
       const { data: { publicUrl } } = supabase.storage
         .from("cleaner-profiles")
         .getPublicUrl(filePath);
 
-      // Update the cleaner profile with the new image URL
+      const freshUrl = `${publicUrl}?t=${Date.now()}`;
+
       if (profile) {
         const { error: updateError } = await supabase
           .from("cleaner_profiles")
-          .update({ profile_image: publicUrl })
+          .update({ profile_image: freshUrl })
           .eq("id", profile.id);
         if (updateError) throw updateError;
       }
 
-      setProfileImageUrl(publicUrl);
+      setProfileImageUrl(freshUrl);
       toast.success("Profile image updated!");
     } catch (error) {
       console.error("Error uploading image:", error);
       toast.error("Failed to upload image");
     } finally {
       setUploadingImage(false);
-      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -275,7 +284,7 @@ const CleanerProfile = () => {
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={handleImageUpload}
+                onChange={handleFileSelect}
               />
               <Button
                 variant="outline"
@@ -292,6 +301,14 @@ const CleanerProfile = () => {
               <p className="text-xs text-muted-foreground mt-2">JPG, PNG or WebP. Max 5MB.</p>
             </div>
           </div>
+
+          <ImageCropDialog
+            open={!!cropImageSrc}
+            imageSrc={cropImageSrc || ""}
+            title="Crop Profile Photo"
+            onClose={() => setCropImageSrc(null)}
+            onCropComplete={handleCroppedImage}
+          />
         </CardContent>
       </Card>
 
