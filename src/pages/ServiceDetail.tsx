@@ -898,6 +898,35 @@ const ServiceDetail = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Sticky Mobile Booking Bar */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-background/95 backdrop-blur-md border-t border-border shadow-[0_-4px_20px_-4px_hsl(var(--foreground)/0.1)] px-4 py-3">
+        <div className="flex items-center justify-between gap-4 max-w-6xl mx-auto">
+          <div className="flex flex-col">
+            <span className="text-lg font-bold text-foreground">
+              {getPriceLabel(listing.price_type, listing.price)}
+            </span>
+            {listing.duration_hours && (
+              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                {listing.duration_hours}h estimated
+              </span>
+            )}
+          </div>
+          <Button
+            variant="cta"
+            size="lg"
+            className="shrink-0"
+            onClick={handleOpenConfirmDialog}
+          >
+            <Zap className="h-4 w-4 mr-1" />
+            Book Now
+          </Button>
+        </div>
+      </div>
+
+      {/* Bottom spacer for mobile sticky bar */}
+      <div className="h-20 lg:hidden" />
     </div>
   );
 };
