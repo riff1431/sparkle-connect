@@ -23,10 +23,8 @@ const SponsoredSpotlightCard = ({ cleaner, listingId }: { cleaner: SponsoredClea
   const handleBookClick = () => trackSponsoredClick(listingId, "book");
 
   return (
-    <motion.div
+    <div
       className="rounded-2xl border border-border/50 shadow-lg overflow-hidden relative transition-shadow duration-300 hover:shadow-xl"
-      whileHover={{ y: -3 }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
     >
       <img src={bgSponsored} alt="" className="absolute inset-0 w-full h-full object-cover" />
       <div className="p-5 relative">
@@ -37,7 +35,7 @@ const SponsoredSpotlightCard = ({ cleaner, listingId }: { cleaner: SponsoredClea
             whileHover={{ scale: 1.03 }}
             transition={{ type: "spring", stiffness: 300 }}
           >
-            <div className="w-24 h-28 rounded-xl overflow-hidden shadow-md border-2 border-white/80 ring-1 ring-border/30">
+            <div className="w-24 h-28 rounded-xl overflow-hidden shadow-md border-2 border-white/80 ring-1 ring-border/30 transition-shadow duration-300 hover:shadow-xl">
               <img src={cleaner.image} alt={cleaner.name} className="w-full h-full object-cover" />
             </div>
           </motion.div>
@@ -76,17 +74,17 @@ const SponsoredSpotlightCard = ({ cleaner, listingId }: { cleaner: SponsoredClea
 
           {/* CTAs */}
           <div className="shrink-0 flex flex-col gap-2.5 justify-center">
-            <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
+            <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 400, damping: 15 }}>
               <Button
-                className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-bold px-6 py-2 rounded-lg shadow-sm text-sm"
+                className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-bold px-6 py-2 rounded-lg shadow-sm hover:shadow-md text-sm transition-shadow"
                 onClick={handleQuoteClick}
               >
                 Request Quote
               </Button>
             </motion.div>
-            <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
+            <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 400, damping: 15 }}>
               <Button
-                className="bg-primary hover:bg-primary-dark text-primary-foreground font-bold px-6 py-2 rounded-lg shadow-sm text-sm"
+                className="bg-primary hover:bg-primary-dark text-primary-foreground font-bold px-6 py-2 rounded-lg shadow-sm hover:shadow-md text-sm transition-shadow"
                 asChild
                 onClick={handleBookClick}
               >
@@ -110,11 +108,11 @@ const SponsoredSpotlightCard = ({ cleaner, listingId }: { cleaner: SponsoredClea
             <Eye className="h-3.5 w-3.5" />
             Visit
           </span>
-          <motion.div className="ml-auto" whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
+          <motion.div className="ml-auto" whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 400, damping: 15 }}>
             <Button
               variant="outline"
               size="sm"
-              className="border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground font-semibold text-xs px-4 rounded-lg"
+              className="border-secondary text-secondary hover:bg-secondary hover:text-secondary-foreground font-semibold text-xs px-4 rounded-lg transition-shadow hover:shadow-md"
               onClick={handleQuoteClick}
             >
               Request Quote <ChevronRight className="h-3.5 w-3.5 ml-1" />
@@ -122,7 +120,7 @@ const SponsoredSpotlightCard = ({ cleaner, listingId }: { cleaner: SponsoredClea
           </motion.div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 

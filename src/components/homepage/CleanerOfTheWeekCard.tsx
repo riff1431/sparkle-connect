@@ -65,12 +65,14 @@ const CleanerOfTheWeekCard = () => {
                 ))}
               </div>
               <span className="text-xs font-medium">139 · {reviewCount} reviews</span>
-              <Link
-                to={`/cleaner/${profile.id}`}
-                className="ml-auto flex items-center gap-0.5 text-xs font-medium text-primary hover:text-primary-dark transition-colors"
-              >
-                View <ChevronRight className="h-3.5 w-3.5" />
-              </Link>
+              <motion.div whileHover={{ x: 3 }} transition={{ type: "spring", stiffness: 400 }}>
+                <Link
+                  to={`/cleaner/${profile.id}`}
+                  className="ml-auto flex items-center gap-0.5 text-xs font-medium text-primary hover:text-primary-dark transition-colors"
+                >
+                  View <ChevronRight className="h-3.5 w-3.5" />
+                </Link>
+              </motion.div>
             </div>
           </div>
 
@@ -82,7 +84,7 @@ const CleanerOfTheWeekCard = () => {
               whileHover={{ scale: 1.03 }}
               transition={{ type: "spring", stiffness: 300 }}
             >
-              <div className="w-36 h-44 rounded-xl overflow-hidden shadow-md border-2 border-white/80 ring-1 ring-border/30">
+              <div className="w-36 h-44 rounded-xl overflow-hidden shadow-md border-2 border-white/80 ring-1 ring-border/30 transition-shadow duration-300 hover:shadow-xl">
                 <img
                   src={profile.profile_image || "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=300&h=400&fit=crop"}
                   alt={profile.business_name}
@@ -117,13 +119,13 @@ const CleanerOfTheWeekCard = () => {
 
             {/* CTA Buttons */}
             <div className="shrink-0 flex flex-col gap-2.5 justify-center items-end">
-              <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
-                <Button className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-bold px-7 py-2.5 rounded-lg shadow-sm text-sm">
+              <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 400, damping: 15 }}>
+                <Button className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-bold px-7 py-2.5 rounded-lg shadow-sm hover:shadow-md text-sm transition-shadow">
                   Request Quote
                 </Button>
               </motion.div>
-              <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
-                <Button className="bg-primary hover:bg-primary-dark text-primary-foreground font-bold px-7 py-2.5 rounded-lg shadow-sm text-sm" asChild>
+              <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 400, damping: 15 }}>
+                <Button className="bg-primary hover:bg-primary-dark text-primary-foreground font-bold px-7 py-2.5 rounded-lg shadow-sm hover:shadow-md text-sm transition-shadow" asChild>
                   <Link to={`/cleaner/${profile.id}`}>
                     Book Now <ChevronRight className="h-4 w-4 ml-1" />
                   </Link>
