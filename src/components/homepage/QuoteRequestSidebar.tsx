@@ -22,6 +22,8 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { motion } from "framer-motion";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 const QUOTE_TYPES = [
   "Residential",
@@ -51,6 +53,7 @@ const TIME_SLOTS = [
 const QuoteRequestSidebar = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const revealRef = useScrollReveal<HTMLDivElement>({ y: 30, delay: 0.2 });
 
   const [address, setAddress] = useState("");
   const [quoteType, setQuoteType] = useState("");
@@ -78,7 +81,6 @@ const QuoteRequestSidebar = () => {
   };
 
   const handleSubmit = useCallback(async () => {
-    // Validate required fields
     if (!address.trim()) {
       toast({ title: "Address is required", variant: "destructive" });
       return;
@@ -98,7 +100,6 @@ const QuoteRequestSidebar = () => {
 
     setSubmitting(true);
 
-    // Combine date + time into a single datetime
     let preferredDatetime: string | null = null;
     if (preferredDate) {
       const dateStr = format(preferredDate, "yyyy-MM-dd");
@@ -130,138 +131,144 @@ const QuoteRequestSidebar = () => {
   }, [address, quoteType, services, preferredDate, preferredTime, notes, user, toast]);
 
   return (
-    <div className="bg-card rounded-xl border border-border shadow-card p-5">
-      <h3 className="font-heading font-bold text-foreground text-lg mb-4">
-        Request a Free Quote
-      </h3>
+    <div ref={revealRef} style={{ opacity: 0 }}>
+      <div className="glass-strong rounded-xl shadow-card p-5 transition-shadow duration-300 hover:shadow-card-hover">
+        <h3 className="font-heading font-bold text-foreground text-lg mb-4">
+          Request a Free Quote
+        </h3>
 
-      <div className="space-y-3">
-        {/* Address */}
-        <div>
-          <Label className="text-xs text-muted-foreground mb-1 block">Address *</Label>
-          <Input
-            placeholder="Enter your address"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            className="h-9 text-sm"
-          />
-        </div>
+        <div className="space-y-3">
+          {/* Address */}
+          <div>
+            <Label className="text-xs text-muted-foreground mb-1 block">Address *</Label>
+            <Input
+              placeholder="Enter your address"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              className="h-9 text-sm transition-all duration-200 focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            />
+          </div>
 
-        {/* Quote Type */}
-        <div>
-          <Label className="text-xs text-muted-foreground mb-1 block">Quote Type *</Label>
-          <Select value={quoteType} onValueChange={setQuoteType}>
-            <SelectTrigger className="h-9 text-sm">
-              <SelectValue placeholder="Select type" />
-            </SelectTrigger>
-            <SelectContent>
-              {QUOTE_TYPES.map((type) => (
-                <SelectItem key={type} value={type}>{type}</SelectItem>
+          {/* Quote Type */}
+          <div>
+            <Label className="text-xs text-muted-foreground mb-1 block">Quote Type *</Label>
+            <Select value={quoteType} onValueChange={setQuoteType}>
+              <SelectTrigger className="h-9 text-sm">
+                <SelectValue placeholder="Select type" />
+              </SelectTrigger>
+              <SelectContent>
+                {QUOTE_TYPES.map((type) => (
+                  <SelectItem key={type} value={type}>{type}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Services Multi-Select */}
+          <div>
+            <Label className="text-xs text-muted-foreground mb-1 block">Services *</Label>
+            <div className="flex flex-wrap gap-1.5">
+              {SERVICE_OPTIONS.map((service) => (
+                <motion.button
+                  key={service}
+                  type="button"
+                  onClick={() => toggleService(service)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={cn(
+                    "px-2.5 py-1 rounded-full text-xs font-medium border transition-all duration-200",
+                    services.includes(service)
+                      ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                      : "bg-muted text-muted-foreground border-border hover:border-primary/50 hover:bg-primary/5"
+                  )}
+                >
+                  {service}
+                </motion.button>
               ))}
-            </SelectContent>
-          </Select>
-        </div>
+            </div>
+          </div>
 
-        {/* Services Multi-Select */}
-        <div>
-          <Label className="text-xs text-muted-foreground mb-1 block">Services *</Label>
-          <div className="flex flex-wrap gap-1.5">
-            {SERVICE_OPTIONS.map((service) => (
-              <button
-                key={service}
-                type="button"
-                onClick={() => toggleService(service)}
-                className={cn(
-                  "px-2.5 py-1 rounded-full text-xs font-medium border transition-colors",
-                  services.includes(service)
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-muted text-muted-foreground border-border hover:border-primary/50"
-                )}
-              >
-                {service}
-              </button>
-            ))}
+          {/* Preferred Date */}
+          <div>
+            <Label className="text-xs text-muted-foreground mb-1 block">Preferred Date *</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full h-9 justify-start text-left font-normal text-sm",
+                    !preferredDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-3.5 w-3.5" />
+                  {preferredDate ? format(preferredDate, "PPP") : "Pick a date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={preferredDate}
+                  onSelect={setPreferredDate}
+                  disabled={(date) => date < new Date()}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          {/* Preferred Time */}
+          <div>
+            <Label className="text-xs text-muted-foreground mb-1 block">Preferred Time</Label>
+            <Select value={preferredTime} onValueChange={setPreferredTime}>
+              <SelectTrigger className="h-9 text-sm">
+                <SelectValue placeholder="Select time" />
+              </SelectTrigger>
+              <SelectContent>
+                {TIME_SLOTS.map((time) => (
+                  <SelectItem key={time} value={time}>{time}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Notes */}
+          <div>
+            <Label className="text-xs text-muted-foreground mb-1 block">Notes (optional)</Label>
+            <Textarea
+              placeholder="Any special instructions or details..."
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              className="min-h-[60px] text-sm resize-none transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+              maxLength={500}
+            />
           </div>
         </div>
 
-        {/* Preferred Date */}
-        <div>
-          <Label className="text-xs text-muted-foreground mb-1 block">Preferred Date *</Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "w-full h-9 justify-start text-left font-normal text-sm",
-                  !preferredDate && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-3.5 w-3.5" />
-                {preferredDate ? format(preferredDate, "PPP") : "Pick a date"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={preferredDate}
-                onSelect={setPreferredDate}
-                disabled={(date) => date < new Date()}
-                initialFocus
-                className={cn("p-3 pointer-events-auto")}
-              />
-            </PopoverContent>
-          </Popover>
+        {/* Submit Button */}
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="mt-4">
+          <Button
+            variant="secondary"
+            className="w-full font-semibold"
+            onClick={handleSubmit}
+            disabled={submitting}
+          >
+            {submitting ? (
+              "Submitting..."
+            ) : (
+              <>
+                <Send className="h-4 w-4 mr-1" />
+                Submit Quote Request
+              </>
+            )}
+          </Button>
+        </motion.div>
+
+        {/* Phone */}
+        <div className="flex items-center gap-2 justify-center mt-3 text-xs text-muted-foreground">
+          <Phone className="h-3.5 w-3.5" />
+          <span>Or call us: 1-800-CLEAN</span>
         </div>
-
-        {/* Preferred Time */}
-        <div>
-          <Label className="text-xs text-muted-foreground mb-1 block">Preferred Time</Label>
-          <Select value={preferredTime} onValueChange={setPreferredTime}>
-            <SelectTrigger className="h-9 text-sm">
-              <SelectValue placeholder="Select time" />
-            </SelectTrigger>
-            <SelectContent>
-              {TIME_SLOTS.map((time) => (
-                <SelectItem key={time} value={time}>{time}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Notes */}
-        <div>
-          <Label className="text-xs text-muted-foreground mb-1 block">Notes (optional)</Label>
-          <Textarea
-            placeholder="Any special instructions or details..."
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            className="min-h-[60px] text-sm resize-none"
-            maxLength={500}
-          />
-        </div>
-      </div>
-
-      {/* Submit Button */}
-      <Button
-        variant="secondary"
-        className="w-full mt-4 font-semibold"
-        onClick={handleSubmit}
-        disabled={submitting}
-      >
-        {submitting ? (
-          "Submitting..."
-        ) : (
-          <>
-            <Send className="h-4 w-4 mr-1" />
-            Submit Quote Request
-          </>
-        )}
-      </Button>
-
-      {/* Phone */}
-      <div className="flex items-center gap-2 justify-center mt-3 text-xs text-muted-foreground">
-        <Phone className="h-3.5 w-3.5" />
-        <span>Or call us: 1-800-CLEAN</span>
       </div>
     </div>
   );

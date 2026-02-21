@@ -13,10 +13,12 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import defaultLogo from "@/assets/logo-new.png";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [logo, setLogo] = useState(defaultLogo);
+  const [scrolled, setScrolled] = useState(false);
   const { user, signOut, loading, role } = useAuth();
 
   useEffect(() => {
@@ -28,6 +30,12 @@ const Header = () => {
       .then(({ data }) => {
         if (data?.setting_value) setLogo(data.setting_value);
       });
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const navLinks = [
@@ -52,25 +60,46 @@ const Header = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-gradient-to-r from-sky-50 via-white to-sky-50 border-b border-border/40 shadow-sm">
+    <motion.header
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className={`sticky top-0 z-50 w-full transition-all duration-300 ${
+        scrolled
+          ? "glass-strong shadow-md"
+          : "bg-gradient-to-r from-sky-50 via-white to-sky-50 border-b border-border/40 shadow-sm"
+      }`}
+    >
       <div className="container mx-auto px-4">
         <div className="flex h-12 items-center justify-between lg:h-14">
           {/* Logo */}
           <Link to="/" className="flex items-center shrink-0">
-            <img src={logo} alt="The Cleaning Network" className="h-9 w-auto lg:h-11" />
+            <motion.img
+              src={logo}
+              alt="The Cleaning Network"
+              className="h-9 w-auto lg:h-11"
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            />
           </Link>
 
           {/* Center Navigation */}
           <nav className="hidden lg:flex items-center gap-1">
-            {navLinks.map((link) => (
-              <Link
+            {navLinks.map((link, i) => (
+              <motion.div
                 key={link.label}
-                to={link.href}
-                className="group inline-flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium text-primary hover:text-primary-dark transition-colors"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 + i * 0.05 }}
               >
-                <link.icon className="h-3.5 w-3.5 text-secondary group-hover:text-secondary-dark transition-colors" />
-                {link.label}
-              </Link>
+                <Link
+                  to={link.href}
+                  className="group inline-flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium text-primary hover:text-primary-dark transition-all duration-200 rounded-lg hover:bg-primary/5"
+                >
+                  <link.icon className="h-3.5 w-3.5 text-secondary group-hover:text-secondary-dark transition-colors" />
+                  {link.label}
+                </Link>
+              </motion.div>
             ))}
           </nav>
 
@@ -129,7 +158,12 @@ const Header = () => {
                     </DropdownMenu>
                   </div>
                 ) : (
-                  <div className="flex items-center">
+                  <motion.div
+                    className="flex items-center"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.4 }}
+                  >
                     <Link
                       to="/auth"
                       className="px-2.5 py-1 text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors"
@@ -143,7 +177,7 @@ const Header = () => {
                     >
                       Sign Up
                     </Link>
-                  </div>
+                  </motion.div>
                 )}
               </>
             )}
@@ -159,53 +193,67 @@ const Header = () => {
         </div>
 
         {/* Mobile Menu */}
-        {isMenuOpen && (
-          <div className="lg:hidden py-3 border-t border-border/50 animate-fade-in">
-            <nav className="flex flex-col gap-0.5">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.label}
-                  to={link.href}
-                  className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted rounded-lg transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <link.icon className="h-4 w-4 text-secondary" />
-                  {link.label}
-                </Link>
-              ))}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="lg:hidden overflow-hidden border-t border-border/50"
+            >
+              <nav className="flex flex-col gap-0.5 py-3">
+                {navLinks.map((link, i) => (
+                  <motion.div
+                    key={link.label}
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: i * 0.05 }}
+                  >
+                    <Link
+                      to={link.href}
+                      className="flex items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-foreground hover:bg-muted rounded-lg transition-colors"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <link.icon className="h-4 w-4 text-secondary" />
+                      {link.label}
+                    </Link>
+                  </motion.div>
+                ))}
 
-              {!loading && (
-                <div className="flex flex-col gap-2 mt-3 px-3 pt-3 border-t border-border/50">
-                  {user ? (
-                    <>
-                      <Button variant="outline" size="sm" className="w-full justify-start" asChild>
-                        <Link to="/dashboard" onClick={() => setIsMenuOpen(false)}>
-                          <LayoutDashboard className="h-4 w-4 mr-2" />
-                          Dashboard
-                        </Link>
-                      </Button>
-                      <Button variant="ghost" size="sm" className="w-full justify-start text-destructive" onClick={() => { signOut(); setIsMenuOpen(false); }}>
-                        <LogOut className="h-4 w-4 mr-2" />
-                        Sign Out
-                      </Button>
-                    </>
-                  ) : (
-                    <>
-                      <Button variant="outline" size="sm" className="w-full" asChild>
-                        <Link to="/auth" onClick={() => setIsMenuOpen(false)}>Log In</Link>
-                      </Button>
-                      <Button variant="secondary" size="sm" className="w-full" asChild>
-                        <Link to="/auth" onClick={() => setIsMenuOpen(false)}>Sign Up</Link>
-                      </Button>
-                    </>
-                  )}
-                </div>
-              )}
-            </nav>
-          </div>
-        )}
+                {!loading && (
+                  <div className="flex flex-col gap-2 mt-3 px-3 pt-3 border-t border-border/50">
+                    {user ? (
+                      <>
+                        <Button variant="outline" size="sm" className="w-full justify-start" asChild>
+                          <Link to="/dashboard" onClick={() => setIsMenuOpen(false)}>
+                            <LayoutDashboard className="h-4 w-4 mr-2" />
+                            Dashboard
+                          </Link>
+                        </Button>
+                        <Button variant="ghost" size="sm" className="w-full justify-start text-destructive" onClick={() => { signOut(); setIsMenuOpen(false); }}>
+                          <LogOut className="h-4 w-4 mr-2" />
+                          Sign Out
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button variant="outline" size="sm" className="w-full" asChild>
+                          <Link to="/auth" onClick={() => setIsMenuOpen(false)}>Log In</Link>
+                        </Button>
+                        <Button variant="secondary" size="sm" className="w-full" asChild>
+                          <Link to="/auth" onClick={() => setIsMenuOpen(false)}>Sign Up</Link>
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                )}
+              </nav>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-    </header>
+    </motion.header>
   );
 };
 

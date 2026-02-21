@@ -1,14 +1,18 @@
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { MapPin, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 import bgHero from "@/assets/bg-hero.png";
 import heroCleaners from "@/assets/hero-cleaners.png";
+
+const ThreeBackground = lazy(() => import("./ThreeBackground"));
 
 const categories = ["A+", "Airbnb", "Office", "Windeer", "Sunstruction", "Airbnb", "Construction", "Full Home", "Office"];
 
 const HomepageHero = () => {
   const [location, setLocation] = useState("");
+  const [isFocused, setIsFocused] = useState(false);
   const navigate = useNavigate();
 
   const handleSearch = (e: React.FormEvent) => {
@@ -23,55 +27,93 @@ const HomepageHero = () => {
         <img src={bgHero} alt="" className="w-full h-full object-cover" />
       </div>
 
-      <div className="container mx-auto px-4 py-12 lg:py-16 relative">
+      {/* Subtle Three.js particles - lazy loaded */}
+      <Suspense fallback={null}>
+        <ThreeBackground />
+      </Suspense>
+
+      <div className="container mx-auto px-4 py-12 lg:py-16 relative z-10">
         <div className="grid lg:grid-cols-2 gap-8 items-center">
           {/* Left Content */}
           <div>
-            <h1 className="font-heading text-3xl md:text-4xl lg:text-[2.75rem] font-bold text-foreground leading-tight mb-3">
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: "easeOut" }}
+              className="font-heading text-3xl md:text-4xl lg:text-[2.75rem] font-bold text-foreground leading-tight mb-3"
+            >
               Search & Book Trusted Cleaners
-            </h1>
-            <p className="text-muted-foreground text-base mb-6">
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }}
+              className="text-muted-foreground text-base mb-6"
+            >
               Find reliable cleaning companies near you.
-            </p>
+            </motion.p>
 
             {/* Search Bar */}
-            <form onSubmit={handleSearch} className="flex items-center bg-card rounded-lg border border-border shadow-sm mb-4 max-w-lg">
-              <div className="flex items-center flex-1 px-3 py-2.5 gap-2">
-                <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
+            <motion.form
+              onSubmit={handleSearch}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
+              className={`flex items-center glass-strong rounded-xl shadow-md mb-4 max-w-lg transition-all duration-300 ${
+                isFocused ? "shadow-lg ring-2 ring-primary/20 scale-[1.01]" : ""
+              }`}
+            >
+              <div className="flex items-center flex-1 px-4 py-3 gap-2">
+                <MapPin className={`h-4 w-4 shrink-0 transition-colors duration-200 ${isFocused ? "text-primary" : "text-muted-foreground"}`} />
                 <input
                   type="text"
                   placeholder="Enter your address or postal code"
                   className="flex-1 bg-transparent outline-none text-sm text-foreground placeholder:text-muted-foreground"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
+                  onFocus={() => setIsFocused(true)}
+                  onBlur={() => setIsFocused(false)}
                 />
               </div>
-              <Button type="submit" variant="secondary" size="sm" className="m-1.5 px-5 rounded-md">
+              <Button type="submit" variant="secondary" size="sm" className="m-1.5 px-5 rounded-lg font-semibold transition-transform duration-200 hover:scale-105 active:scale-95">
                 <Search className="h-4 w-4 mr-1.5" />
                 Search
               </Button>
-            </form>
+            </motion.form>
 
             {/* Category Chips */}
-            <div className="flex flex-wrap gap-2">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+              className="flex flex-wrap gap-2"
+            >
               {categories.map((cat, i) => (
-                <button
+                <motion.button
                   key={`${cat}-${i}`}
                   onClick={() => navigate(`/search?service=${encodeURIComponent(cat)}`)}
-                  className={`px-3 py-1.5 rounded-md text-xs font-medium border transition-colors ${
+                  whileHover={{ scale: 1.05, y: -1 }}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                     i === 0
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-card/80 backdrop-blur-sm text-foreground border-border hover:bg-muted"
+                      ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                      : "glass text-foreground hover:bg-primary/5 hover:border-primary/30"
                   }`}
                 >
                   {cat}
-                </button>
+                </motion.button>
               ))}
-            </div>
+            </motion.div>
           </div>
 
           {/* Right Hero Image */}
-          <div className="hidden lg:block relative">
+          <motion.div
+            className="hidden lg:block relative"
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+          >
             <div className="rounded-2xl overflow-hidden">
               <img
                 src={heroCleaners}
@@ -79,7 +121,7 @@ const HomepageHero = () => {
                 className="w-full h-auto object-cover"
               />
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>

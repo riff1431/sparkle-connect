@@ -2,9 +2,11 @@ import { Star } from "lucide-react";
 import { useActiveSponsoredListings } from "@/hooks/useSponsoredListings";
 import SponsoredSpotlightCard from "./SponsoredSpotlightCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 const SponsoredSpotlightSection = () => {
   const { data: listings, isLoading } = useActiveSponsoredListings();
+  const revealRef = useScrollReveal<HTMLDivElement>({ y: 40 });
 
   if (isLoading) {
     return (
@@ -20,7 +22,7 @@ const SponsoredSpotlightSection = () => {
   }
 
   return (
-    <div className="space-y-4">
+    <div ref={revealRef} className="space-y-4" style={{ opacity: 0 }}>
       <div className="flex items-center gap-2.5">
         <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-amber-100">
           <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
