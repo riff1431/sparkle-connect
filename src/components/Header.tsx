@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Search, Briefcase, CalendarDays, Star, User, LogOut, LayoutDashboard, Shield, ShoppingBag, Bell } from "lucide-react";
+import { Menu, X, Search, Briefcase, CalendarDays, Star, User, LogOut, LayoutDashboard, Shield, ShoppingBag } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   DropdownMenu,
@@ -16,6 +16,7 @@ import defaultLogo from "@/assets/logo-new.png";
 import { motion, AnimatePresence } from "framer-motion";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { Badge } from "@/components/ui/badge";
+import NotificationBell from "@/components/NotificationBell";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -120,17 +121,7 @@ const Header = () => {
                         Admin
                       </Link>
                     )}
-                    <Link
-                      to={role === "cleaner" ? "/cleaner/messages" : "/dashboard/messages"}
-                      className="relative p-1.5 rounded-md hover:bg-muted transition-colors"
-                    >
-                      <Bell className="h-4 w-4 text-muted-foreground" />
-                      {unreadCount > 0 && (
-                        <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-bold text-destructive-foreground">
-                          {unreadCount > 99 ? "99+" : unreadCount}
-                        </span>
-                      )}
-                    </Link>
+                    <NotificationBell />
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <button className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-muted transition-colors outline-none">

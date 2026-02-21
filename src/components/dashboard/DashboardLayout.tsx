@@ -1,10 +1,11 @@
 import { useEffect } from "react";
 import { Outlet, useNavigate, Link } from "react-router-dom";
-import { Loader2, Bell, MessageSquare, User } from "lucide-react";
+import { Loader2, MessageSquare, User } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
 import DashboardSidebar from "./DashboardSidebar";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
+import NotificationBell from "@/components/NotificationBell";
 import logo from "@/assets/logo.jpeg";
 
 const DashboardLayout = () => {
@@ -66,13 +67,7 @@ const DashboardLayout = () => {
                   </span>
                 )}
               </Link>
-              <Link
-                to="/dashboard/messages"
-                className="relative p-2 rounded-md hover:bg-muted transition-colors"
-                title="Notifications"
-              >
-                <Bell className="h-5 w-5 text-muted-foreground" />
-              </Link>
+              <NotificationBell />
               <Link
                 to="/dashboard/profile"
                 className="p-2 rounded-md hover:bg-muted transition-colors"
