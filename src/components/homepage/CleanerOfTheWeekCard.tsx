@@ -43,9 +43,7 @@ const CleanerOfTheWeekCard = () => {
   return (
     <div ref={revealRef}>
       <motion.div
-        className="rounded-2xl border border-border/50 shadow-lg overflow-hidden relative transition-shadow duration-300 hover:shadow-xl"
-        whileHover={{ y: -4 }}
-        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+        className="rounded-2xl border border-border/50 shadow-lg overflow-hidden relative transition-shadow duration-300"
       >
         {/* Background Image */}
         <img src={bgCleanerWeek} alt="" className="absolute inset-0 w-full h-full object-cover" />
