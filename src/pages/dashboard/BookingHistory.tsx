@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { usePlatformSettings } from "@/hooks/usePlatformSettings";
+import GetInvoiceButton from "@/components/GetInvoiceButton";
 
 interface Booking {
   id: string;
@@ -276,6 +277,7 @@ const BookingHistory = () => {
                         <RotateCcw className="h-4 w-4 mr-1" />
                         Book Again
                       </Button>
+                      <GetInvoiceButton bookingId={booking.id} />
                     </div>
                   </div>
                 </div>

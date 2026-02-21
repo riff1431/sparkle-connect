@@ -22,6 +22,7 @@ import { Separator } from "@/components/ui/separator";
 import { usePlatformSettings } from "@/hooks/usePlatformSettings";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import GetInvoiceButton from "@/components/GetInvoiceButton";
 
 const BookingDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -218,6 +219,11 @@ const BookingDetail = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Actions */}
+      <div className="flex gap-3">
+        <GetInvoiceButton bookingId={booking.id} size="default" />
+      </div>
 
       {/* Timestamps */}
       <Card>

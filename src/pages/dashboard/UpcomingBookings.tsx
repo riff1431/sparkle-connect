@@ -46,6 +46,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { usePlatformSettings } from "@/hooks/usePlatformSettings";
+import GetInvoiceButton from "@/components/GetInvoiceButton";
 
 interface Booking {
   id: string;
@@ -512,7 +513,10 @@ const UpcomingBookings = () => {
             </div>
           )}
 
-          <DialogFooter className="gap-2 sm:gap-0">
+          <DialogFooter className="gap-2 sm:gap-0 flex-wrap">
+            {selectedBooking && (
+              <GetInvoiceButton bookingId={selectedBooking.id} />
+            )}
             {selectedBooking?.cleaner_id && selectedBooking?.status !== "cancelled" && (
               <Button
                 variant="outline"
