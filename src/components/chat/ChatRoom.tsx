@@ -647,7 +647,7 @@ const ChatInfoSheet = ({ conversationId, partnerId, partnerName }: { conversatio
             {filtered.map((booking) => (
               <Link
                 key={booking.id}
-                to={`/dashboard/history`}
+                to={`/dashboard/booking/${booking.id}`}
                 className="block rounded-lg border border-border p-3 space-y-2 hover:bg-muted/50 transition-colors cursor-pointer group"
               >
                 <div className="flex items-center justify-between gap-2">
