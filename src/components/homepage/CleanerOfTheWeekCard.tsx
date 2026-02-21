@@ -118,21 +118,21 @@ const CleanerOfTheWeekCard = () => {
             </div>
 
             {/* CTA Buttons */}
-            <div className="shrink-0 flex flex-row sm:flex-col gap-2 sm:gap-2.5 justify-start sm:justify-center items-start sm:items-end">
+            <div className="shrink-0 flex flex-row sm:flex-col gap-2 sm:gap-2.5 justify-start sm:justify-center items-start sm:items-stretch">
               <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 400, damping: 15 }}>
-                <Button className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-bold px-5 sm:px-7 py-2 sm:py-2.5 rounded-lg shadow-sm hover:shadow-md text-xs sm:text-sm transition-shadow">
+                <Button className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-bold px-4 sm:px-7 py-2 sm:py-2.5 rounded-lg shadow-sm hover:shadow-md text-xs sm:text-sm transition-shadow w-full">
                   Request Quote
                 </Button>
               </motion.div>
               <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 400, damping: 15 }}>
-                <Button className="bg-primary hover:bg-primary-dark text-primary-foreground font-bold px-5 sm:px-7 py-2 sm:py-2.5 rounded-lg shadow-sm hover:shadow-md text-xs sm:text-sm transition-shadow" asChild>
+                <Button className="bg-primary hover:bg-primary-dark text-primary-foreground font-bold px-4 sm:px-7 py-2 sm:py-2.5 rounded-lg shadow-sm hover:shadow-md text-xs sm:text-sm transition-shadow w-full" asChild>
                   <Link to={`/cleaner/${profile.id}`}>
                     Book Now <ChevronRight className="h-4 w-4 ml-1" />
                   </Link>
                 </Button>
               </motion.div>
-              <span className="text-sm text-muted-foreground font-medium">
-                Request Quote · <span className="text-foreground font-bold">${profile.hourly_rate}</span>
+              <span className="text-xs sm:text-sm text-muted-foreground font-medium text-center sm:text-right">
+                Quote · <span className="text-foreground font-bold">${profile.hourly_rate}</span>
               </span>
             </div>
           </div>

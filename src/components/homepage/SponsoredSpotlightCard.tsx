@@ -73,7 +73,7 @@ const SponsoredSpotlightCard = ({ cleaner, listingId }: { cleaner: SponsoredClea
           </div>
 
           {/* CTAs */}
-          <div className="shrink-0 flex flex-row sm:flex-col gap-2 sm:gap-2.5 justify-start sm:justify-center">
+          <div className="shrink-0 flex flex-row sm:flex-col gap-2 sm:gap-2.5 justify-start sm:justify-center items-stretch">
             <motion.div whileHover={{ scale: 1.05, y: -2 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 400, damping: 15 }}>
               <Button
                 className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-bold px-6 py-2 rounded-lg shadow-sm hover:shadow-md text-sm transition-shadow"
@@ -95,7 +95,7 @@ const SponsoredSpotlightCard = ({ cleaner, listingId }: { cleaner: SponsoredClea
         </div>
 
         {/* Bottom Stats Bar */}
-        <div className="mt-3 sm:mt-4 pt-3 border-t border-border/40 flex items-center gap-3 sm:gap-4 flex-wrap">
+        <div className="mt-3 sm:mt-4 pt-3 border-t border-border/40 flex items-center gap-2 sm:gap-4 flex-wrap">
           <span className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
             <Clock className="h-3.5 w-3.5" />
             Starting at <span className="text-foreground font-bold">${cleaner.startingPrice}</span>

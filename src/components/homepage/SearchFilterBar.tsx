@@ -13,7 +13,7 @@ const SearchFilterBar = () => {
     <div className="relative py-3 overflow-hidden">
       <img src={bgSearchBar} alt="" className="absolute inset-0 w-full h-full object-cover" />
       <div className="container mx-auto px-4 relative">
-        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap overflow-x-auto no-scrollbar">
           <div className="flex items-center bg-muted rounded-md px-3 py-2 gap-2 flex-1 min-w-0 max-w-full sm:max-w-xs">
             <Search className="h-4 w-4 text-muted-foreground" />
             <input
