@@ -5,6 +5,7 @@ import SearchFilterBar from "@/components/homepage/SearchFilterBar";
 import CleanerOfTheWeekCard from "@/components/homepage/CleanerOfTheWeekCard";
 import CategoryChipsRow from "@/components/homepage/CategoryChipsRow";
 import SponsoredSpotlightSection from "@/components/homepage/SponsoredSpotlightSection";
+import HomepageServicesGrid from "@/components/homepage/HomepageServicesGrid";
 import QuoteRequestSidebar from "@/components/homepage/QuoteRequestSidebar";
 import MapPreviewCard from "@/components/homepage/MapPreviewCard";
 
@@ -27,6 +28,7 @@ const Index = () => {
                 <CleanerOfTheWeekCard />
                 <CategoryChipsRow />
                 <SponsoredSpotlightSection />
+                <HomepageServicesGrid />
               </div>
 
               {/* Right Sidebar */}
