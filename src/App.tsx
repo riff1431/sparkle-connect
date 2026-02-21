@@ -20,6 +20,7 @@ import Profile from "./pages/dashboard/Profile";
 import Settings from "./pages/dashboard/Settings";
 import Subscription from "./pages/dashboard/Subscription";
 import MyJobs from "./pages/dashboard/MyJobs";
+import BookingDetail from "./pages/dashboard/BookingDetail";
 import CleanerDashboardLayout from "./components/cleaner-dashboard/CleanerDashboardLayout";
 import CleanerDashboardOverview from "./pages/cleaner-dashboard/CleanerDashboardOverview";
 import CleanerBookingRequests from "./pages/cleaner-dashboard/CleanerBookingRequests";
@@ -84,6 +85,7 @@ const AnimatedApp = () => {
           <Route path="history" element={<BookingHistory />} />
           <Route path="addresses" element={<Addresses />} />
           <Route path="my-jobs" element={<MyJobs />} />
+          <Route path="booking/:id" element={<BookingDetail />} />
           <Route path="quotes" element={<MyQuotes />} />
           <Route path="messages" element={<CustomerMessages />} />
           <Route path="subscription" element={<Subscription />} />
