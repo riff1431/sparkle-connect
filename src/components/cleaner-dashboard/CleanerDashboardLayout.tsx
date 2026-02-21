@@ -3,8 +3,9 @@ import { Outlet, Navigate, useNavigate, Link } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import CleanerDashboardSidebar from "./CleanerDashboardSidebar";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2, Bell, MessageSquare, User } from "lucide-react";
+import { Loader2, MessageSquare, User } from "lucide-react";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
+import NotificationBell from "@/components/NotificationBell";
 
 const CleanerDashboardLayout = () => {
   const { user, loading, role, roleLoading } = useAuth();
@@ -54,9 +55,7 @@ const CleanerDashboardLayout = () => {
                   </span>
                 )}
               </Link>
-              <Link to="/cleaner/messages" className="relative p-2 rounded-md hover:bg-muted transition-colors" title="Notifications">
-                <Bell className="h-5 w-5 text-muted-foreground" />
-              </Link>
+              <NotificationBell />
               <Link to="/cleaner/profile" className="p-2 rounded-md hover:bg-muted transition-colors" title="Profile">
                 <User className="h-5 w-5 text-muted-foreground" />
               </Link>
