@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Search, Briefcase, CalendarDays, Star, User, LogOut, LayoutDashboard, Shield, ShoppingBag } from "lucide-react";
@@ -11,11 +11,24 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import logo from "@/assets/logo-new.png";
+import { supabase } from "@/integrations/supabase/client";
+import defaultLogo from "@/assets/logo-new.png";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [logo, setLogo] = useState(defaultLogo);
   const { user, signOut, loading, role } = useAuth();
+
+  useEffect(() => {
+    supabase
+      .from("theme_settings")
+      .select("setting_value")
+      .eq("setting_key", "logo_url")
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.setting_value) setLogo(data.setting_value);
+      });
+  }, []);
 
   const navLinks = [
     { label: "Find Cleaners", href: "/search", icon: Search },
