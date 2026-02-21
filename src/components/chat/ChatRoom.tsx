@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Send, MessageSquare, Check, CheckCheck } from "lucide-react";
+import { ArrowLeft, Send, MessageSquare, Check, CheckCheck, Paperclip, X, FileText, Loader2, Image as ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format, isToday, isYesterday } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
 import TypingIndicator from "./TypingIndicator";
 import OnlineStatusDot from "./OnlineStatusDot";
+import { toast } from "@/hooks/use-toast";
 
 interface ChatRoomProps {
   conversationId: string | null;
@@ -21,14 +22,22 @@ interface ChatRoomProps {
   isAdmin?: boolean;
 }
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const IMAGE_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+const ALLOWED_TYPES = [...IMAGE_TYPES, "application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "text/plain"];
+
 const ChatRoom = ({ conversationId, onBack, isAdmin }: ChatRoomProps) => {
   const { user } = useAuth();
   const { data: messages = [], isLoading, sendMessage } = useChatMessages(conversationId);
   const { partnerTyping, partnerOnline, setTyping } = useChatPresence(conversationId);
   const [inputText, setInputText] = useState("");
   const [sending, setSending] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [filePreviewUrl, setFilePreviewUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch conversation partner info
   const { data: partner } = useQuery({
@@ -50,7 +59,6 @@ const ChatRoom = ({ conversationId, onBack, isAdmin }: ChatRoomProps) => {
         .eq("id", partnerId)
         .single();
 
-      // Check if partner is a cleaner — use business name if available
       const { data: cleanerProfile } = await supabase
         .from("cleaner_profiles")
         .select("business_name, profile_image")
@@ -70,6 +78,62 @@ const ChatRoom = ({ conversationId, onBack, isAdmin }: ChatRoomProps) => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, partnerTyping]);
 
+  // Clean up file preview URL on unmount or file change
+  useEffect(() => {
+    return () => {
+      if (filePreviewUrl) URL.revokeObjectURL(filePreviewUrl);
+    };
+  }, [filePreviewUrl]);
+
+  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > MAX_FILE_SIZE) {
+      toast({ title: "File too large", description: "Maximum file size is 10MB.", variant: "destructive" });
+      return;
+    }
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      toast({ title: "Unsupported file type", description: "Please upload an image, PDF, or text file.", variant: "destructive" });
+      return;
+    }
+
+    if (filePreviewUrl) URL.revokeObjectURL(filePreviewUrl);
+    setSelectedFile(file);
+    if (IMAGE_TYPES.includes(file.type)) {
+      setFilePreviewUrl(URL.createObjectURL(file));
+    } else {
+      setFilePreviewUrl(null);
+    }
+
+    // Reset file input so same file can be re-selected
+    e.target.value = "";
+  }, [filePreviewUrl]);
+
+  const clearFile = useCallback(() => {
+    if (filePreviewUrl) URL.revokeObjectURL(filePreviewUrl);
+    setSelectedFile(null);
+    setFilePreviewUrl(null);
+  }, [filePreviewUrl]);
+
+  const uploadFile = async (file: File): Promise<string> => {
+    const ext = file.name.split(".").pop() || "bin";
+    const path = `${user!.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+    const { error } = await supabase.storage
+      .from("chat-attachments")
+      .upload(path, file, { contentType: file.type });
+
+    if (error) throw error;
+
+    const { data: urlData } = supabase.storage
+      .from("chat-attachments")
+      .getPublicUrl(path);
+
+    return urlData.publicUrl;
+  };
+
   // Handle typing indicator on input change
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -84,15 +148,26 @@ const ChatRoom = ({ conversationId, onBack, isAdmin }: ChatRoomProps) => {
   );
 
   const handleSend = async () => {
-    if (!inputText.trim() || sending || isAdmin) return;
+    if ((!inputText.trim() && !selectedFile) || sending || isAdmin) return;
     setSending(true);
     try {
-      await sendMessage(inputText);
+      let attachmentUrl: string | undefined;
+
+      if (selectedFile) {
+        setUploading(true);
+        attachmentUrl = await uploadFile(selectedFile);
+        setUploading(false);
+      }
+
+      const text = inputText.trim() || (selectedFile ? `📎 ${selectedFile.name}` : "");
+      await sendMessage(text, attachmentUrl);
       setInputText("");
+      clearFile();
       setTyping(false);
       inputRef.current?.focus();
-    } catch {
-      // Error handled by hook
+    } catch (err: any) {
+      setUploading(false);
+      toast({ title: "Failed to send", description: err.message, variant: "destructive" });
     } finally {
       setSending(false);
     }
@@ -198,7 +273,17 @@ const ChatRoom = ({ conversationId, onBack, isAdmin }: ChatRoomProps) => {
                           : "bg-muted text-foreground rounded-bl-md"
                       )}
                     >
-                      <p className="break-words whitespace-pre-wrap">{msg.text}</p>
+                      {/* Attachment */}
+                      {msg.attachment_url && (
+                        <MessageAttachment url={msg.attachment_url} isOwn={isOwn} />
+                      )}
+                      {/* Text — hide if it's just the auto-generated file name */}
+                      {msg.text && !msg.text.startsWith("📎 ") && (
+                        <p className="break-words whitespace-pre-wrap">{msg.text}</p>
+                      )}
+                      {msg.text && msg.text.startsWith("📎 ") && !msg.attachment_url && (
+                        <p className="break-words whitespace-pre-wrap">{msg.text}</p>
+                      )}
                       <div
                         className={cn(
                           "flex items-center gap-1 mt-1",
@@ -232,10 +317,50 @@ const ChatRoom = ({ conversationId, onBack, isAdmin }: ChatRoomProps) => {
         <div ref={messagesEndRef} />
       </div>
 
+      {/* File preview bar */}
+      {selectedFile && !isAdmin && (
+        <div className="px-3 pt-2 border-t border-border bg-muted/30">
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-background border border-border">
+            {filePreviewUrl ? (
+              <img src={filePreviewUrl} alt="Preview" className="h-12 w-12 rounded object-cover" />
+            ) : (
+              <div className="h-12 w-12 rounded bg-muted flex items-center justify-center">
+                <FileText className="h-5 w-5 text-muted-foreground" />
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium text-foreground truncate">{selectedFile.name}</p>
+              <p className="text-[10px] text-muted-foreground">
+                {(selectedFile.size / 1024).toFixed(1)} KB
+              </p>
+            </div>
+            <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={clearFile}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Input */}
       {!isAdmin && (
         <div className="p-3 border-t border-border bg-background">
           <div className="flex items-center gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              className="hidden"
+              accept={ALLOWED_TYPES.join(",")}
+              onChange={handleFileSelect}
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="shrink-0 h-10 w-10 text-muted-foreground hover:text-foreground"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={sending}
+            >
+              <Paperclip className="h-5 w-5" />
+            </Button>
             <Input
               ref={inputRef}
               placeholder="Type a message..."
@@ -249,15 +374,53 @@ const ChatRoom = ({ conversationId, onBack, isAdmin }: ChatRoomProps) => {
             <Button
               size="icon"
               onClick={handleSend}
-              disabled={!inputText.trim() || sending}
+              disabled={(!inputText.trim() && !selectedFile) || sending}
               className="shrink-0 h-10 w-10"
             >
-              <Send className="h-4 w-4" />
+              {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             </Button>
           </div>
         </div>
       )}
     </>
+  );
+};
+
+/** Renders an image or file attachment inside a message bubble */
+const MessageAttachment = ({ url, isOwn }: { url: string; isOwn: boolean }) => {
+  const isImage = /\.(jpe?g|png|gif|webp)$/i.test(url);
+  const fileName = decodeURIComponent(url.split("/").pop() || "file");
+  // Remove the timestamp prefix from display name
+  const displayName = fileName.replace(/^\d+-[a-z0-9]+\./, "file.");
+
+  if (isImage) {
+    return (
+      <a href={url} target="_blank" rel="noopener noreferrer" className="block mb-1">
+        <img
+          src={url}
+          alt="Attachment"
+          className="rounded-lg max-w-full max-h-60 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+          loading="lazy"
+        />
+      </a>
+    );
+  }
+
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={cn(
+        "flex items-center gap-2 p-2 rounded-lg mb-1 transition-colors",
+        isOwn
+          ? "bg-primary-foreground/10 hover:bg-primary-foreground/20"
+          : "bg-background hover:bg-muted"
+      )}
+    >
+      <FileText className="h-5 w-5 shrink-0" />
+      <span className="text-xs truncate underline">{displayName}</span>
+    </a>
   );
 };
 
