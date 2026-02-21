@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { FileText, Loader2 } from "lucide-react";
+import { useState, useCallback } from "react";
+import { FileText, Loader2, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,6 +44,20 @@ const GetInvoiceButton = ({ bookingId, variant = "outline", size = "sm", classNa
     }
   };
 
+  const handleDownloadPdf = useCallback(() => {
+    if (!previewHtml) return;
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      toast({ variant: "destructive", title: "Error", description: "Please allow popups to download the invoice." });
+      return;
+    }
+    printWindow.document.write(previewHtml);
+    printWindow.document.close();
+    printWindow.onload = () => {
+      printWindow.print();
+    };
+  }, [previewHtml, toast]);
+
   return (
     <>
       <Button variant={variant} size={size} className={className} disabled={loading} onClick={handleGetInvoice}>
@@ -54,7 +68,13 @@ const GetInvoiceButton = ({ bookingId, variant = "outline", size = "sm", classNa
       <Dialog open={!!previewHtml} onOpenChange={() => setPreviewHtml(null)}>
         <DialogContent className="max-w-3xl max-h-[85vh] overflow-auto">
           <DialogHeader>
-            <DialogTitle>Invoice</DialogTitle>
+            <DialogTitle className="flex items-center justify-between">
+              Invoice
+              <Button variant="outline" size="sm" onClick={handleDownloadPdf} className="mr-6">
+                <Download className="h-4 w-4 mr-1" />
+                Download / Print
+              </Button>
+            </DialogTitle>
           </DialogHeader>
           {previewHtml && (
             <iframe srcDoc={previewHtml} className="w-full min-h-[600px] border rounded-lg" title="Invoice" />
