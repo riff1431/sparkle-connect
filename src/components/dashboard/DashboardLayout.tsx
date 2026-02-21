@@ -1,14 +1,15 @@
 import { useEffect } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
-import { Loader2 } from "lucide-react";
+import { Outlet, useNavigate, Link } from "react-router-dom";
+import { Loader2, Bell, MessageSquare, User } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
 import DashboardSidebar from "./DashboardSidebar";
+import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import logo from "@/assets/logo.jpeg";
-import { Link } from "react-router-dom";
 
 const DashboardLayout = () => {
   const { user, loading, role, roleLoading } = useAuth();
+  const unreadCount = useUnreadMessages();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -42,14 +43,44 @@ const DashboardLayout = () => {
         <DashboardSidebar />
         <SidebarInset className="flex-1">
           {/* Dashboard Header */}
-          <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b border-border bg-background px-4 md:px-6">
-            <SidebarTrigger className="-ml-1" />
-            <Link to="/" className="flex items-center gap-2">
-              <img src={logo} alt="The Cleaning Network" className="h-8 w-auto rounded" />
-              <span className="font-heading font-semibold text-foreground hidden sm:inline">
-                The Cleaning Network
-              </span>
-            </Link>
+          <header className="sticky top-0 z-40 flex h-16 items-center justify-between gap-4 border-b border-border bg-background px-4 md:px-6">
+            <div className="flex items-center gap-4">
+              <SidebarTrigger className="-ml-1" />
+              <Link to="/" className="flex items-center gap-2">
+                <img src={logo} alt="The Cleaning Network" className="h-8 w-auto rounded" />
+                <span className="font-heading font-semibold text-foreground hidden sm:inline">
+                  The Cleaning Network
+                </span>
+              </Link>
+            </div>
+            <div className="flex items-center gap-1">
+              <Link
+                to="/dashboard/messages"
+                className="relative p-2 rounded-md hover:bg-muted transition-colors"
+                title="Messages"
+              >
+                <MessageSquare className="h-5 w-5 text-muted-foreground" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-0.5 right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-bold text-destructive-foreground">
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </span>
+                )}
+              </Link>
+              <Link
+                to="/dashboard/messages"
+                className="relative p-2 rounded-md hover:bg-muted transition-colors"
+                title="Notifications"
+              >
+                <Bell className="h-5 w-5 text-muted-foreground" />
+              </Link>
+              <Link
+                to="/dashboard/profile"
+                className="p-2 rounded-md hover:bg-muted transition-colors"
+                title="Profile"
+              >
+                <User className="h-5 w-5 text-muted-foreground" />
+              </Link>
+            </div>
           </header>
 
           {/* Main Content */}
