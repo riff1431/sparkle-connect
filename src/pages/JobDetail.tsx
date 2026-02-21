@@ -94,6 +94,24 @@ const JobDetail = () => {
     },
   });
 
+  // Fetch similar jobs (same service type or location, excluding current)
+  const { data: similarJobs = [] } = useQuery({
+    queryKey: ["similar-jobs", id, job?.service_type, job?.location],
+    enabled: !!job,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("jobs")
+        .select("id, title, service_type, location, budget_min, budget_max, applications_count, created_at, urgency")
+        .eq("status", "open")
+        .neq("id", id!)
+        .or(`service_type.eq.${job!.service_type},location.ilike.%${job!.location.split(",")[0].trim()}%`)
+        .order("created_at", { ascending: false })
+        .limit(4);
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
   // Fetch applications count
   const { data: applicationsData } = useQuery({
     queryKey: ["job-applications-list", id],
@@ -561,6 +579,48 @@ const JobDetail = () => {
             </Card>
           </div>
         </div>
+
+        {/* Similar Jobs */}
+        {similarJobs.length > 0 && (
+          <div className="mt-10">
+            <h2 className="text-xl font-bold text-foreground mb-4">Similar Jobs</h2>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {similarJobs.map((sj) => (
+                <Card
+                  key={sj.id}
+                  className="hover:shadow-md transition-shadow cursor-pointer border-border/60 hover:border-primary/30"
+                  onClick={() => navigate(`/jobs/${sj.id}`)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      {getStatusBadge("open")}
+                      {getUrgencyBadge(sj.urgency)}
+                    </div>
+                    <h3 className="font-semibold text-foreground line-clamp-1 mb-1">{sj.title}</h3>
+                    <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Briefcase className="h-3 w-3" />
+                        {sj.service_type}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <MapPin className="h-3 w-3" />
+                        {sj.location}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <DollarSign className="h-3 w-3" />
+                        {formatBudget(sj.budget_min, sj.budget_max)}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Users className="h-3 w-3" />
+                        {sj.applications_count} applied
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
       </main>
 
       <Footer />
