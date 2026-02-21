@@ -391,6 +391,23 @@ const CleanerBookingRequests = () => {
           )}
 
           <DialogFooter className="gap-2 sm:gap-0">
+            {selectedBooking?.status !== "cancelled" && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSelectedBooking(null);
+                  handleStartChat(selectedBooking!);
+                }}
+                disabled={chattingBookingId === selectedBooking?.id}
+              >
+                {chattingBookingId === selectedBooking?.id ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <MessageSquare className="mr-2 h-4 w-4" />
+                )}
+                Chat
+              </Button>
+            )}
             {selectedBooking?.status === "pending" && (
               <>
                 <Button
