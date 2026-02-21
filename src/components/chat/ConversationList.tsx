@@ -1,4 +1,5 @@
 import { useChatConversations, ConversationWithDetails } from "@/hooks/useChatConversations";
+import { useGlobalOnlineStatus } from "@/hooks/useChatPresence";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -7,6 +8,7 @@ import { MessageSquare, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useMemo } from "react";
 import { formatDistanceToNow } from "date-fns";
+import OnlineStatusDot from "./OnlineStatusDot";
 
 interface ConversationListProps {
   selectedId: string | null;
@@ -16,6 +18,7 @@ interface ConversationListProps {
 
 const ConversationList = ({ selectedId, onSelect, isAdmin }: ConversationListProps) => {
   const { data: conversations = [], isLoading } = useChatConversations();
+  const onlineUsers = useGlobalOnlineStatus();
   const [search, setSearch] = useState("");
 
   const filtered = useMemo(() => {
@@ -69,14 +72,21 @@ const ConversationList = ({ selectedId, onSelect, isAdmin }: ConversationListPro
             </p>
           </div>
         ) : (
-          filtered.map((conv) => (
-            <ConversationItem
-              key={conv.id}
-              conversation={conv}
-              isSelected={selectedId === conv.id}
-              onClick={() => onSelect(conv.id)}
-            />
-          ))
+          filtered.map((conv) => {
+            const otherId = conv.customer_id === conv.provider_id ? conv.provider_id : 
+              (onlineUsers.has(conv.customer_id) ? conv.customer_id : conv.provider_id);
+            // Determine which user is "other" — we need the auth user's ID
+            const isOtherOnline = onlineUsers.has(conv.customer_id) || onlineUsers.has(conv.provider_id);
+            return (
+              <ConversationItem
+                key={conv.id}
+                conversation={conv}
+                isSelected={selectedId === conv.id}
+                onClick={() => onSelect(conv.id)}
+                isOnline={isOtherOnline}
+              />
+            );
+          })
         )}
       </div>
     </>
@@ -87,10 +97,12 @@ const ConversationItem = ({
   conversation,
   isSelected,
   onClick,
+  isOnline,
 }: {
   conversation: ConversationWithDetails;
   isSelected: boolean;
   onClick: () => void;
+  isOnline: boolean;
 }) => {
   const timeAgo = conversation.last_message_at
     ? formatDistanceToNow(new Date(conversation.last_message_at), { addSuffix: true })
@@ -104,12 +116,19 @@ const ConversationItem = ({
         isSelected && "bg-primary/5 border-l-2 border-primary"
       )}
     >
-      <Avatar className="h-10 w-10 shrink-0">
-        <AvatarImage src={conversation.other_user_avatar || undefined} />
-        <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
-          {conversation.other_user_name.charAt(0).toUpperCase()}
-        </AvatarFallback>
-      </Avatar>
+      <div className="relative shrink-0">
+        <Avatar className="h-10 w-10">
+          <AvatarImage src={conversation.other_user_avatar || undefined} />
+          <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
+            {conversation.other_user_name.charAt(0).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+        <OnlineStatusDot
+          online={isOnline}
+          className="absolute -bottom-0.5 -right-0.5"
+          size="sm"
+        />
+      </div>
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-2">

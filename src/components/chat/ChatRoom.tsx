@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useChatMessages, ChatMessage } from "@/hooks/useChatMessages";
+import { useChatPresence } from "@/hooks/useChatPresence";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,8 @@ import { format, isToday, isYesterday } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
+import TypingIndicator from "./TypingIndicator";
+import OnlineStatusDot from "./OnlineStatusDot";
 
 interface ChatRoomProps {
   conversationId: string | null;
@@ -21,6 +24,7 @@ interface ChatRoomProps {
 const ChatRoom = ({ conversationId, onBack, isAdmin }: ChatRoomProps) => {
   const { user } = useAuth();
   const { data: messages = [], isLoading, sendMessage } = useChatMessages(conversationId);
+  const { partnerTyping, partnerOnline, setTyping } = useChatPresence(conversationId);
   const [inputText, setInputText] = useState("");
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -53,7 +57,20 @@ const ChatRoom = ({ conversationId, onBack, isAdmin }: ChatRoomProps) => {
   // Auto-scroll to bottom on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, partnerTyping]);
+
+  // Handle typing indicator on input change
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setInputText(e.target.value);
+      if (e.target.value.trim()) {
+        setTyping(true);
+      } else {
+        setTyping(false);
+      }
+    },
+    [setTyping]
+  );
 
   const handleSend = async () => {
     if (!inputText.trim() || sending || isAdmin) return;
@@ -61,6 +78,7 @@ const ChatRoom = ({ conversationId, onBack, isAdmin }: ChatRoomProps) => {
     try {
       await sendMessage(inputText);
       setInputText("");
+      setTyping(false);
       inputRef.current?.focus();
     } catch {
       // Error handled by hook
@@ -97,19 +115,32 @@ const ChatRoom = ({ conversationId, onBack, isAdmin }: ChatRoomProps) => {
             <ArrowLeft className="h-5 w-5" />
           </Button>
         )}
-        <Avatar className="h-9 w-9">
-          <AvatarImage src={partner?.avatar_url || undefined} />
-          <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
-            {(partner?.full_name || "U").charAt(0).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
+        <div className="relative">
+          <Avatar className="h-9 w-9">
+            <AvatarImage src={partner?.avatar_url || undefined} />
+            <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
+              {(partner?.full_name || "U").charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <OnlineStatusDot
+            online={partnerOnline}
+            className="absolute -bottom-0.5 -right-0.5"
+            size="sm"
+          />
+        </div>
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-sm text-foreground truncate">
             {partner?.full_name || "Loading..."}
           </p>
-          {isAdmin && (
-            <p className="text-[11px] text-muted-foreground">Admin view (read-only)</p>
-          )}
+          <p className="text-[11px] text-muted-foreground">
+            {isAdmin
+              ? "Admin view (read-only)"
+              : partnerTyping
+              ? "Typing..."
+              : partnerOnline
+              ? "Online"
+              : "Offline"}
+          </p>
         </div>
       </div>
 
@@ -186,6 +217,7 @@ const ChatRoom = ({ conversationId, onBack, isAdmin }: ChatRoomProps) => {
             })}
           </AnimatePresence>
         )}
+        {partnerTyping && <TypingIndicator />}
         <div ref={messagesEndRef} />
       </div>
 
@@ -197,7 +229,7 @@ const ChatRoom = ({ conversationId, onBack, isAdmin }: ChatRoomProps) => {
               ref={inputRef}
               placeholder="Type a message..."
               value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
+              onChange={handleInputChange}
               onKeyDown={handleKeyDown}
               className="flex-1 h-10"
               maxLength={2000}
