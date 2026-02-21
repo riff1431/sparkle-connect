@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { AvatarImage } from "@/components/ui/avatar";
 import { Menu, X, Search, Briefcase, CalendarDays, Star, User, LogOut, LayoutDashboard, Shield, ShoppingBag } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -22,8 +23,21 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [logo, setLogo] = useState(defaultLogo);
   const [scrolled, setScrolled] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const { user, signOut, loading, role } = useAuth();
   const unreadCount = useUnreadMessages();
+
+  useEffect(() => {
+    if (!user) { setAvatarUrl(null); return; }
+    supabase
+      .from("profiles")
+      .select("avatar_url")
+      .eq("id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.avatar_url) setAvatarUrl(data.avatar_url);
+      });
+  }, [user]);
 
   useEffect(() => {
     supabase
@@ -126,6 +140,7 @@ const Header = () => {
                       <DropdownMenuTrigger asChild>
                         <button className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-muted transition-colors outline-none">
                           <Avatar className="h-6 w-6">
+                            {avatarUrl && <AvatarImage src={avatarUrl} alt="Profile" />}
                             <AvatarFallback className="bg-primary text-primary-foreground text-[10px] font-semibold">
                               {getInitials(user.email || "U")}
                             </AvatarFallback>
