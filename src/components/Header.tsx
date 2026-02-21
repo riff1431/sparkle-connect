@@ -245,6 +245,15 @@ const Header = () => {
                   <div className="flex flex-col gap-2 mt-3 px-3 pt-3 border-t border-border/50">
                     {user ? (
                       <>
+                        <div className="flex items-center gap-2.5 px-1 py-1 mb-1">
+                          <Avatar className="h-8 w-8">
+                            {avatarUrl && <AvatarImage src={avatarUrl} alt="Profile" />}
+                            <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
+                              {getInitials(user.email || "U")}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="text-sm font-medium text-foreground">{getUserName()}</span>
+                        </div>
                         <Button variant="outline" size="sm" className="w-full justify-start" asChild>
                           <Link to="/dashboard" onClick={() => setIsMenuOpen(false)}>
                             <LayoutDashboard className="h-4 w-4 mr-2" />
