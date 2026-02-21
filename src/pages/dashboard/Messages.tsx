@@ -1,9 +1,10 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import ChatLayout from "@/components/chat/ChatLayout";
 
 const CustomerMessages = () => {
   const location = useLocation();
-  const initialConversationId = (location.state as any)?.conversationId || null;
+  const [searchParams] = useSearchParams();
+  const initialConversationId = searchParams.get("conversation") || (location.state as any)?.conversationId || null;
 
   return (
     <div className="space-y-4">
