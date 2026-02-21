@@ -52,6 +52,9 @@ import ServiceDetail from "./pages/ServiceDetail";
 import CleanerServiceListings from "./pages/cleaner-dashboard/CleanerServiceListings";
 import CleanerQuoteRequests from "./pages/cleaner-dashboard/CleanerQuoteRequests";
 import MyQuotes from "./pages/dashboard/MyQuotes";
+import CustomerMessages from "./pages/dashboard/Messages";
+import CleanerMessages from "./pages/cleaner-dashboard/CleanerMessages";
+import AdminMessages from "./pages/admin-dashboard/AdminMessages";
 import AdminQuoteRequests from "./pages/admin-dashboard/AdminQuoteRequests";
 import NotFound from "./pages/NotFound";
 
@@ -80,6 +83,7 @@ const AnimatedApp = () => {
           <Route path="addresses" element={<Addresses />} />
           <Route path="my-jobs" element={<MyJobs />} />
           <Route path="quotes" element={<MyQuotes />} />
+          <Route path="messages" element={<CustomerMessages />} />
           <Route path="subscription" element={<Subscription />} />
           <Route path="profile" element={<Profile />} />
           <Route path="settings" element={<Settings />} />
@@ -97,6 +101,7 @@ const AnimatedApp = () => {
           <Route path="settings" element={<CleanerSettings />} />
           <Route path="services" element={<CleanerServiceListings />} />
           <Route path="quotes" element={<CleanerQuoteRequests />} />
+          <Route path="messages" element={<CleanerMessages />} />
         </Route>
 
         {/* Admin Dashboard Routes */}
@@ -116,6 +121,7 @@ const AnimatedApp = () => {
           <Route path="theme" element={<AdminThemeManagement />} />
           <Route path="service-listings" element={<AdminServiceListings />} />
           <Route path="quotes" element={<AdminQuoteRequests />} />
+          <Route path="messages" element={<AdminMessages />} />
         </Route>
         
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

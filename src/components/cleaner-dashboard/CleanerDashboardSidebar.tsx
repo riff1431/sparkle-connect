@@ -9,7 +9,8 @@ import {
   Crown,
   Zap,
   ShoppingBag,
-  FileQuestion
+  FileQuestion,
+  MessageSquare,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
@@ -32,6 +33,7 @@ const menuItems = [
   { title: "My Services", url: "/cleaner/services", icon: ShoppingBag },
   { title: "Booking Requests", url: "/cleaner/bookings", icon: ClipboardList },
   { title: "Quote Requests", url: "/cleaner/quotes", icon: FileQuestion },
+  { title: "Messages", url: "/cleaner/messages", icon: MessageSquare },
   { title: "My Schedule", url: "/cleaner/schedule", icon: Calendar },
   { title: "Membership", url: "/cleaner/subscription", icon: Crown },
   { title: "Sponsored Spotlight", url: "/cleaner/sponsorship", icon: Zap },

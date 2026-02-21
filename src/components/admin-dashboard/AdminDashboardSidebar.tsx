@@ -13,7 +13,8 @@ import {
   Zap,
   Paintbrush,
   ShoppingBag,
-  FileQuestion
+  FileQuestion,
+  MessageSquare,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -48,6 +49,7 @@ const menuItems = [
   { title: "Payment Verification", url: "/admin/payment-verification", icon: BadgeCheck },
   { title: "Service Listings", url: "/admin/service-listings", icon: ShoppingBag },
   { title: "Quote Requests", url: "/admin/quotes", icon: FileQuestion },
+  { title: "Conversations", url: "/admin/messages", icon: MessageSquare },
   { title: "Settings", url: "/admin/settings", icon: Settings },
   { title: "Theme Management", url: "/admin/theme", icon: Paintbrush },
 ];
