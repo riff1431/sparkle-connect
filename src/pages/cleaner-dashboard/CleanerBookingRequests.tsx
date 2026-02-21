@@ -27,6 +27,7 @@ import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import type { Database } from "@/integrations/supabase/types";
+import GetInvoiceButton from "@/components/GetInvoiceButton";
 
 type BookingStatus = Database["public"]["Enums"]["booking_status"];
 
@@ -390,7 +391,10 @@ const CleanerBookingRequests = () => {
             </div>
           )}
 
-          <DialogFooter className="gap-2 sm:gap-0">
+          <DialogFooter className="gap-2 sm:gap-0 flex-wrap">
+            {selectedBooking && (
+              <GetInvoiceButton bookingId={selectedBooking.id} />
+            )}
             {selectedBooking?.status !== "cancelled" && (
               <Button
                 variant="outline"
