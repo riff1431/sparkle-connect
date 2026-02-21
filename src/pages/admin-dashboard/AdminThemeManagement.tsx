@@ -192,6 +192,52 @@ const AdminThemeManagement = () => {
     );
   };
 
+  const fontOptions = [
+    { value: "Inter", label: "Inter" },
+    { value: "Plus Jakarta Sans", label: "Plus Jakarta Sans" },
+    { value: "Roboto", label: "Roboto" },
+    { value: "Open Sans", label: "Open Sans" },
+    { value: "Lato", label: "Lato" },
+    { value: "Montserrat", label: "Montserrat" },
+    { value: "Poppins", label: "Poppins" },
+    { value: "Nunito", label: "Nunito" },
+    { value: "Raleway", label: "Raleway" },
+    { value: "Source Sans 3", label: "Source Sans 3" },
+  ];
+
+  const renderFontInput = (setting: ThemeSetting) => {
+    const value = getCurrentValue(setting) || "Inter";
+
+    return (
+      <div className="space-y-2">
+        <Label className="text-sm font-medium">{setting.label}</Label>
+        {setting.description && (
+          <p className="text-xs text-muted-foreground">{setting.description}</p>
+        )}
+        <Select value={value} onValueChange={(v) => handleChange(setting.setting_key, v)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select font..." />
+          </SelectTrigger>
+          <SelectContent>
+            {fontOptions.map((font) => (
+              <SelectItem key={font.value} value={font.value}>
+                <span style={{ fontFamily: font.value }}>{font.label}</span>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <div
+          className="p-4 rounded-lg border border-border bg-muted/50 mt-2"
+          style={{ fontFamily: value }}
+        >
+          <p className="text-sm font-medium">Preview: {value}</p>
+          <p className="text-sm">The quick brown fox jumps over the lazy dog.</p>
+          <p className="text-xs text-muted-foreground mt-1">ABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789</p>
+        </div>
+      </div>
+    );
+  };
+
   const renderSelectInput = (setting: ThemeSetting) => {
     const value = getCurrentValue(setting) || "";
 
@@ -222,6 +268,8 @@ const AdminThemeManagement = () => {
         return renderImageInput(setting);
       case "select":
         return renderSelectInput(setting);
+      case "font":
+        return renderFontInput(setting);
       default:
         return (
           <div className="space-y-2">

@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import GlobalFontProvider from "@/components/GlobalFontProvider";
 import Index from "./pages/Index";
 import Search from "./pages/Search";
 import CleanerPublicProfile from "./pages/CleanerProfile";
@@ -58,6 +59,7 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
+      <GlobalFontProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -125,6 +127,7 @@ const App = () => (
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
+      </GlobalFontProvider>
     </AuthProvider>
   </QueryClientProvider>
 );
