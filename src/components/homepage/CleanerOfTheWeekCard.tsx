@@ -41,7 +41,7 @@ const CleanerOfTheWeekCard = () => {
   const reviewCount = 55;
 
   return (
-    <div ref={revealRef} style={{ opacity: 0 }}>
+    <div ref={revealRef}>
       <motion.div
         className="rounded-2xl border border-border/50 shadow-lg overflow-hidden relative transition-shadow duration-300 hover:shadow-xl"
         whileHover={{ y: -4 }}

@@ -23,14 +23,23 @@ export function useScrollReveal<T extends HTMLElement>(
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
-    if (prefersReducedMotion || !ref.current) return;
+    if (!ref.current) return;
 
-    const { y = 40, x = 0, opacity = 0, duration = 0.8, delay = 0, once = true } = options;
+    if (prefersReducedMotion) {
+      gsap.set(ref.current, { opacity: 1, y: 0, x: 0 });
+      return;
+    }
 
-    gsap.fromTo(
-      ref.current,
-      { y, x, opacity },
-      {
+    const { y = 40, x = 0, duration = 0.8, delay = 0, once = true } = options;
+
+    // Set initial state immediately
+    gsap.set(ref.current, { opacity: 0, y, x });
+
+    // Delay ScrollTrigger setup to allow page transitions to complete
+    const timer = setTimeout(() => {
+      if (!ref.current) return;
+      ScrollTrigger.refresh();
+      gsap.to(ref.current, {
         y: 0,
         x: 0,
         opacity: 1,
@@ -39,13 +48,14 @@ export function useScrollReveal<T extends HTMLElement>(
         ease: "power3.out",
         scrollTrigger: {
           trigger: ref.current,
-          start: "top 85%",
+          start: "top 90%",
           toggleActions: once ? "play none none none" : "play reverse play reverse",
         },
-      }
-    );
+      });
+    }, 350);
 
     return () => {
+      clearTimeout(timer);
       ScrollTrigger.getAll().forEach((t) => t.kill());
     };
   }, []);
