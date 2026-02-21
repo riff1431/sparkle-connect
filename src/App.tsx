@@ -54,8 +54,11 @@ import CleanerServiceListings from "./pages/cleaner-dashboard/CleanerServiceList
 import CleanerQuoteRequests from "./pages/cleaner-dashboard/CleanerQuoteRequests";
 import MyQuotes from "./pages/dashboard/MyQuotes";
 import CustomerMessages from "./pages/dashboard/Messages";
+import CustomerInvoices from "./pages/dashboard/Invoices";
 import CleanerMessages from "./pages/cleaner-dashboard/CleanerMessages";
+import CleanerInvoices from "./pages/cleaner-dashboard/CleanerInvoices";
 import AdminMessages from "./pages/admin-dashboard/AdminMessages";
+import AdminInvoices from "./pages/admin-dashboard/AdminInvoices";
 import AdminQuoteRequests from "./pages/admin-dashboard/AdminQuoteRequests";
 import AdminNotifications from "./pages/admin-dashboard/AdminNotifications";
 import NotFound from "./pages/NotFound";
@@ -88,6 +91,7 @@ const AnimatedApp = () => {
           <Route path="booking/:id" element={<BookingDetail />} />
           <Route path="quotes" element={<MyQuotes />} />
           <Route path="messages" element={<CustomerMessages />} />
+          <Route path="invoices" element={<CustomerInvoices />} />
           <Route path="subscription" element={<Subscription />} />
           <Route path="profile" element={<Profile />} />
           <Route path="settings" element={<Settings />} />
@@ -106,6 +110,7 @@ const AnimatedApp = () => {
           <Route path="services" element={<CleanerServiceListings />} />
           <Route path="quotes" element={<CleanerQuoteRequests />} />
           <Route path="messages" element={<CleanerMessages />} />
+          <Route path="invoices" element={<CleanerInvoices />} />
         </Route>
 
         {/* Admin Dashboard Routes */}
@@ -126,6 +131,7 @@ const AnimatedApp = () => {
           <Route path="service-listings" element={<AdminServiceListings />} />
           <Route path="quotes" element={<AdminQuoteRequests />} />
           <Route path="messages" element={<AdminMessages />} />
+          <Route path="invoices" element={<AdminInvoices />} />
           <Route path="notifications" element={<AdminNotifications />} />
         </Route>
         

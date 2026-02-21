@@ -243,6 +243,74 @@ export type Database = {
         }
         Relationships: []
       }
+      invoices: {
+        Row: {
+          amount: number
+          booking_id: string | null
+          cleaner_id: string | null
+          commission_amount: number
+          created_at: string
+          created_by: string | null
+          customer_id: string
+          due_date: string | null
+          id: string
+          invoice_number: string
+          net_amount: number
+          notes: string | null
+          paid_at: string | null
+          service_date: string
+          service_type: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          booking_id?: string | null
+          cleaner_id?: string | null
+          commission_amount?: number
+          created_at?: string
+          created_by?: string | null
+          customer_id: string
+          due_date?: string | null
+          id?: string
+          invoice_number: string
+          net_amount?: number
+          notes?: string | null
+          paid_at?: string | null
+          service_date: string
+          service_type: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          booking_id?: string | null
+          cleaner_id?: string | null
+          commission_amount?: number
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string
+          due_date?: string | null
+          id?: string
+          invoice_number?: string
+          net_amount?: number
+          notes?: string | null
+          paid_at?: string | null
+          service_date?: string
+          service_type?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       job_applications: {
         Row: {
           applicant_id: string

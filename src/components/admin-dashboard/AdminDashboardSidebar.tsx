@@ -16,6 +16,7 @@ import {
   FileQuestion,
   MessageSquare,
   Bell,
+  FileText,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -51,6 +52,7 @@ const menuItems = [
   { title: "Service Listings", url: "/admin/service-listings", icon: ShoppingBag },
   { title: "Quote Requests", url: "/admin/quotes", icon: FileQuestion },
   { title: "Conversations", url: "/admin/messages", icon: MessageSquare },
+  { title: "Invoices", url: "/admin/invoices", icon: FileText },
   { title: "Notifications", url: "/admin/notifications", icon: Bell },
   { title: "Settings", url: "/admin/settings", icon: Settings },
   { title: "Theme Management", url: "/admin/theme", icon: Paintbrush },
