@@ -17,10 +17,13 @@ import {
   MapPin,
   CheckCircle,
   XCircle,
-  Eye
+  Eye,
+  MessageSquare,
+  Loader2
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import type { Database } from "@/integrations/supabase/types";
@@ -42,10 +45,58 @@ interface Booking {
 
 const CleanerBookingRequests = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [chattingBookingId, setChattingBookingId] = useState<string | null>(null);
+
+  const handleStartChat = async (booking: Booking) => {
+    if (!user) return;
+    setChattingBookingId(booking.id);
+    try {
+      // Check for existing conversation (cleaner is provider)
+      const { data: existing } = await supabase
+        .from("conversations")
+        .select("id")
+        .eq("customer_id", booking.customer_id)
+        .eq("provider_id", user.id)
+        .maybeSingle();
+
+      let conversationId = existing?.id;
+
+      if (!conversationId) {
+        const { data: newConvo, error: convoError } = await supabase
+          .from("conversations")
+          .insert({
+            customer_id: booking.customer_id,
+            provider_id: user.id,
+          })
+          .select("id")
+          .single();
+
+        if (convoError) throw convoError;
+        conversationId = newConvo.id;
+
+        // Send booking details as first message
+        const bookingMessage = `📋 **Booking Details**\n\n🧹 Service: ${booking.service_type}\n📅 Date: ${format(new Date(booking.scheduled_date), "MMMM d, yyyy")}\n🕐 Time: ${booking.scheduled_time}\n⏱️ Duration: ${booking.duration_hours} hours${booking.special_instructions ? `\n📝 Notes: ${booking.special_instructions}` : ""}\n\n💰 Total: $${Number(booking.service_price).toFixed(0)}`;
+
+        await supabase.from("messages").insert({
+          conversation_id: conversationId,
+          sender_id: user.id,
+          text: bookingMessage,
+        });
+      }
+
+      navigate(`/cleaner/messages?conversation=${conversationId}`);
+    } catch (error) {
+      console.error("Error starting chat:", error);
+      toast.error("Failed to start chat");
+    } finally {
+      setChattingBookingId(null);
+    }
+  };
 
   const fetchBookings = async () => {
     if (!user) return;
@@ -171,19 +222,35 @@ const CleanerBookingRequests = () => {
               Duration: {booking.duration_hours} hours
             </p>
           </div>
-          <div className="text-right">
+          <div className="text-right space-y-2">
             <p className="text-xl font-bold text-foreground">
               ${Number(booking.service_price).toFixed(0)}
             </p>
-            <Button
-              variant="outline"
-              size="sm"
-              className="mt-2"
-              onClick={() => setSelectedBooking(booking)}
-            >
-              <Eye className="mr-1 h-4 w-4" />
-              View Details
-            </Button>
+            <div className="flex flex-col gap-1">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSelectedBooking(booking)}
+              >
+                <Eye className="mr-1 h-4 w-4" />
+                View Details
+              </Button>
+              {booking.status !== "cancelled" && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleStartChat(booking)}
+                  disabled={chattingBookingId === booking.id}
+                >
+                  {chattingBookingId === booking.id ? (
+                    <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                  ) : (
+                    <MessageSquare className="mr-1 h-4 w-4" />
+                  )}
+                  Chat
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </CardContent>
