@@ -617,13 +617,13 @@ const ServiceDetail = () => {
           </div>
 
           {/* ============ RIGHT COLUMN - BOOKING SIDEBAR ============ */}
-          <div className="lg:self-start">
+          <div className="lg:sticky lg:top-20 lg:self-start">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.15 }}
             >
-              <Card className="lg:sticky lg:top-20 shadow-lg border-border/60 overflow-hidden">
+              <Card className="shadow-lg border-border/60 overflow-hidden">
                 {/* Price Header */}
                 <div className="bg-gradient-to-r from-primary to-primary-dark p-6 text-center">
                   <p className="text-4xl font-bold text-primary-foreground">
