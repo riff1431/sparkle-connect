@@ -48,6 +48,9 @@ import JobDetail from "./pages/JobDetail";
 import FindServices from "./pages/FindServices";
 import ServiceDetail from "./pages/ServiceDetail";
 import CleanerServiceListings from "./pages/cleaner-dashboard/CleanerServiceListings";
+import CleanerQuoteRequests from "./pages/cleaner-dashboard/CleanerQuoteRequests";
+import MyQuotes from "./pages/dashboard/MyQuotes";
+import AdminQuoteRequests from "./pages/admin-dashboard/AdminQuoteRequests";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -78,6 +81,7 @@ const App = () => (
               <Route path="history" element={<BookingHistory />} />
               <Route path="addresses" element={<Addresses />} />
               <Route path="my-jobs" element={<MyJobs />} />
+              <Route path="quotes" element={<MyQuotes />} />
               <Route path="subscription" element={<Subscription />} />
               <Route path="profile" element={<Profile />} />
               <Route path="settings" element={<Settings />} />
@@ -94,6 +98,7 @@ const App = () => (
               <Route path="earnings" element={<CleanerEarnings />} />
               <Route path="settings" element={<CleanerSettings />} />
               <Route path="services" element={<CleanerServiceListings />} />
+              <Route path="quotes" element={<CleanerQuoteRequests />} />
             </Route>
 
             {/* Admin Dashboard Routes */}
@@ -112,6 +117,7 @@ const App = () => (
               <Route path="settings" element={<AdminSettings />} />
               <Route path="theme" element={<AdminThemeManagement />} />
               <Route path="service-listings" element={<AdminServiceListings />} />
+              <Route path="quotes" element={<AdminQuoteRequests />} />
             </Route>
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

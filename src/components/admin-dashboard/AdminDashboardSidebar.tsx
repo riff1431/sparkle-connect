@@ -12,7 +12,8 @@ import {
   Crown,
   Zap,
   Paintbrush,
-  ShoppingBag
+  ShoppingBag,
+  FileQuestion
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
@@ -43,6 +44,7 @@ const menuItems = [
   { title: "Payment Gateway", url: "/admin/payment-gateway", icon: CreditCard },
   { title: "Payment Verification", url: "/admin/payment-verification", icon: BadgeCheck },
   { title: "Service Listings", url: "/admin/service-listings", icon: ShoppingBag },
+  { title: "Quote Requests", url: "/admin/quotes", icon: FileQuestion },
   { title: "Settings", url: "/admin/settings", icon: Settings },
   { title: "Theme Management", url: "/admin/theme", icon: Paintbrush },
 ];

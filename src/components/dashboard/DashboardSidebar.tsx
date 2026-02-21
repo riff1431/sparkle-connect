@@ -9,6 +9,7 @@ import {
   LogOut,
   Crown,
   Briefcase,
+  FileQuestion,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
@@ -32,6 +33,7 @@ const menuItems = [
   { title: "Upcoming", url: "/dashboard/upcoming", icon: CalendarDays },
   { title: "Booking History", url: "/dashboard/history", icon: History },
   { title: "My Jobs", url: "/dashboard/my-jobs", icon: Briefcase },
+  { title: "My Quotes", url: "/dashboard/quotes", icon: FileQuestion },
   { title: "Addresses", url: "/dashboard/addresses", icon: MapPin },
   { title: "Membership", url: "/dashboard/subscription", icon: Crown },
   { title: "Profile", url: "/dashboard/profile", icon: User },

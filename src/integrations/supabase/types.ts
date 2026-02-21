@@ -314,6 +314,36 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          link: string | null
+          read_at: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          read_at?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          read_at?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       payment_records: {
         Row: {
           amount: number
@@ -507,6 +537,109 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      quote_requests: {
+        Row: {
+          address: string
+          assigned_provider_id: string | null
+          city: string | null
+          created_at: string
+          customer_id: string | null
+          id: string
+          latitude: number | null
+          listing_id: string | null
+          longitude: number | null
+          notes: string | null
+          preferred_datetime: string | null
+          quote_type: string
+          services: Json
+          status: Database["public"]["Enums"]["quote_request_status"]
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          assigned_provider_id?: string | null
+          city?: string | null
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          latitude?: number | null
+          listing_id?: string | null
+          longitude?: number | null
+          notes?: string | null
+          preferred_datetime?: string | null
+          quote_type?: string
+          services?: Json
+          status?: Database["public"]["Enums"]["quote_request_status"]
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          assigned_provider_id?: string | null
+          city?: string | null
+          created_at?: string
+          customer_id?: string | null
+          id?: string
+          latitude?: number | null
+          listing_id?: string | null
+          longitude?: number | null
+          notes?: string | null
+          preferred_datetime?: string | null
+          quote_type?: string
+          services?: Json
+          status?: Database["public"]["Enums"]["quote_request_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_requests_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "service_listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quote_responses: {
+        Row: {
+          created_at: string
+          id: string
+          message: string | null
+          price_amount: number
+          provider_id: string
+          quote_request_id: string
+          status: Database["public"]["Enums"]["quote_response_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          price_amount: number
+          provider_id: string
+          quote_request_id: string
+          status?: Database["public"]["Enums"]["quote_response_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          price_amount?: number
+          provider_id?: string
+          quote_request_id?: string
+          status?: Database["public"]["Enums"]["quote_response_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_responses_quote_request_id_fkey"
+            columns: ["quote_request_id"]
+            isOneToOne: false
+            referencedRelation: "quote_requests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reviews: {
         Row: {
@@ -984,6 +1117,14 @@ export type Database = {
         | "completed"
         | "cancelled"
       payment_status: "pending" | "verified" | "rejected"
+      quote_request_status:
+        | "new"
+        | "assigned"
+        | "responded"
+        | "booked"
+        | "closed"
+        | "rejected"
+      quote_response_status: "sent" | "accepted" | "declined"
       sponsored_status: "inactive" | "requested" | "active" | "expired"
     }
     CompositeTypes: {
@@ -1121,6 +1262,15 @@ export const Constants = {
         "cancelled",
       ],
       payment_status: ["pending", "verified", "rejected"],
+      quote_request_status: [
+        "new",
+        "assigned",
+        "responded",
+        "booked",
+        "closed",
+        "rejected",
+      ],
+      quote_response_status: ["sent", "accepted", "declined"],
       sponsored_status: ["inactive", "requested", "active", "expired"],
     },
   },
