@@ -551,14 +551,16 @@ const BookingDetailsCard = ({ text }: { text: string }) => {
 };
 
 /** Info sheet showing order history between the two users */
+const STATUS_FILTERS = ["all", "pending", "confirmed", "in_progress", "completed", "cancelled"] as const;
+
 const ChatInfoSheet = ({ conversationId, partnerId, partnerName }: { conversationId: string; partnerId: string; partnerName: string }) => {
   const { user } = useAuth();
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const { data: bookings = [], isLoading } = useQuery({
     queryKey: ["chat-order-history", conversationId, partnerId],
     enabled: !!user && !!partnerId,
     queryFn: async () => {
-      // Fetch bookings where the current user is customer and partner is cleaner, or vice versa
       const { data: asCustomer } = await supabase
         .from("bookings")
         .select("*")
@@ -574,12 +576,13 @@ const ChatInfoSheet = ({ conversationId, partnerId, partnerName }: { conversatio
         .order("scheduled_date", { ascending: false });
 
       const all = [...(asCustomer || []), ...(asCleaner || [])];
-      // Deduplicate and sort by date desc
       const unique = Array.from(new Map(all.map(b => [b.id, b])).values());
       unique.sort((a, b) => new Date(b.scheduled_date).getTime() - new Date(a.scheduled_date).getTime());
       return unique;
     },
   });
+
+  const filtered = statusFilter === "all" ? bookings : bookings.filter(b => b.status === statusFilter);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -605,6 +608,22 @@ const ChatInfoSheet = ({ conversationId, partnerId, partnerName }: { conversatio
           <p className="text-sm text-muted-foreground">Bookings with {partnerName}</p>
         </SheetHeader>
         <Separator className="my-4" />
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          {STATUS_FILTERS.map((s) => (
+            <button
+              key={s}
+              onClick={() => setStatusFilter(s)}
+              className={cn(
+                "px-2.5 py-1 rounded-full text-xs font-medium capitalize transition-colors border",
+                statusFilter === s
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-background text-muted-foreground border-border hover:bg-muted"
+              )}
+            >
+              {s === "in_progress" ? "In Progress" : s}
+            </button>
+          ))}
+        </div>
         {isLoading ? (
           <div className="space-y-3">
             {[1, 2, 3].map(i => (
@@ -615,15 +634,17 @@ const ChatInfoSheet = ({ conversationId, partnerId, partnerName }: { conversatio
               </div>
             ))}
           </div>
-        ) : bookings.length === 0 ? (
+        ) : filtered.length === 0 ? (
           <div className="text-center py-12">
             <ClipboardList className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
-            <p className="text-sm font-medium text-foreground">No bookings yet</p>
-            <p className="text-xs text-muted-foreground mt-1">No previous orders with {partnerName}</p>
+            <p className="text-sm font-medium text-foreground">No bookings found</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {statusFilter === "all" ? `No previous orders with ${partnerName}` : `No ${statusFilter.replace("_", " ")} bookings with ${partnerName}`}
+            </p>
           </div>
         ) : (
           <div className="space-y-3">
-            {bookings.map((booking) => (
+            {filtered.map((booking) => (
               <Link
                 key={booking.id}
                 to={`/dashboard/history`}
