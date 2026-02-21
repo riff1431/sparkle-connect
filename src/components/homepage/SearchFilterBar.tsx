@@ -9,7 +9,7 @@ const SearchFilterBar = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="bg-card border-b border-border py-3">
+    <div className="bg-transparent py-3">
       <div className="container mx-auto px-4">
         <div className="flex items-center gap-3 flex-wrap">
           <div className="flex items-center bg-muted rounded-md px-3 py-2 gap-2 flex-1 max-w-xs">
