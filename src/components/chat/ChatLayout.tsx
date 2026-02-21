@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ConversationList from "./ConversationList";
@@ -14,6 +14,13 @@ interface ChatLayoutProps {
 const ChatLayout = ({ isAdmin = false, initialConversationId = null }: ChatLayoutProps) => {
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(initialConversationId);
   const isMobile = useIsMobile();
+
+  // Sync with initialConversationId when it changes (e.g. URL query param update)
+  useEffect(() => {
+    if (initialConversationId) {
+      setSelectedConversationId(initialConversationId);
+    }
+  }, [initialConversationId]);
   const showInbox = isMobile ? !selectedConversationId : true;
   const showChat = isMobile ? !!selectedConversationId : true;
 
