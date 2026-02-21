@@ -60,7 +60,7 @@ const HomepageHero = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
               className={`flex items-center glass-strong rounded-xl shadow-md mb-4 w-full max-w-lg transition-all duration-300 ${
-                isFocused ? "shadow-lg ring-2 ring-primary/20 scale-[1.01]" : ""
+                isFocused ? "shadow-lg ring-2 ring-primary/20 sm:scale-[1.01]" : ""
               }`}
             >
               <div className="flex items-center flex-1 px-4 py-3 gap-2">

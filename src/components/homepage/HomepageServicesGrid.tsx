@@ -69,8 +69,8 @@ const ServiceCard = ({ service }: { service: any }) => (
           </span>
         </div>
 
-        <div className="flex items-center justify-between pt-3 border-t border-border/40">
-          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+        <div className="flex items-center justify-between pt-3 border-t border-border/40 gap-2">
+          <div className="flex items-center gap-3 text-xs text-muted-foreground min-w-0 truncate">
             {service.duration_hours && (
               <span className="flex items-center gap-1">
                 <Clock className="h-3 w-3" />
@@ -84,9 +84,9 @@ const ServiceCard = ({ service }: { service: any }) => (
               </span>
             )}
           </div>
-          <span className="font-bold text-foreground text-sm">
+          <span className="font-bold text-foreground text-sm shrink-0">
             ${service.price}
-            <span className="text-xs font-normal text-muted-foreground">/{service.price_type}</span>
+            <span className="text-xs font-normal text-muted-foreground truncate">/{service.price_type}</span>
           </span>
         </div>
       </div>
@@ -131,7 +131,7 @@ const HomepageServicesGrid = () => {
           </Link>
         </motion.div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
         {services.map((service) => (
           <ServiceCard key={service.id} service={service} />
         ))}
