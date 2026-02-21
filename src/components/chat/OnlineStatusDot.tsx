@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { cn } from "@/lib/utils";
 
 interface OnlineStatusDotProps {
@@ -6,20 +7,25 @@ interface OnlineStatusDotProps {
   size?: "sm" | "md";
 }
 
-const OnlineStatusDot = ({ online, className, size = "sm" }: OnlineStatusDotProps) => {
-  const sizeClasses = size === "sm" ? "h-2.5 w-2.5" : "h-3 w-3";
+const OnlineStatusDot = forwardRef<HTMLSpanElement, OnlineStatusDotProps>(
+  ({ online, className, size = "sm" }, ref) => {
+    const sizeClasses = size === "sm" ? "h-2.5 w-2.5" : "h-3 w-3";
 
-  return (
-    <span
-      className={cn(
-        "block rounded-full border-2 border-background",
-        sizeClasses,
-        online ? "bg-emerald-500" : "bg-muted-foreground/30",
-        className
-      )}
-      title={online ? "Online" : "Offline"}
-    />
-  );
-};
+    return (
+      <span
+        ref={ref}
+        className={cn(
+          "block rounded-full border-2 border-background",
+          sizeClasses,
+          online ? "bg-emerald-500" : "bg-muted-foreground/30",
+          className
+        )}
+        title={online ? "Online" : "Offline"}
+      />
+    );
+  }
+);
+
+OnlineStatusDot.displayName = "OnlineStatusDot";
 
 export default OnlineStatusDot;
