@@ -25,73 +25,66 @@ const useHomepageServices = () => {
 };
 
 const ServiceCard = ({ service }: { service: any }) => (
-  <motion.div
-    whileHover={{ y: -4 }}
-    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+  <Link
+    to={`/services/${service.id}`}
+    className="group block rounded-xl border border-border/50 bg-card overflow-hidden shadow-sm transition-all duration-300 hover:shadow-xl hover:shadow-primary/10"
   >
-    <Link
-      to={`/services/${service.id}`}
-      className="group block rounded-xl border border-border/50 bg-card overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300"
-    >
-      <div className="aspect-[16/10] overflow-hidden bg-muted">
+    {/* Thumbnail - only this hovers */}
+    <div className="aspect-[16/10] overflow-hidden bg-muted relative">
+      <img
+        src={service.image_url || "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&h=250&fit=crop"}
+        alt={service.title}
+        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+      />
+      {/* Cleaner avatar - bottom left of thumbnail */}
+      <div className="absolute bottom-2 left-2">
         <img
-          src={service.image_url || "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&h=250&fit=crop"}
-          alt={service.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          src={service.cleaner_profiles?.profile_image || "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop"}
+          alt={service.cleaner_profiles?.business_name || ""}
+          className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-md"
         />
       </div>
-      <div className="p-4">
-        <div className="flex items-center gap-2 mb-2">
-          <Badge variant="secondary" className="text-[10px] px-2 py-0 font-semibold">
-            {service.category}
+    </div>
+    <div className="p-3 sm:p-4">
+      <div className="flex items-center gap-2 mb-1.5">
+        <Badge variant="secondary" className="text-[10px] px-2 py-0 font-semibold">
+          {service.category}
+        </Badge>
+        {service.cleaner_profiles?.is_verified && (
+          <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] px-1.5 py-0">
+            Verified
           </Badge>
-          {service.cleaner_profiles?.is_verified && (
-            <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] px-1.5 py-0">
-              Verified
-            </Badge>
-          )}
-        </div>
-        <h4 className="font-heading font-bold text-foreground text-sm line-clamp-1 mb-1 group-hover:text-primary transition-colors">
-          {service.title}
-        </h4>
-        <p className="text-muted-foreground text-xs line-clamp-2 mb-3">{service.description}</p>
-
-        <div className="flex items-center gap-2 mb-3">
-          {service.cleaner_profiles?.profile_image && (
-            <img
-              src={service.cleaner_profiles.profile_image}
-              alt=""
-              className="w-5 h-5 rounded-full object-cover"
-            />
-          )}
-          <span className="text-xs text-muted-foreground font-medium truncate">
-            {service.cleaner_profiles?.business_name || "Service Provider"}
-          </span>
-        </div>
-
-        <div className="flex items-center justify-between pt-3 border-t border-border/40 gap-2">
-          <div className="flex items-center gap-3 text-xs text-muted-foreground min-w-0 truncate">
-            {service.duration_hours && (
-              <span className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                {service.duration_hours}h
-              </span>
-            )}
-            {service.cleaner_profiles?.service_areas?.[0] && (
-              <span className="flex items-center gap-1">
-                <MapPin className="h-3 w-3" />
-                {service.cleaner_profiles.service_areas[0]}
-              </span>
-            )}
-          </div>
-          <span className="font-bold text-foreground text-sm shrink-0">
-            ${service.price}
-            <span className="text-xs font-normal text-muted-foreground truncate">/{service.price_type}</span>
-          </span>
-        </div>
+        )}
       </div>
-    </Link>
-  </motion.div>
+      <h4 className="font-heading font-bold text-foreground text-sm line-clamp-1 mb-1.5">
+        {service.title}
+      </h4>
+      <span className="text-xs text-muted-foreground font-medium truncate block mb-2">
+        {service.cleaner_profiles?.business_name || "Service Provider"}
+      </span>
+
+      <div className="flex items-center justify-between pt-2.5 border-t border-border/40 gap-2">
+        <div className="flex items-center gap-3 text-xs text-muted-foreground min-w-0 truncate">
+          {service.duration_hours && (
+            <span className="flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              {service.duration_hours}h
+            </span>
+          )}
+          {service.cleaner_profiles?.service_areas?.[0] && (
+            <span className="flex items-center gap-1">
+              <MapPin className="h-3 w-3" />
+              {service.cleaner_profiles.service_areas[0]}
+            </span>
+          )}
+        </div>
+        <span className="font-bold text-foreground text-sm shrink-0">
+          ${service.price}
+          <span className="text-xs font-normal text-muted-foreground truncate">/{service.price_type}</span>
+        </span>
+      </div>
+    </div>
+  </Link>
 );
 
 const HomepageServicesGrid = () => {
