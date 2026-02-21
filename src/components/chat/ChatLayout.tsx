@@ -7,10 +7,12 @@ import ChatRoom from "./ChatRoom";
 interface ChatLayoutProps {
   /** Admin mode: read-only view of all conversations */
   isAdmin?: boolean;
+  /** Pre-select a conversation on mount */
+  initialConversationId?: string | null;
 }
 
-const ChatLayout = ({ isAdmin = false }: ChatLayoutProps) => {
-  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
+const ChatLayout = ({ isAdmin = false, initialConversationId = null }: ChatLayoutProps) => {
+  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(initialConversationId);
   const isMobile = useIsMobile();
   const showInbox = isMobile ? !selectedConversationId : true;
   const showChat = isMobile ? !!selectedConversationId : true;

@@ -31,7 +31,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import WriteReviewDialog from "@/components/WriteReviewDialog";
-
+import { getOrCreateConversation } from "@/hooks/useChatConversations";
 const TIME_SLOTS = [
   "08:00", "09:00", "10:00", "11:00", "12:00",
   "13:00", "14:00", "15:00", "16:00", "17:00", "18:00",
@@ -63,6 +63,7 @@ const ServiceDetail = () => {
   const [specialInstructions, setSpecialInstructions] = useState("");
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
+  const [startingChat, setStartingChat] = useState(false);
 
   const { data: addresses = [] } = useQuery({
     queryKey: ["user-addresses", user?.id],
@@ -789,9 +790,30 @@ const ServiceDetail = () => {
                       variant="outline"
                       className="w-full h-11"
                       size="lg"
-                      onClick={() => navigate(`/cleaner/${listing.cleaner_profile_id}`)}
+                      disabled={startingChat}
+                      onClick={async () => {
+                        if (!user) {
+                          toast({ title: "Please sign in", description: "You need to be logged in to message a provider.", variant: "destructive" });
+                          navigate("/auth");
+                          return;
+                        }
+                        if (user.id === listing.cleaner_user_id) {
+                          toast({ title: "Cannot message yourself", variant: "destructive" });
+                          return;
+                        }
+                        setStartingChat(true);
+                        try {
+                          const convId = await getOrCreateConversation(user.id, listing.cleaner_user_id);
+                          navigate("/dashboard/messages", { state: { conversationId: convId } });
+                        } catch (err: any) {
+                          toast({ title: "Failed to start chat", description: err.message, variant: "destructive" });
+                        } finally {
+                          setStartingChat(false);
+                        }
+                      }}
                     >
-                      <MessageSquare className="h-4 w-4 mr-2" /> Contact Provider
+                      {startingChat ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <MessageSquare className="h-4 w-4 mr-2" />}
+                      {startingChat ? "Starting Chat..." : "Send Message"}
                     </Button>
                   </div>
 
