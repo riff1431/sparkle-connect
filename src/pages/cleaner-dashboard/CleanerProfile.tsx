@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,11 +6,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { 
   Save, 
   Plus,
   X,
-  Loader2
+  Loader2,
+  Camera
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -48,8 +50,11 @@ const CleanerProfile = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [profile, setProfile] = useState<CleanerProfile | null>(null);
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const [newArea, setNewArea] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
     business_name: "",
@@ -78,6 +83,7 @@ const CleanerProfile = () => {
 
         if (data) {
           setProfile(data);
+          setProfileImageUrl(data.profile_image || null);
           setFormData({
             business_name: data.business_name,
             bio: data.bio || "",
@@ -99,6 +105,54 @@ const CleanerProfile = () => {
 
     fetchProfile();
   }, [user]);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be less than 5MB");
+      return;
+    }
+
+    setUploadingImage(true);
+    try {
+      const fileExt = file.name.split(".").pop();
+      const filePath = `${user.id}/profile.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("cleaner-profiles")
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("cleaner-profiles")
+        .getPublicUrl(filePath);
+
+      // Update the cleaner profile with the new image URL
+      if (profile) {
+        const { error: updateError } = await supabase
+          .from("cleaner_profiles")
+          .update({ profile_image: publicUrl })
+          .eq("id", profile.id);
+        if (updateError) throw updateError;
+      }
+
+      setProfileImageUrl(publicUrl);
+      toast.success("Profile image updated!");
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      toast.error("Failed to upload image");
+    } finally {
+      setUploadingImage(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
   const handleServiceToggle = (service: string) => {
     setFormData(prev => ({
@@ -200,6 +254,46 @@ const CleanerProfile = () => {
         <h1 className="font-heading text-2xl font-bold text-foreground">My Business Profile</h1>
         <p className="text-muted-foreground">Manage how customers see your business on the platform.</p>
       </div>
+
+      {/* Profile Image */}
+      <Card className="border-border">
+        <CardHeader>
+          <CardTitle>Profile Image</CardTitle>
+          <CardDescription>Upload a photo that represents your business.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-6">
+            <Avatar className="h-24 w-24">
+              <AvatarImage src={profileImageUrl || ""} />
+              <AvatarFallback className="text-2xl bg-primary text-primary-foreground">
+                {formData.business_name ? formData.business_name[0]?.toUpperCase() : "C"}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageUpload}
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingImage}
+              >
+                {uploadingImage ? (
+                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Uploading...</>
+                ) : (
+                  <><Camera className="h-4 w-4 mr-2" />Change Photo</>
+                )}
+              </Button>
+              <p className="text-xs text-muted-foreground mt-2">JPG, PNG or WebP. Max 5MB.</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Basic Info */}
       <Card className="border-border">
