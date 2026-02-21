@@ -6,7 +6,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Send, MessageSquare, Check, CheckCheck, Paperclip, X, FileText, Loader2, Image as ImageIcon, CalendarDays, Clock4, DollarSign, MapPin, ClipboardList, StickyNote } from "lucide-react";
+import { ArrowLeft, Send, MessageSquare, Check, CheckCheck, Paperclip, X, FileText, Loader2, Image as ImageIcon, CalendarDays, Clock4, DollarSign, MapPin, ClipboardList, StickyNote, Info } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { format, isToday, isYesterday } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
@@ -228,6 +231,10 @@ const ChatRoom = ({ conversationId, onBack, isAdmin }: ChatRoomProps) => {
               : "Offline"}
           </p>
         </div>
+        {/* Info icon - Order History */}
+        {partner && conversationId && (
+          <ChatInfoSheet conversationId={conversationId} partnerId={partner.id} partnerName={partner.full_name} />
+        )}
       </div>
 
       {/* Messages */}
@@ -539,6 +546,113 @@ const BookingDetailsCard = ({ text }: { text: string }) => {
         )}
       </div>
     </div>
+  );
+};
+
+/** Info sheet showing order history between the two users */
+const ChatInfoSheet = ({ conversationId, partnerId, partnerName }: { conversationId: string; partnerId: string; partnerName: string }) => {
+  const { user } = useAuth();
+
+  const { data: bookings = [], isLoading } = useQuery({
+    queryKey: ["chat-order-history", conversationId, partnerId],
+    enabled: !!user && !!partnerId,
+    queryFn: async () => {
+      // Fetch bookings where the current user is customer and partner is cleaner, or vice versa
+      const { data: asCustomer } = await supabase
+        .from("bookings")
+        .select("*")
+        .eq("customer_id", user!.id)
+        .eq("cleaner_id", partnerId)
+        .order("scheduled_date", { ascending: false });
+
+      const { data: asCleaner } = await supabase
+        .from("bookings")
+        .select("*")
+        .eq("cleaner_id", user!.id)
+        .eq("customer_id", partnerId)
+        .order("scheduled_date", { ascending: false });
+
+      const all = [...(asCustomer || []), ...(asCleaner || [])];
+      // Deduplicate and sort by date desc
+      const unique = Array.from(new Map(all.map(b => [b.id, b])).values());
+      unique.sort((a, b) => new Date(b.scheduled_date).getTime() - new Date(a.scheduled_date).getTime());
+      return unique;
+    },
+  });
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "completed": return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
+      case "confirmed": return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
+      case "pending": return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400";
+      case "cancelled": return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400";
+      case "in_progress": return "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400";
+      default: return "bg-muted text-muted-foreground";
+    }
+  };
+
+  return (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button variant="ghost" size="icon" className="shrink-0 h-9 w-9 text-muted-foreground hover:text-foreground">
+          <Info className="h-5 w-5" />
+        </Button>
+      </SheetTrigger>
+      <SheetContent className="w-[360px] sm:w-[420px] overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle className="text-lg font-heading">Order History</SheetTitle>
+          <p className="text-sm text-muted-foreground">Bookings with {partnerName}</p>
+        </SheetHeader>
+        <Separator className="my-4" />
+        {isLoading ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="rounded-lg border border-border p-3 space-y-2">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-3 w-48" />
+                <Skeleton className="h-3 w-24" />
+              </div>
+            ))}
+          </div>
+        ) : bookings.length === 0 ? (
+          <div className="text-center py-12">
+            <ClipboardList className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
+            <p className="text-sm font-medium text-foreground">No bookings yet</p>
+            <p className="text-xs text-muted-foreground mt-1">No previous orders with {partnerName}</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {bookings.map((booking) => (
+              <div key={booking.id} className="rounded-lg border border-border p-3 space-y-2 hover:bg-muted/30 transition-colors">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-semibold text-sm text-foreground truncate">{booking.service_type}</span>
+                  <Badge className={cn("text-[10px] capitalize", getStatusColor(booking.status))}>
+                    {booking.status.replace("_", " ")}
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <CalendarDays className="h-3 w-3" />
+                    {format(new Date(booking.scheduled_date), "MMM d, yyyy")}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Clock4 className="h-3 w-3" />
+                    {booking.scheduled_time}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">{booking.duration_hours}h duration</span>
+                  <span className="font-semibold text-foreground flex items-center gap-0.5">
+                    <DollarSign className="h-3 w-3" />
+                    {Number(booking.service_price).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </SheetContent>
+    </Sheet>
   );
 };
 
