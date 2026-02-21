@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, addDays } from "date-fns";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
+import WriteReviewDialog from "@/components/WriteReviewDialog";
 
 const TIME_SLOTS = [
   "08:00", "09:00", "10:00", "11:00", "12:00",
@@ -54,6 +55,7 @@ const ServiceDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [isBuying, setIsBuying] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(addDays(new Date(), 1));
   const [selectedTime, setSelectedTime] = useState("09:00");
@@ -172,6 +174,37 @@ const ServiceDetail = () => {
         reviewer_name: profileMap.get(r.reviewer_id)?.full_name || null,
         reviewer_avatar: profileMap.get(r.reviewer_id)?.avatar_url || null,
       }));
+    },
+  });
+
+  // Check if user has a completed booking with this cleaner (required to review)
+  const { data: hasCompletedBooking = false } = useQuery({
+    queryKey: ["has-completed-booking", user?.id, listing?.cleaner_user_id],
+    enabled: !!user && !!listing?.cleaner_user_id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("bookings")
+        .select("id")
+        .eq("customer_id", user!.id)
+        .eq("cleaner_id", listing!.cleaner_user_id)
+        .eq("status", "completed")
+        .limit(1);
+      return (data?.length ?? 0) > 0;
+    },
+  });
+
+  // Check if user already reviewed this cleaner
+  const { data: hasExistingReview = false } = useQuery({
+    queryKey: ["has-existing-review", user?.id, listing?.cleaner_profile_id],
+    enabled: !!user && !!listing?.cleaner_profile_id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("reviews")
+        .select("id")
+        .eq("reviewer_id", user!.id)
+        .eq("cleaner_profile_id", listing!.cleaner_profile_id)
+        .limit(1);
+      return (data?.length ?? 0) > 0;
     },
   });
 
@@ -553,12 +586,25 @@ const ServiceDetail = () => {
                     <span className="text-sm font-normal text-muted-foreground">({listing.cleaner_reviews_count})</span>
                   )}
                 </h2>
-                {listing.cleaner_rating > 0 && (
-                  <div className="flex items-center gap-1.5">
-                    <Star className="h-4 w-4 fill-accent text-accent" />
-                    <span className="font-bold text-foreground text-sm">{listing.cleaner_rating.toFixed(1)}</span>
-                  </div>
-                )}
+                <div className="flex items-center gap-3">
+                  {listing.cleaner_rating > 0 && (
+                    <div className="flex items-center gap-1.5">
+                      <Star className="h-4 w-4 fill-accent text-accent" />
+                      <span className="font-bold text-foreground text-sm">{listing.cleaner_rating.toFixed(1)}</span>
+                    </div>
+                  )}
+                  <WriteReviewDialog
+                    cleanerProfileId={listing.cleaner_profile_id}
+                    cleanerName={listing.cleaner_name}
+                    hasCompletedBooking={hasCompletedBooking}
+                    hasExistingReview={hasExistingReview}
+                    onReviewSubmitted={() => {
+                      queryClient.invalidateQueries({ queryKey: ["service-reviews"] });
+                      queryClient.invalidateQueries({ queryKey: ["service-detail"] });
+                      queryClient.invalidateQueries({ queryKey: ["has-existing-review"] });
+                    }}
+                  />
+                </div>
               </div>
 
               {cleanerReviews.length === 0 ? (
