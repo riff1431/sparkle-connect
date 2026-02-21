@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import {
   CalendarDays,
@@ -9,6 +9,8 @@ import {
   CheckCircle,
   X,
   Info,
+  MessageSquare,
+  Loader2,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -45,6 +47,7 @@ interface Booking {
   duration_hours: number;
   status: string;
   cleaner_name: string | null;
+  cleaner_id: string | null;
   special_instructions: string | null;
   addresses: {
     label: string;
@@ -58,8 +61,10 @@ interface Booking {
 const UpcomingBookings = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [chattingBookingId, setChattingBookingId] = useState<string | null>(null);
   const { 
     settings, 
     formatCurrency, 
@@ -82,6 +87,7 @@ const UpcomingBookings = () => {
           duration_hours,
           status,
           cleaner_name,
+          cleaner_id,
           special_instructions,
           addresses (
             label,
@@ -132,6 +138,91 @@ const UpcomingBookings = () => {
         title: "Error",
         description: "Failed to cancel booking. Please try again.",
       });
+    }
+  };
+
+  const handleStartChat = async (booking: Booking) => {
+    if (!user || !booking.cleaner_id) {
+      toast({
+        variant: "destructive",
+        title: "Cannot start chat",
+        description: "No cleaner assigned to this booking yet.",
+      });
+      return;
+    }
+
+    setChattingBookingId(booking.id);
+
+    try {
+      // Check for existing conversation
+      const { data: existing } = await supabase
+        .from("conversations")
+        .select("id")
+        .eq("customer_id", user.id)
+        .eq("provider_id", booking.cleaner_id)
+        .maybeSingle();
+
+      let conversationId: string;
+
+      if (existing) {
+        conversationId = existing.id;
+      } else {
+        // Create new conversation
+        const { data: newConvo, error: convoError } = await supabase
+          .from("conversations")
+          .insert({
+            customer_id: user.id,
+            provider_id: booking.cleaner_id,
+          })
+          .select("id")
+          .single();
+
+        if (convoError) throw convoError;
+        conversationId = newConvo.id;
+      }
+
+      // Build booking details message
+      const dateStr = format(new Date(booking.scheduled_date), "EEEE, MMMM d, yyyy");
+      const addressStr = booking.addresses
+        ? `📍 ${booking.addresses.label}: ${booking.addresses.street_address}, ${booking.addresses.city}`
+        : "";
+      
+      const bookingMessage = [
+        `📋 **Booking Details**`,
+        `🧹 Service: ${booking.service_type}`,
+        `📅 Date: ${dateStr}`,
+        `🕐 Time: ${booking.scheduled_time} • ${booking.duration_hours} hours`,
+        `💰 Total: ${formatCurrency(booking.service_price)}`,
+        addressStr,
+        booking.special_instructions ? `📝 Notes: ${booking.special_instructions}` : "",
+      ].filter(Boolean).join("\n");
+
+      // Send booking details as first message (only if no prior messages exist)
+      const { data: existingMessages } = await supabase
+        .from("messages")
+        .select("id")
+        .eq("conversation_id", conversationId)
+        .limit(1);
+
+      if (!existingMessages || existingMessages.length === 0) {
+        await supabase.from("messages").insert({
+          conversation_id: conversationId,
+          sender_id: user.id,
+          text: bookingMessage,
+        });
+      }
+
+      // Navigate to messages with this conversation selected
+      navigate(`/dashboard/messages?conversation=${conversationId}`);
+    } catch (error) {
+      console.error("Error starting chat:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to start chat. Please try again.",
+      });
+    } finally {
+      setChattingBookingId(null);
     }
   };
 
@@ -252,6 +343,23 @@ const UpcomingBookings = () => {
                         </div>
                         <div className="text-sm text-muted-foreground">Total</div>
                       </div>
+
+                      {booking.cleaner_id && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-primary hover:text-primary"
+                          disabled={chattingBookingId === booking.id}
+                          onClick={() => handleStartChat(booking)}
+                        >
+                          {chattingBookingId === booking.id ? (
+                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          ) : (
+                            <MessageSquare className="h-4 w-4 mr-1" />
+                          )}
+                          Chat
+                        </Button>
+                      )}
 
                       <div className="flex gap-2">
                         <Button variant="outline" size="sm">
