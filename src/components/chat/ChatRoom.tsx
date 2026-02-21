@@ -460,7 +460,10 @@ const BookingDetailsCard = ({ text }: { text: string }) => {
 
   const service = extract("🧹 Service: ");
   const date = extract("📅 Date: ");
-  const time = extract("🕐 Time: ");
+  const rawTime = extract("🕐 Time: ");
+  // Handle combined format "14:00 • 2 hours" or plain "14:00"
+  const time = rawTime?.split("•")[0]?.trim() ?? rawTime;
+  const duration = extract("⏱️ Duration: ") ?? (rawTime?.includes("•") ? rawTime.split("•")[1]?.trim() : null);
   const total = extract("💰 Total: ");
   const address = extract("📍 ");
   const notes = extract("📝 Notes: ");
@@ -498,6 +501,15 @@ const BookingDetailsCard = ({ text }: { text: string }) => {
             <div>
               <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wide">Time</p>
               <p className="font-medium text-foreground">{time}</p>
+            </div>
+          </div>
+        )}
+        {duration && (
+          <div className="flex items-start gap-2.5">
+            <Clock4 className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+            <div>
+              <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wide">Duration</p>
+              <p className="font-medium text-foreground">{duration}</p>
             </div>
           </div>
         )}
