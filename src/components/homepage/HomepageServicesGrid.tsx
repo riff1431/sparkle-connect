@@ -31,22 +31,34 @@ const useHomepageServices = () => {
   return { ...query, page, setPage };
 };
 
+const CATEGORY_IMAGES: Record<string, string> = {
+  "Home Cleaning": "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&h=250&fit=crop",
+  "Deep Cleaning": "https://images.unsplash.com/photo-1628177142898-93e36e4e3a50?w=400&h=250&fit=crop",
+  "Office Cleaning": "https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=250&fit=crop",
+  "Carpet Cleaning": "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=400&h=250&fit=crop",
+  "Window Cleaning": "https://images.unsplash.com/photo-1596263373796-7e25e2c63f5a?w=400&h=250&fit=crop",
+  "Eco-Friendly Cleaning": "https://images.unsplash.com/photo-1542728928-1413d1894ed1?w=400&h=250&fit=crop",
+  "Post-Construction": "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=400&h=250&fit=crop",
+  "Move-in/Move-out": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&h=250&fit=crop",
+};
+
+const getServiceImage = (service: any) =>
+  service.image_url || CATEGORY_IMAGES[service.category] || "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&h=250&fit=crop";
+
 const ServiceCard = ({ service }: { service: any }) => (
   <Link
     to={`/services/${service.id}`}
     className="group block rounded-xl border border-border/50 bg-card overflow-hidden shadow-sm transition-all duration-300 hover:shadow-xl hover:shadow-primary/10"
   >
-    {/* Thumbnail - only this hovers */}
     <div className="aspect-[16/10] overflow-hidden bg-muted relative">
       <img
-        src={service.image_url || "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&h=250&fit=crop"}
+        src={getServiceImage(service)}
         alt={service.title}
         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
       />
-      {/* Cleaner avatar - bottom left of thumbnail */}
       <div className="absolute bottom-2 left-2">
         <img
-          src={service.cleaner_profiles?.profile_image || "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop"}
+          src={service.cleaner_profiles?.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(service.cleaner_profiles?.business_name || "SP")}&background=random&size=80`}
           alt={service.cleaner_profiles?.business_name || ""}
           className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-md"
         />
