@@ -14,12 +14,12 @@ const CategoryChipsRow = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="flex flex-wrap gap-3 py-4">
+    <div className="flex flex-wrap gap-2 sm:gap-3 py-3 sm:py-4">
       {chips.map((chip) => (
         <button
           key={chip.label}
           onClick={() => navigate(`/search?service=${encodeURIComponent(chip.label)}`)}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-card border border-border rounded-lg text-sm font-medium text-foreground hover:bg-muted hover:shadow-sm transition-all"
+          className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-card border border-border rounded-lg text-xs sm:text-sm font-medium text-foreground hover:bg-muted hover:shadow-sm transition-all"
         >
           <chip.icon className="h-4 w-4 text-primary" />
           {chip.label}

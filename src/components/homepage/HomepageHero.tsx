@@ -32,7 +32,7 @@ const HomepageHero = () => {
         <ThreeBackground />
       </Suspense>
 
-      <div className="container mx-auto px-4 py-12 lg:py-16 relative z-10">
+      <div className="container mx-auto px-4 py-8 sm:py-12 lg:py-16 relative z-10">
         <div className="grid lg:grid-cols-2 gap-8 items-center">
           {/* Left Content */}
           <div>
@@ -40,7 +40,7 @@ const HomepageHero = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, ease: "easeOut" }}
-              className="font-heading text-3xl md:text-4xl lg:text-[2.75rem] font-bold text-foreground leading-tight mb-3"
+              className="font-heading text-2xl sm:text-3xl md:text-4xl lg:text-[2.75rem] font-bold text-foreground leading-tight mb-3"
             >
               Search & Book Trusted Cleaners
             </motion.h1>
@@ -48,7 +48,7 @@ const HomepageHero = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }}
-              className="text-muted-foreground text-base mb-6"
+              className="text-muted-foreground text-sm sm:text-base mb-4 sm:mb-6"
             >
               Find reliable cleaning companies near you.
             </motion.p>
@@ -59,7 +59,7 @@ const HomepageHero = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
-              className={`flex items-center glass-strong rounded-xl shadow-md mb-4 max-w-lg transition-all duration-300 ${
+              className={`flex items-center glass-strong rounded-xl shadow-md mb-4 w-full max-w-lg transition-all duration-300 ${
                 isFocused ? "shadow-lg ring-2 ring-primary/20 scale-[1.01]" : ""
               }`}
             >
