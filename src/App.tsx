@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import GlobalFontProvider from "@/components/GlobalFontProvider";
 import PageTransition from "@/components/PageTransition";
+import CustomCursor from "@/components/CustomCursor";
 import Index from "./pages/Index";
 import Search from "./pages/Search";
 import CleanerPublicProfile from "./pages/CleanerProfile";
@@ -130,6 +131,7 @@ const App = () => (
     <AuthProvider>
       <GlobalFontProvider>
       <TooltipProvider>
+        <CustomCursor />
         <Toaster />
         <Sonner />
         <BrowserRouter>
