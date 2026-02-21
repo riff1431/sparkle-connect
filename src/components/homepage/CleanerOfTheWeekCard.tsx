@@ -38,7 +38,7 @@ const CleanerOfTheWeekCard = () => {
   const reviewCount = 55; // placeholder
 
   return (
-    <div className="rounded-2xl border border-border shadow-lg overflow-hidden relative">
+    <div className="rounded-2xl border border-border shadow-lg overflow-hidden relative transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
       {/* Background Image */}
       <img src={bgCleanerWeek} alt="" className="absolute inset-0 w-full h-full object-cover" />
       <div className="relative">
