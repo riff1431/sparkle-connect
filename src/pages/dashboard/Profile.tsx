@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { User, Mail, Phone, Camera, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,6 +23,8 @@ const Profile = () => {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     full_name: "",
     phone: "",
@@ -55,6 +57,50 @@ const Profile = () => {
 
     fetchProfile();
   }, [user]);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast({ variant: "destructive", title: "Invalid file", description: "Please select an image file." });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ variant: "destructive", title: "File too large", description: "Image must be less than 5MB." });
+      return;
+    }
+
+    setUploadingImage(true);
+    try {
+      const fileExt = file.name.split(".").pop();
+      const filePath = `${user.id}/avatar.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(filePath, file, { upsert: true });
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(filePath);
+
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ avatar_url: publicUrl })
+        .eq("id", user.id);
+      if (updateError) throw updateError;
+
+      setProfile(prev => prev ? { ...prev, avatar_url: publicUrl } : null);
+      toast({ title: "Photo updated", description: "Your profile photo has been updated." });
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      toast({ variant: "destructive", title: "Upload failed", description: "Failed to upload photo. Please try again." });
+    } finally {
+      setUploadingImage(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
 
   const handleSave = async () => {
     if (!user) return;
@@ -155,12 +201,27 @@ const Profile = () => {
               </AvatarFallback>
             </Avatar>
             <div>
-              <Button variant="outline" size="sm" disabled>
-                <Camera className="h-4 w-4 mr-2" />
-                Change Photo
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageUpload}
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingImage}
+              >
+                {uploadingImage ? (
+                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Uploading...</>
+                ) : (
+                  <><Camera className="h-4 w-4 mr-2" />Change Photo</>
+                )}
               </Button>
               <p className="text-xs text-muted-foreground mt-2">
-                Photo upload coming soon
+                JPG, PNG or WebP. Max 5MB.
               </p>
             </div>
           </div>
