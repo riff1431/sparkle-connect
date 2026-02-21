@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { Link } from "react-router-dom";
 import { useChatMessages, ChatMessage } from "@/hooks/useChatMessages";
 import { useChatPresence } from "@/hooks/useChatPresence";
 import { useAuth } from "@/contexts/AuthContext";
@@ -623,9 +624,13 @@ const ChatInfoSheet = ({ conversationId, partnerId, partnerName }: { conversatio
         ) : (
           <div className="space-y-3">
             {bookings.map((booking) => (
-              <div key={booking.id} className="rounded-lg border border-border p-3 space-y-2 hover:bg-muted/30 transition-colors">
+              <Link
+                key={booking.id}
+                to={`/dashboard/history`}
+                className="block rounded-lg border border-border p-3 space-y-2 hover:bg-muted/50 transition-colors cursor-pointer group"
+              >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-semibold text-sm text-foreground truncate">{booking.service_type}</span>
+                  <span className="font-semibold text-sm text-foreground truncate group-hover:text-primary transition-colors">{booking.service_type}</span>
                   <Badge className={cn("text-[10px] capitalize", getStatusColor(booking.status))}>
                     {booking.status.replace("_", " ")}
                   </Badge>
@@ -647,7 +652,7 @@ const ChatInfoSheet = ({ conversationId, partnerId, partnerName }: { conversatio
                     {Number(booking.service_price).toFixed(2)}
                   </span>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
