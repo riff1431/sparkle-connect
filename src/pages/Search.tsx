@@ -145,7 +145,7 @@ const Search = () => {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
-        <div className="flex gap-6">
+        <div className="flex flex-col lg:flex-row gap-6">
           {/* Filters Sidebar */}
           <SearchFilters
             filters={filters}
