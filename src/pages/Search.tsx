@@ -39,6 +39,7 @@ function toCleanerCardFormat(r: CleanerSearchResult): Cleaner {
     instantBooking: r.instant_booking,
     responseTime: r.response_time || "Responds in ~1 hour",
     description: r.bio || "Professional cleaning services available.",
+    userId: r.user_id,
   };
 }
 

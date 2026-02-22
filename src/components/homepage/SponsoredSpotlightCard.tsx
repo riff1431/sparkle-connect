@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Star, MapPin, DollarSign, Shield, Clock, Eye, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -5,6 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { trackSponsoredClick } from "@/hooks/useSponsoredListings";
 import { motion } from "framer-motion";
 import bgSponsored from "@/assets/bg-sponsored.png";
+import RequestQuoteDialog from "@/components/RequestQuoteDialog";
 
 interface SponsoredCleaner {
   id: string;
@@ -16,17 +18,24 @@ interface SponsoredCleaner {
   startingPrice: number;
   services: string[];
   isVerified: boolean;
+  userId?: string;
 }
 
 const SponsoredSpotlightCard = ({ cleaner, listingId }: { cleaner: SponsoredCleaner; listingId: string }) => {
   const navigate = useNavigate();
+  const [quoteOpen, setQuoteOpen] = useState(false);
   const handleQuoteClick = () => {
     trackSponsoredClick(listingId, "quote");
-    navigate(`/cleaner/${cleaner.id}?action=quote`);
+    if (cleaner.userId) {
+      setQuoteOpen(true);
+    } else {
+      navigate(`/cleaner/${cleaner.id}?action=quote`);
+    }
   };
   const handleBookClick = () => trackSponsoredClick(listingId, "book");
 
   return (
+    <>
     <div
       className="rounded-2xl border border-border/50 shadow-lg overflow-hidden relative transition-shadow duration-300 hover:shadow-xl"
     >
@@ -129,6 +138,16 @@ const SponsoredSpotlightCard = ({ cleaner, listingId }: { cleaner: SponsoredClea
         </div>
       </div>
     </div>
+    {cleaner.userId && (
+      <RequestQuoteDialog
+        open={quoteOpen}
+        onOpenChange={setQuoteOpen}
+        cleanerProfileId={cleaner.id}
+        cleanerUserId={cleaner.userId}
+        cleanerName={cleaner.name}
+      />
+    )}
+    </>
   );
 };
 
