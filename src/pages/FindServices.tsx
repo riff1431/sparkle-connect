@@ -59,7 +59,7 @@ const FindServices = () => {
   const [category, setCategory] = useState("All");
   const [sortBy, setSortBy] = useState("newest");
   const [priceRange, setPriceRange] = useState("all");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
 
   const { data: listings = [], isLoading } = useQuery({
     queryKey: ["service-listings", category, sortBy],
@@ -145,17 +145,17 @@ const FindServices = () => {
     });
   }, [listings, searchQuery, priceRange]);
 
-  const totalPages = Math.ceil(filteredListings.length / ITEMS_PER_PAGE);
-  const paginatedListings = useMemo(() => {
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredListings.slice(start, start + ITEMS_PER_PAGE);
-  }, [filteredListings, currentPage]);
+  const visibleListings = useMemo(() => {
+    return filteredListings.slice(0, visibleCount);
+  }, [filteredListings, visibleCount]);
 
-  // Reset to page 1 when filters change
-  const handleCategoryChange = (val: string) => { setCategory(val); setCurrentPage(1); };
-  const handleSearchChange = (val: string) => { setSearchQuery(val); setCurrentPage(1); };
-  const handlePriceChange = (val: string) => { setPriceRange(val); setCurrentPage(1); };
-  const handleSortChange = (val: string) => { setSortBy(val); setCurrentPage(1); };
+  const hasMore = visibleCount < filteredListings.length;
+
+  // Reset visible count when filters change
+  const handleCategoryChange = (val: string) => { setCategory(val); setVisibleCount(ITEMS_PER_PAGE); };
+  const handleSearchChange = (val: string) => { setSearchQuery(val); setVisibleCount(ITEMS_PER_PAGE); };
+  const handlePriceChange = (val: string) => { setPriceRange(val); setVisibleCount(ITEMS_PER_PAGE); };
+  const handleSortChange = (val: string) => { setSortBy(val); setVisibleCount(ITEMS_PER_PAGE); };
 
   const getPriceLabel = (type: string, price: number) => {
     switch (type) {
@@ -270,7 +270,7 @@ const FindServices = () => {
           </Card>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-            {paginatedListings.map((listing) => (
+            {visibleListings.map((listing) => (
               <Card
                 key={listing.id}
                 className="group overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer border-border/60 hover:border-primary/30"
@@ -363,35 +363,18 @@ const FindServices = () => {
           </div>
         )}
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 mt-8">
+        {/* Load More */}
+        {hasMore && (
+          <div className="flex flex-col items-center gap-2 mt-8">
+            <p className="text-sm text-muted-foreground">
+              Showing {visibleCount} of {filteredListings.length} services
+            </p>
             <Button
               variant="outline"
-              size="sm"
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((p) => p - 1)}
+              size="lg"
+              onClick={() => setVisibleCount((prev) => prev + ITEMS_PER_PAGE)}
             >
-              Previous
-            </Button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <Button
-                key={page}
-                variant={page === currentPage ? "default" : "outline"}
-                size="sm"
-                onClick={() => setCurrentPage(page)}
-                className="w-9"
-              >
-                {page}
-              </Button>
-            ))}
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((p) => p + 1)}
-            >
-              Next
+              Load More
             </Button>
           </div>
         )}
