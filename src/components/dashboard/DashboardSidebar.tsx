@@ -22,27 +22,24 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarFooter,
-  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
 
 const menuItems = [
-  { title: "Overview", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Upcoming", url: "/dashboard/upcoming", icon: CalendarDays },
-  { title: "Booking History", url: "/dashboard/history", icon: History },
+  { title: "Main Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Profile", url: "/dashboard/profile", icon: User },
   { title: "My Jobs", url: "/dashboard/my-jobs", icon: Briefcase },
   { title: "My Quotes", url: "/dashboard/quotes", icon: FileQuestion },
+  { title: "Upcoming", url: "/dashboard/upcoming", icon: CalendarDays },
+  { title: "Booking History", url: "/dashboard/history", icon: History },
   { title: "Messages", url: "/dashboard/messages", icon: MessageSquare },
   { title: "Invoices", url: "/dashboard/invoices", icon: FileText },
   { title: "Addresses", url: "/dashboard/addresses", icon: MapPin },
   { title: "Membership", url: "/dashboard/subscription", icon: Crown },
-  { title: "Profile", url: "/dashboard/profile", icon: User },
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ];
 
@@ -61,52 +58,58 @@ const DashboardSidebar = () => {
   };
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-border">
-      <SidebarContent className="pt-4">
+    <Sidebar collapsible="icon" className="border-r-0 bg-white shadow-[2px_0_12px_-4px_rgba(0,0,0,0.08)]">
+      <SidebarContent className="pt-6 px-2 bg-white">
         <SidebarGroup>
-          <SidebarGroupLabel className={collapsed ? "sr-only" : ""}>
-            Customer Dashboard
-          </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isActive(item.url)}
-                    tooltip={item.title}
-                  >
-                    <NavLink
-                      to={item.url}
-                      end={item.url === "/dashboard"}
-                      className="flex items-center gap-3"
-                      activeClassName="bg-primary/10 text-primary font-medium"
+            <SidebarMenu className="space-y-0.5">
+              {menuItems.map((item) => {
+                const active = isActive(item.url);
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={active}
+                      tooltip={item.title}
+                      className={`
+                        rounded-lg px-3 py-2.5 transition-all duration-200
+                        ${active
+                          ? "bg-gradient-to-r from-primary/10 to-primary/5 text-primary font-semibold border-l-[3px] border-primary"
+                          : "text-muted-foreground hover:bg-muted/60 hover:text-foreground border-l-[3px] border-transparent"
+                        }
+                      `}
                     >
-                      <item.icon className="h-4 w-4 shrink-0" />
-                      <span className="flex-1">{item.title}</span>
-                      {item.title === "Messages" && unreadCount > 0 && (
-                        <Badge variant="destructive" className="ml-auto h-5 min-w-5 px-1.5 text-[10px] justify-center">
-                          {unreadCount > 99 ? "99+" : unreadCount}
-                        </Badge>
-                      )}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+                      <NavLink
+                        to={item.url}
+                        end={item.url === "/dashboard"}
+                        className="flex items-center gap-3"
+                        activeClassName=""
+                      >
+                        <item.icon className={`h-[18px] w-[18px] shrink-0 ${active ? "text-primary" : "text-muted-foreground"}`} />
+                        <span className="text-[14px]">{item.title}</span>
+                        {item.title === "Messages" && unreadCount > 0 && (
+                          <Badge variant="destructive" className="ml-auto h-5 min-w-5 px-1.5 text-[10px] justify-center">
+                            {unreadCount > 99 ? "99+" : unreadCount}
+                          </Badge>
+                        )}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4">
-        <Button
-          variant="ghost"
-          className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive"
+      <SidebarFooter className="p-3 bg-white border-t border-border/50">
+        <button
           onClick={signOut}
+          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-colors text-[14px]"
         >
-          <LogOut className="h-4 w-4 shrink-0" />
+          <LogOut className="h-[18px] w-[18px] shrink-0" />
           {!collapsed && <span>Sign Out</span>}
-        </Button>
+        </button>
       </SidebarFooter>
     </Sidebar>
   );
