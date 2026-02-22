@@ -474,8 +474,7 @@ const CleanerProfile = () => {
             <Tabs defaultValue="about" className="w-full">
               <TabsList className="w-full justify-start bg-card border border-border h-auto p-1 flex-wrap">
                 <TabsTrigger value="about">About</TabsTrigger>
-                <TabsTrigger value="services">Services & Pricing</TabsTrigger>
-                <TabsTrigger value="my-services">Services</TabsTrigger>
+                <TabsTrigger value="services">Services</TabsTrigger>
                 <TabsTrigger value="gallery">Gallery</TabsTrigger>
                 <TabsTrigger value="reviews">Reviews ({cleaner.reviewCount})</TabsTrigger>
               </TabsList>
@@ -516,63 +515,7 @@ const CleanerProfile = () => {
               </TabsContent>
 
               {/* Services Tab */}
-              <TabsContent value="services" className="mt-6 space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Services</CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      Book between {settings.min_booking_hours}-{settings.max_booking_hours} hours per session
-                    </p>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {cleaner.services.map((service) => (
-                      <div
-                        key={service.name}
-                        className="flex flex-col md:flex-row md:items-center justify-between p-4 rounded-xl border border-border hover:border-primary/50 hover:bg-primary/5 transition-colors"
-                      >
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-foreground">{service.name}</h4>
-                          <p className="text-sm text-muted-foreground">{service.description}</p>
-                        </div>
-                        <div className="flex items-center gap-4 mt-3 md:mt-0">
-                          <span className="font-heading text-xl font-bold text-primary">
-                            {currencySymbol}{service.pricePerHour}/hr
-                          </span>
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={() => setSelectedService(service.name)}
-                          >
-                            Select
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Add-Ons</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid sm:grid-cols-2 gap-3">
-                      {cleaner.addOns.map((addon) => (
-                        <div
-                          key={addon.name}
-                          className="flex items-center justify-between p-3 rounded-lg border border-border"
-                        >
-                          <span className="text-foreground">{addon.name}</span>
-                          <span className="font-semibold text-primary">+{currencySymbol}{addon.price}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              {/* My Services Tab */}
-              <TabsContent value="my-services" className="mt-6">
+              <TabsContent value="services" className="mt-6">
                 {loadingListings ? (
                   <div className="flex items-center justify-center h-40">
                     <Loader2 className="h-6 w-6 animate-spin text-primary" />
