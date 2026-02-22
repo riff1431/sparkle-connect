@@ -525,16 +525,20 @@ const CleanerProfile = () => {
                     {serviceListings.map((listing) => (
                       <Link key={listing.id} to={`/services/${listing.id}`} className="group">
                         <Card className="overflow-hidden h-full hover:border-primary/50 transition-colors">
-                          {listing.image_url && (
-                            <div className="aspect-video overflow-hidden">
+                          <div className="aspect-video overflow-hidden bg-muted">
+                            {listing.image_url ? (
                               <img
                                 src={listing.image_url}
                                 alt={listing.title}
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                               />
-                            </div>
-                          )}
-                          <CardContent className={cn("space-y-2", listing.image_url ? "p-4" : "p-4 pt-4")}>
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <span className="text-3xl text-muted-foreground/40">🧹</span>
+                              </div>
+                            )}
+                          </div>
+                          <CardContent className="space-y-2 p-4">
                             <div className="flex items-start justify-between gap-2">
                               <h4 className="font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors">
                                 {listing.title}
