@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const GOOGLE_FONTS_BASE = "https://fonts.googleapis.com/css2?family=";
 
-interface TypographySettings {
+interface ThemeSettings {
   global_font?: string;
   heading_font?: string;
   body_font?: string;
@@ -12,9 +12,10 @@ interface TypographySettings {
   heading_size_h3?: string;
   body_size?: string;
   small_text_size?: string;
+  og_image?: string;
 }
 
-const TYPOGRAPHY_KEYS = [
+const THEME_KEYS = [
   "global_font",
   "heading_font",
   "body_font",
@@ -23,6 +24,7 @@ const TYPOGRAPHY_KEYS = [
   "heading_size_h3",
   "body_size",
   "small_text_size",
+  "og_image",
 ];
 
 function loadGoogleFont(font: string, linkId: string) {
@@ -38,16 +40,16 @@ function loadGoogleFont(font: string, linkId: string) {
 }
 
 const GlobalFontProvider = ({ children }: { children: React.ReactNode }) => {
-  const [settings, setSettings] = useState<TypographySettings>({});
+  const [settings, setSettings] = useState<ThemeSettings>({});
 
   useEffect(() => {
     supabase
       .from("theme_settings")
       .select("setting_key, setting_value")
-      .in("setting_key", TYPOGRAPHY_KEYS)
+      .in("setting_key", THEME_KEYS)
       .then(({ data }) => {
         if (data) {
-          const map: TypographySettings = {};
+          const map: ThemeSettings = {};
           data.forEach((row) => {
             if (row.setting_value) {
               (map as any)[row.setting_key] = row.setting_value;
@@ -93,6 +95,18 @@ const GlobalFontProvider = ({ children }: { children: React.ReactNode }) => {
       ${resolvedBody ? `body, p, span, div, li, td, th, label, a, input, textarea, select, button { font-family: var(--font-sans); }` : ""}
     `;
   }, [settings]);
+
+  // Dynamically update OG image meta tags
+  useEffect(() => {
+    if (settings.og_image) {
+      const updateMeta = (selector: string, attr: string, value: string) => {
+        const el = document.querySelector(selector) as HTMLMetaElement | null;
+        if (el) el.setAttribute(attr, value);
+      };
+      updateMeta('meta[property="og:image"]', 'content', settings.og_image);
+      updateMeta('meta[name="twitter:image"]', 'content', settings.og_image);
+    }
+  }, [settings.og_image]);
 
   return <>{children}</>;
 };
