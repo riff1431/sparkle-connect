@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
-import { LayoutGrid, List, Search as SearchIcon, Map } from "lucide-react";
+import { LayoutGrid, List, Search as SearchIcon, Map, Loader2 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import SearchFilters, { FilterState } from "@/components/SearchFilters";
@@ -18,147 +18,41 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import SearchResultsMap from "@/components/maps/SearchResultsMap";
+import { useSearchCleaners, type CleanerSearchResult } from "@/hooks/useSearchCleaners";
+import LiveSearchDropdown from "@/components/LiveSearchDropdown";
+import { useLiveSearch } from "@/hooks/useSearchCleaners";
 
-// Mock data - will be replaced with API calls
-const mockCleaners: Cleaner[] = [
-  {
-    id: 1,
-    name: "SparklePro Cleaning",
-    image: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=400&h=400&fit=crop",
-    rating: 4.9,
-    reviews: 127,
-    location: "Toronto, ON",
-    services: ["Home", "Deep Clean", "Airbnb"],
-    priceFrom: 85,
-    verified: true,
-    featured: true,
-    instantBooking: true,
-    responseTime: "Responds in ~1 hour",
-    description: "Professional home cleaning with eco-friendly products. Serving Toronto and GTA with same-day availability.",
-    subscriptionTier: "premium",
-  },
-  {
-    id: 2,
-    name: "CleanSweep Masters",
-    image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop",
-    rating: 4.8,
-    reviews: 89,
-    location: "Vancouver, BC",
-    services: ["Office", "Commercial", "Post-Construction"],
-    priceFrom: 120,
-    verified: true,
-    featured: false,
-    instantBooking: true,
-    responseTime: "Responds in ~2 hours",
-    description: "Specialized in commercial and office cleaning. Trusted by over 50 businesses in Vancouver.",
-    subscriptionTier: "pro",
-  },
-  {
-    id: 3,
-    name: "Eco Clean Solutions",
-    image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&h=400&fit=crop",
-    rating: 5.0,
-    reviews: 64,
-    location: "Calgary, AB",
-    services: ["Eco-Friendly", "Home", "Move In/Out"],
-    priceFrom: 95,
-    verified: true,
-    featured: true,
-    instantBooking: false,
-    responseTime: "Responds in ~30 min",
-    description: "100% eco-friendly cleaning using only natural, non-toxic products. Perfect for families with kids and pets.",
-    subscriptionTier: "premium",
-  },
-  {
-    id: 4,
-    name: "Maid Masters",
-    image: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=400&h=400&fit=crop",
-    rating: 4.7,
-    reviews: 156,
-    location: "Montreal, QC",
-    services: ["Home", "Regular", "Deep Clean"],
-    priceFrom: 75,
-    verified: true,
-    featured: false,
-    instantBooking: true,
-    responseTime: "Responds in ~3 hours",
-    description: "Affordable and reliable home cleaning services. Weekly, bi-weekly, and monthly plans available.",
-    subscriptionTier: "basic",
-  },
-  {
-    id: 5,
-    name: "Crystal Clear Cleaners",
-    image: "https://images.unsplash.com/photo-1587614382346-4ec70e388b28?w=400&h=400&fit=crop",
-    rating: 4.6,
-    reviews: 203,
-    location: "Toronto, ON",
-    services: ["Home", "Office", "Windows"],
-    priceFrom: 90,
-    verified: true,
-    featured: false,
-    instantBooking: true,
-    responseTime: "Responds in ~1 hour",
-    description: "Comprehensive cleaning services including specialized window cleaning. Satisfaction guaranteed.",
-    subscriptionTier: "pro",
-  },
-  {
-    id: 6,
-    name: "Fresh Start Cleaning Co.",
-    image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&h=400&fit=crop",
-    rating: 4.9,
-    reviews: 78,
-    location: "Ottawa, ON",
-    services: ["Move In/Out", "Deep Clean", "Post-Construction"],
-    priceFrom: 150,
-    verified: true,
-    featured: true,
-    instantBooking: false,
-    responseTime: "Responds in ~2 hours",
-    description: "Specializing in move-in/move-out and post-construction cleaning. We handle the toughest jobs.",
-    subscriptionTier: "premium",
-  },
-  {
-    id: 7,
-    name: "Green Leaf Cleaning",
-    image: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=400&h=400&fit=crop",
-    rating: 4.8,
-    reviews: 92,
-    location: "Edmonton, AB",
-    services: ["Eco-Friendly", "Home", "Airbnb"],
-    priceFrom: 88,
-    verified: true,
-    featured: false,
-    instantBooking: true,
-    responseTime: "Responds in ~45 min",
-    description: "Sustainable cleaning solutions for environmentally conscious homeowners. Carbon-neutral operations.",
-    subscriptionTier: "basic",
-  },
-  {
-    id: 8,
-    name: "Premier Office Cleaners",
-    image: "https://images.unsplash.com/photo-1580894894513-541e068a3e2b?w=400&h=400&fit=crop",
-    rating: 4.5,
-    reviews: 167,
-    location: "Vancouver, BC",
-    services: ["Office", "Commercial", "Industrial"],
-    priceFrom: 200,
-    verified: true,
-    featured: false,
-    instantBooking: false,
-    responseTime: "Responds in ~4 hours",
-    description: "Enterprise-grade commercial cleaning for offices, warehouses, and industrial facilities.",
-  },
-];
+// Map DB result to CleanerCard format
+function toCleanerCardFormat(r: CleanerSearchResult): Cleaner {
+  return {
+    id: r.id as any,
+    name: r.business_name,
+    image: r.profile_image || "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=400&h=400&fit=crop",
+    rating: r.avg_rating,
+    reviews: r.review_count,
+    location: r.service_areas.join(", ") || "Various locations",
+    services: r.services,
+    priceFrom: r.hourly_rate,
+    verified: r.is_verified,
+    featured: r.is_verified && r.avg_rating >= 4.5,
+    instantBooking: r.instant_booking,
+    responseTime: r.response_time || "Responds in ~1 hour",
+    description: r.bio || "Professional cleaning services available.",
+  };
+}
 
 const Search = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState<"grid" | "list" | "map">("grid");
-  const [activeMapCleaner, setActiveMapCleaner] = useState<number | null>(null);
-  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
-  
+  const [activeMapCleaner, setActiveMapCleaner] = useState<number | string | null>(null);
+  const [searchQuery, setSearchQuery] = useState(
+    searchParams.get("q") || searchParams.get("location") || ""
+  );
+  const [showLiveSearch, setShowLiveSearch] = useState(false);
+
   const initialService = searchParams.get("service");
   const [filters, setFilters] = useState<FilterState>({
-    location: searchParams.get("location") || "",
+    location: "",
     serviceTypes: initialService ? [initialService] : [],
     minRating: 0,
     priceRange: [0, 500],
@@ -167,93 +61,65 @@ const Search = () => {
     sortBy: "recommended",
   });
 
-  // Filter and sort cleaners
-  const filteredCleaners = useMemo(() => {
-    let result = [...mockCleaners];
+  // Full search query
+  const { data: searchResults = [], isLoading } = useSearchCleaners({
+    query: searchQuery,
+    location: filters.location,
+    serviceTypes: filters.serviceTypes,
+    minRating: filters.minRating,
+    priceRange: filters.priceRange,
+    verifiedOnly: filters.verifiedOnly,
+    instantBooking: filters.instantBooking,
+    sortBy: filters.sortBy,
+  });
 
-    // Filter by location
-    if (filters.location) {
-      const locationLower = filters.location.toLowerCase();
-      result = result.filter((c) => 
-        c.location.toLowerCase().includes(locationLower)
-      );
-    }
+  // Live search for dropdown
+  const { data: liveResults = [], isLoading: liveLoading } = useLiveSearch(searchQuery, showLiveSearch);
 
-    // Filter by service types
-    if (filters.serviceTypes.length > 0) {
-      result = result.filter((c) =>
-        filters.serviceTypes.some((type) =>
-          c.services.some((s) => s.toLowerCase().includes(type.toLowerCase()))
-        )
-      );
-    }
-
-    // Filter by rating
-    if (filters.minRating > 0) {
-      result = result.filter((c) => c.rating >= filters.minRating);
-    }
-
-    // Filter by price range
-    result = result.filter(
-      (c) => c.priceFrom >= filters.priceRange[0] && c.priceFrom <= filters.priceRange[1]
-    );
-
-    // Filter by verified
-    if (filters.verifiedOnly) {
-      result = result.filter((c) => c.verified);
-    }
-
-    // Filter by instant booking
-    if (filters.instantBooking) {
-      result = result.filter((c) => c.instantBooking);
-    }
-
-    // Sort
-    switch (filters.sortBy) {
-      case "rating":
-        result.sort((a, b) => b.rating - a.rating);
-        break;
-      case "price-low":
-        result.sort((a, b) => a.priceFrom - b.priceFrom);
-        break;
-      case "price-high":
-        result.sort((a, b) => b.priceFrom - a.priceFrom);
-        break;
-      case "reviews":
-        result.sort((a, b) => b.reviews - a.reviews);
-        break;
-      default:
-        // Recommended: featured first, then by rating
-        result.sort((a, b) => {
-          if (a.featured !== b.featured) return b.featured ? 1 : -1;
-          return b.rating - a.rating;
-        });
-    }
-
-    return result;
-  }, [filters]);
+  const filteredCleaners = useMemo(
+    () => searchResults.map(toCleanerCardFormat),
+    [searchResults]
+  );
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    setFilters({ ...filters, location: searchQuery });
+    setShowLiveSearch(false);
   };
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
+
       {/* Search Header */}
       <div className="bg-primary/5 border-b border-border">
         <div className="container mx-auto px-4 py-6">
-          <form onSubmit={handleSearch} className="flex gap-3 max-w-2xl">
+          <form onSubmit={handleSearch} className="flex gap-3 max-w-2xl relative">
             <div className="relative flex-1">
               <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
-                placeholder="Search by location, city, or postal code..."
+                placeholder="Search by cleaner name, service, or location..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setShowLiveSearch(true);
+                }}
+                onFocus={() => {
+                  if (searchQuery.length >= 2) setShowLiveSearch(true);
+                }}
+                onBlur={() => {
+                  setTimeout(() => setShowLiveSearch(false), 200);
+                }}
                 className="pl-10 h-12 text-base bg-background"
               />
+              {showLiveSearch && (
+                <LiveSearchDropdown
+                  results={liveResults}
+                  isLoading={liveLoading}
+                  query={searchQuery}
+                  onSelect={() => setShowLiveSearch(false)}
+                  className="top-full mt-1"
+                />
+              )}
             </div>
             <Button type="submit" size="lg">
               Search
@@ -274,15 +140,23 @@ const Search = () => {
 
           {/* Results */}
           <div className="flex-1 min-w-0">
-            {/* Cleaner of the Week pinned above sponsored */}
             <CleanerOfTheWeek />
-            {/* Sponsored Spotlight pinned above results */}
             <SponsoredSpotlight variant="search" limit={3} />
+
             {/* Desktop Sort & Results Header */}
             <div className="hidden lg:flex items-center justify-between mb-6">
               <div className="flex items-center gap-4">
                 <span className="text-muted-foreground">
-                  <span className="font-semibold text-foreground">{filteredCleaners.length}</span> cleaners found
+                  {isLoading ? (
+                    <span className="flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Searching...
+                    </span>
+                  ) : (
+                    <>
+                      <span className="font-semibold text-foreground">{filteredCleaners.length}</span> cleaners found
+                    </>
+                  )}
                 </span>
                 <ToggleGroup
                   type="single"
@@ -300,8 +174,8 @@ const Search = () => {
                   </ToggleGroupItem>
                 </ToggleGroup>
               </div>
-              <Select 
-                value={filters.sortBy} 
+              <Select
+                value={filters.sortBy}
                 onValueChange={(value) => setFilters({ ...filters, sortBy: value })}
               >
                 <SelectTrigger className="w-48">
@@ -318,7 +192,12 @@ const Search = () => {
             </div>
 
             {/* Results Grid/List/Map */}
-            {filteredCleaners.length > 0 ? (
+            {isLoading ? (
+              <div className="flex items-center justify-center py-16">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <span className="ml-3 text-muted-foreground">Finding cleaners...</span>
+              </div>
+            ) : filteredCleaners.length > 0 ? (
               viewMode === "map" ? (
                 <div className="space-y-4">
                   <SearchResultsMap
@@ -366,11 +245,12 @@ const Search = () => {
                 </div>
                 <h3 className="font-heading text-xl font-semibold mb-2">No cleaners found</h3>
                 <p className="text-muted-foreground mb-6">
-                  Try adjusting your filters or search for a different location.
+                  Try adjusting your filters or search for a different term.
                 </p>
                 <Button
                   variant="outline"
-                  onClick={() =>
+                  onClick={() => {
+                    setSearchQuery("");
                     setFilters({
                       location: "",
                       serviceTypes: [],
@@ -379,19 +259,10 @@ const Search = () => {
                       verifiedOnly: false,
                       instantBooking: false,
                       sortBy: "recommended",
-                    })
-                  }
+                    });
+                  }}
                 >
                   Clear all filters
-                </Button>
-              </div>
-            )}
-
-            {/* Load More */}
-            {filteredCleaners.length > 0 && (
-              <div className="text-center mt-12">
-                <Button variant="outline" size="lg">
-                  Load More Results
                 </Button>
               </div>
             )}

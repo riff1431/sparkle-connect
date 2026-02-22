@@ -6,7 +6,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { cn } from "@/lib/utils";
 
 export interface Cleaner {
-  id: number;
+  id: number | string;
   name: string;
   image: string;
   rating: number;

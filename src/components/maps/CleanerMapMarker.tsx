@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 export interface MapCleaner {
-  id: number;
+  id: number | string;
   name: string;
   image: string;
   rating: number;
@@ -22,7 +22,7 @@ export interface MapCleaner {
 interface CleanerMapMarkerProps {
   cleaner: MapCleaner;
   isActive?: boolean;
-  onSelect?: (id: number) => void;
+  onSelect?: (id: number | string) => void;
 }
 
 const CleanerMapMarker = ({ cleaner, isActive, onSelect }: CleanerMapMarkerProps) => {

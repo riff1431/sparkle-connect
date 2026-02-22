@@ -23,7 +23,7 @@ const defaultCenter = { lat: 46.8, lng: -80.0 }; // Center of Canada
 
 interface SearchResultsMapProps {
   cleaners: Array<{
-    id: number;
+    id: number | string;
     name: string;
     image: string;
     rating: number;
@@ -33,8 +33,8 @@ interface SearchResultsMapProps {
     verified: boolean;
     services: string[];
   }>;
-  activeCleanerId?: number | null;
-  onCleanerSelect?: (id: number) => void;
+  activeCleanerId?: number | string | null;
+  onCleanerSelect?: (id: number | string) => void;
   className?: string;
 }
 

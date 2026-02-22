@@ -40,7 +40,7 @@ const NEARBY_CLEANERS = [
 
 const NearbyCleanersMap = () => {
   const navigate = useNavigate();
-  const [activeId, setActiveId] = useState<number | null>(null);
+  const [activeId, setActiveId] = useState<number | string | null>(null);
 
   return (
     <section className="py-16 bg-muted/30">
