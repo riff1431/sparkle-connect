@@ -172,41 +172,58 @@ export function useSearchCleaners(options: UseSearchCleanersOptions = {}) {
   });
 }
 
-// Lightweight hook for live search dropdown (just name/location matching)
+// Lightweight hook for live search dropdown with ratings
 export function useLiveSearch(query: string, enabled = true) {
   return useQuery({
     queryKey: ["live-search", query],
     queryFn: async () => {
       if (!query || query.length < 2) return [];
 
-      const { data, error } = await supabase
+      // Fetch profiles
+      const { data: allData } = await supabase
         .from("cleaner_profiles")
-        .select("id, business_name, profile_image, services, service_areas, hourly_rate, is_verified")
+        .select("id, business_name, profile_image, services, service_areas, hourly_rate, is_verified, instant_booking, bio")
         .eq("is_active", true)
-        .or(`business_name.ilike.%${query}%,service_areas.cs.{"${query}"}`)
-        .limit(6);
+        .limit(50);
 
-      if (error) {
-        // Fallback: fetch all and filter client-side
-        const { data: allData } = await supabase
-          .from("cleaner_profiles")
-          .select("id, business_name, profile_image, services, service_areas, hourly_rate, is_verified")
-          .eq("is_active", true)
-          .limit(50);
+      if (!allData) return [];
 
-        if (!allData) return [];
-        const q = query.toLowerCase();
-        return allData
-          .filter(
-            (p) =>
-              p.business_name.toLowerCase().includes(q) ||
-              p.services.some((s: string) => s.toLowerCase().includes(q)) ||
-              p.service_areas.some((a: string) => a.toLowerCase().includes(q))
-          )
-          .slice(0, 6);
-      }
+      const q = query.toLowerCase();
+      const filtered = allData
+        .filter(
+          (p) =>
+            p.business_name.toLowerCase().includes(q) ||
+            p.services.some((s: string) => s.toLowerCase().includes(q)) ||
+            p.service_areas.some((a: string) => a.toLowerCase().includes(q))
+        )
+        .slice(0, 6);
 
-      return data || [];
+      if (filtered.length === 0) return [];
+
+      // Fetch ratings for matched profiles
+      const ids = filtered.map((p) => p.id);
+      const { data: reviews } = await supabase
+        .from("reviews")
+        .select("cleaner_profile_id, rating")
+        .in("cleaner_profile_id", ids);
+
+      const ratingMap: Record<string, { total: number; count: number }> = {};
+      reviews?.forEach((r) => {
+        if (!ratingMap[r.cleaner_profile_id]) {
+          ratingMap[r.cleaner_profile_id] = { total: 0, count: 0 };
+        }
+        ratingMap[r.cleaner_profile_id].total += r.rating;
+        ratingMap[r.cleaner_profile_id].count += 1;
+      });
+
+      return filtered.map((p) => {
+        const rating = ratingMap[p.id];
+        return {
+          ...p,
+          avg_rating: rating ? Math.round((rating.total / rating.count) * 10) / 10 : 0,
+          review_count: rating?.count || 0,
+        };
+      });
     },
     enabled: enabled && query.length >= 2,
     staleTime: 30000,
