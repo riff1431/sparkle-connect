@@ -221,6 +221,22 @@ const CleanerProfile = () => {
     },
   });
 
+  // Fetch cleaner's service listings
+  const { data: serviceListings, isLoading: loadingListings } = useQuery({
+    queryKey: ["cleaner-service-listings", id],
+    enabled: !!id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("service_listings")
+        .select("*")
+        .eq("cleaner_profile_id", id!)
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+  });
+
   const handleSendMessage = async () => {
     if (!user) {
       toast({ title: "Please sign in", description: "You need to be logged in to message a provider.", variant: "destructive" });
@@ -459,6 +475,7 @@ const CleanerProfile = () => {
               <TabsList className="w-full justify-start bg-card border border-border h-auto p-1 flex-wrap">
                 <TabsTrigger value="about">About</TabsTrigger>
                 <TabsTrigger value="services">Services & Pricing</TabsTrigger>
+                <TabsTrigger value="my-services">Services</TabsTrigger>
                 <TabsTrigger value="gallery">Gallery</TabsTrigger>
                 <TabsTrigger value="reviews">Reviews ({cleaner.reviewCount})</TabsTrigger>
               </TabsList>
@@ -552,6 +569,88 @@ const CleanerProfile = () => {
                     </div>
                   </CardContent>
                 </Card>
+              </TabsContent>
+
+              {/* My Services Tab */}
+              <TabsContent value="my-services" className="mt-6">
+                {loadingListings ? (
+                  <div className="flex items-center justify-center h-40">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  </div>
+                ) : serviceListings && serviceListings.length > 0 ? (
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {serviceListings.map((listing) => (
+                      <Link key={listing.id} to={`/services/${listing.id}`} className="group">
+                        <Card className="overflow-hidden h-full hover:border-primary/50 transition-colors">
+                          {listing.image_url && (
+                            <div className="aspect-video overflow-hidden">
+                              <img
+                                src={listing.image_url}
+                                alt={listing.title}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              />
+                            </div>
+                          )}
+                          <CardContent className={cn("space-y-2", listing.image_url ? "p-4" : "p-4 pt-4")}>
+                            <div className="flex items-start justify-between gap-2">
+                              <h4 className="font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors">
+                                {listing.title}
+                              </h4>
+                              <Badge variant="secondary" className="shrink-0 text-xs">
+                                {listing.category}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground line-clamp-2">
+                              {listing.description}
+                            </p>
+                            <div className="flex items-center justify-between pt-2 border-t border-border">
+                              <span className="font-heading text-lg font-bold text-primary">
+                                {currencySymbol}{listing.price}
+                                <span className="text-xs font-normal text-muted-foreground ml-1">
+                                  {listing.price_type === "hourly" ? "/hr" : listing.price_type === "fixed" ? " fixed" : ""}
+                                </span>
+                              </span>
+                              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                                {listing.duration_hours && (
+                                  <span className="flex items-center gap-1">
+                                    <Clock className="h-3 w-3" />
+                                    {listing.duration_hours}h
+                                  </span>
+                                )}
+                                {listing.location && (
+                                  <span className="flex items-center gap-1">
+                                    <MapPin className="h-3 w-3" />
+                                    {listing.location}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            {listing.features && listing.features.length > 0 && (
+                              <div className="flex flex-wrap gap-1 pt-1">
+                                {listing.features.slice(0, 3).map((f) => (
+                                  <Badge key={f} variant="outline" className="text-[10px] px-1.5 py-0">
+                                    {f}
+                                  </Badge>
+                                ))}
+                                {listing.features.length > 3 && (
+                                  <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                                    +{listing.features.length - 3} more
+                                  </Badge>
+                                )}
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <Card>
+                    <CardContent className="p-8 text-center">
+                      <p className="text-muted-foreground">No service listings available yet.</p>
+                    </CardContent>
+                  </Card>
+                )}
               </TabsContent>
 
               {/* Gallery Tab */}
