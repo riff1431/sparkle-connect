@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Star, MapPin, Shield, Clock, Heart, CheckCircle, Crown, Zap, BarChart2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -88,6 +88,20 @@ const SubscriptionTierBadge = ({ tier }: { tier: string }) => {
 };
 
 const CleanerCard = ({ cleaner, variant = "grid" }: CleanerCardProps) => {
+  const navigate = useNavigate();
+
+  const handleQuote = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate(`/cleaner/${cleaner.id}?action=quote`);
+  };
+
+  const handleBook = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate(`/cleaner/${cleaner.id}?action=book`);
+  };
+
   if (variant === "list") {
     return (
       <Link 
@@ -178,10 +192,10 @@ const CleanerCard = ({ cleaner, variant = "grid" }: CleanerCardProps) => {
               <span className="font-semibold text-primary text-lg ml-2">${cleaner.priceFrom}</span>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={(e) => e.preventDefault()}>
+              <Button variant="outline" size="sm" onClick={handleQuote}>
                 Get Quote
               </Button>
-              <Button variant="secondary" size="sm" onClick={(e) => e.preventDefault()}>
+              <Button variant="secondary" size="sm" onClick={handleBook}>
                 Book Now
               </Button>
             </div>
@@ -279,10 +293,10 @@ const CleanerCard = ({ cleaner, variant = "grid" }: CleanerCardProps) => {
             <span className="font-semibold text-primary ml-1">${cleaner.priceFrom}</span>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={(e) => e.preventDefault()}>
+            <Button variant="outline" size="sm" onClick={handleQuote}>
               Quote
             </Button>
-            <Button variant="secondary" size="sm" onClick={(e) => e.preventDefault()}>
+            <Button variant="secondary" size="sm" onClick={handleBook}>
               Book
             </Button>
           </div>

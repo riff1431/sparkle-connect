@@ -1,7 +1,7 @@
 import { Star, MapPin, DollarSign, Shield, Clock, Eye, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { trackSponsoredClick } from "@/hooks/useSponsoredListings";
 import { motion } from "framer-motion";
 import bgSponsored from "@/assets/bg-sponsored.png";
@@ -19,7 +19,11 @@ interface SponsoredCleaner {
 }
 
 const SponsoredSpotlightCard = ({ cleaner, listingId }: { cleaner: SponsoredCleaner; listingId: string }) => {
-  const handleQuoteClick = () => trackSponsoredClick(listingId, "quote");
+  const navigate = useNavigate();
+  const handleQuoteClick = () => {
+    trackSponsoredClick(listingId, "quote");
+    navigate(`/cleaner/${cleaner.id}?action=quote`);
+  };
   const handleBookClick = () => trackSponsoredClick(listingId, "book");
 
   return (
