@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { MapPin, Star, DollarSign, Sparkles, Filter, X, ChevronDown } from "lucide-react";
+import LocationAutocomplete from "@/components/LocationAutocomplete";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
@@ -100,11 +101,12 @@ const SearchFilters = ({ filters, onFiltersChange, resultCount }: SearchFiltersP
           <MapPin className="h-4 w-4 text-primary" />
           Location
         </label>
-        <Input
-          placeholder="Enter city or postal code"
+        <LocationAutocomplete
           value={filters.location}
-          onChange={(e) => updateFilter("location", e.target.value)}
-          className="bg-background"
+          onChange={(val) => updateFilter("location", val)}
+          onSelect={(val) => updateFilter("location", val)}
+          placeholder="Enter city or postal code"
+          className="h-10 rounded-lg bg-background"
         />
       </div>
 
