@@ -42,6 +42,8 @@ function toCleanerCardFormat(r: CleanerSearchResult): Cleaner {
   };
 }
 
+const ITEMS_PER_PAGE = 12;
+
 const Search = () => {
   const [searchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState<"grid" | "list" | "map">("grid");
@@ -53,6 +55,7 @@ const Search = () => {
     searchParams.get("location") || ""
   );
   const [showLiveSearch, setShowLiveSearch] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
 
   const initialService = searchParams.get("service");
   const [filters, setFilters] = useState<FilterState>({
@@ -85,9 +88,23 @@ const Search = () => {
     [searchResults]
   );
 
+  const visibleCleaners = useMemo(
+    () => filteredCleaners.slice(0, visibleCount),
+    [filteredCleaners, visibleCount]
+  );
+
+  const hasMore = visibleCount < filteredCleaners.length;
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setShowLiveSearch(false);
+    setVisibleCount(ITEMS_PER_PAGE);
+  };
+
+  // Reset visible count when filters change
+  const handleFiltersChange = (newFilters: FilterState) => {
+    setFilters(newFilters);
+    setVisibleCount(ITEMS_PER_PAGE);
   };
 
   return (
@@ -149,7 +166,7 @@ const Search = () => {
           {/* Filters Sidebar */}
           <SearchFilters
             filters={filters}
-            onFiltersChange={setFilters}
+            onFiltersChange={handleFiltersChange}
             resultCount={filteredCleaners.length}
           />
 
@@ -213,46 +230,64 @@ const Search = () => {
                 <span className="ml-3 text-muted-foreground">Finding cleaners...</span>
               </div>
             ) : filteredCleaners.length > 0 ? (
-              viewMode === "map" ? (
-                <div className="space-y-4">
-                  <SearchResultsMap
-                    cleaners={filteredCleaners}
-                    activeCleanerId={activeMapCleaner}
-                    onCleanerSelect={setActiveMapCleaner}
-                    className="h-[500px] rounded-xl overflow-hidden border border-border"
-                  />
-                  <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
-                    {filteredCleaners.map((cleaner) => (
+              <>
+                {viewMode === "map" ? (
+                  <div className="space-y-4">
+                    <SearchResultsMap
+                      cleaners={filteredCleaners}
+                      activeCleanerId={activeMapCleaner}
+                      onCleanerSelect={setActiveMapCleaner}
+                      className="h-[500px] rounded-xl overflow-hidden border border-border"
+                    />
+                    <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+                      {visibleCleaners.map((cleaner) => (
+                        <div
+                          key={cleaner.id}
+                          className={`cursor-pointer transition-all ${activeMapCleaner === cleaner.id ? "ring-2 ring-primary rounded-xl" : ""}`}
+                          onMouseEnter={() => setActiveMapCleaner(cleaner.id)}
+                          onMouseLeave={() => setActiveMapCleaner(null)}
+                        >
+                          <CleanerCard cleaner={cleaner} variant="grid" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    className={
+                      viewMode === "grid"
+                        ? "grid md:grid-cols-2 xl:grid-cols-3 gap-6"
+                        : "space-y-4"
+                    }
+                  >
+                    {visibleCleaners.map((cleaner, index) => (
                       <div
                         key={cleaner.id}
-                        className={`cursor-pointer transition-all ${activeMapCleaner === cleaner.id ? "ring-2 ring-primary rounded-xl" : ""}`}
-                        onMouseEnter={() => setActiveMapCleaner(cleaner.id)}
-                        onMouseLeave={() => setActiveMapCleaner(null)}
+                        className="animate-fade-in"
+                        style={{ animationDelay: `${index * 0.05}s` }}
                       >
-                        <CleanerCard cleaner={cleaner} variant="grid" />
+                        <CleanerCard cleaner={cleaner} variant={viewMode} />
                       </div>
                     ))}
                   </div>
-                </div>
-              ) : (
-                <div
-                  className={
-                    viewMode === "grid"
-                      ? "grid md:grid-cols-2 xl:grid-cols-3 gap-6"
-                      : "space-y-4"
-                  }
-                >
-                  {filteredCleaners.map((cleaner, index) => (
-                    <div
-                      key={cleaner.id}
-                      className="animate-fade-in"
-                      style={{ animationDelay: `${index * 0.05}s` }}
+                )}
+
+                {/* Load More */}
+                {hasMore && (
+                  <div className="flex flex-col items-center gap-2 mt-8">
+                    <p className="text-sm text-muted-foreground">
+                      Showing {visibleCount} of {filteredCleaners.length} cleaners
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      onClick={() => setVisibleCount((prev) => prev + ITEMS_PER_PAGE)}
                     >
-                      <CleanerCard cleaner={cleaner} variant={viewMode} />
-                    </div>
-                  ))}
-                </div>
-              )
+                      Load More
+                    </Button>
+                  </div>
+                )}
+              </>
             ) : (
               <div className="text-center py-16">
                 <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
