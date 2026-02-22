@@ -13,6 +13,7 @@ interface ThemeSettings {
   body_size?: string;
   small_text_size?: string;
   og_image?: string;
+  favicon_url?: string;
   site_title?: string;
   site_description?: string;
   og_title?: string;
@@ -29,6 +30,7 @@ const THEME_KEYS = [
   "body_size",
   "small_text_size",
   "og_image",
+  "favicon_url",
   "site_title",
   "site_description",
   "og_title",
@@ -127,7 +129,17 @@ const GlobalFontProvider = ({ children }: { children: React.ReactNode }) => {
       updateMeta('meta[property="og:image"]', 'content', settings.og_image);
       updateMeta('meta[name="twitter:image"]', 'content', settings.og_image);
     }
-  }, [settings.site_title, settings.site_description, settings.og_title, settings.og_description, settings.og_image]);
+    if (settings.favicon_url) {
+      let link = document.querySelector('link[rel="icon"]') as HTMLLinkElement | null;
+      if (!link) {
+        link = document.createElement("link");
+        link.rel = "icon";
+        document.head.appendChild(link);
+      }
+      link.href = settings.favicon_url;
+      link.type = "image/png";
+    }
+  }, [settings.site_title, settings.site_description, settings.og_title, settings.og_description, settings.og_image, settings.favicon_url]);
 
   return <>{children}</>;
 };
