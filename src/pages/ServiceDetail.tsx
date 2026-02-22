@@ -323,17 +323,17 @@ const ServiceDetail = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="container mx-auto px-4 py-6 max-w-6xl">
+      <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-6xl">
         {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-          <button onClick={() => navigate("/services")} className="hover:text-primary transition-colors">Services</button>
-          <ChevronRight className="h-3.5 w-3.5" />
-          <span className="hover:text-primary transition-colors cursor-pointer" onClick={() => navigate(`/services?category=${listing.category}`)}>{listing.category}</span>
-          <ChevronRight className="h-3.5 w-3.5" />
-          <span className="text-foreground font-medium truncate max-w-[200px]">{listing.title}</span>
+        <nav className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-muted-foreground mb-4 sm:mb-6 overflow-x-auto">
+          <button onClick={() => navigate("/services")} className="hover:text-primary transition-colors shrink-0">Services</button>
+          <ChevronRight className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0" />
+          <span className="hover:text-primary transition-colors cursor-pointer shrink-0" onClick={() => navigate(`/services?category=${listing.category}`)}>{listing.category}</span>
+          <ChevronRight className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0" />
+          <span className="text-foreground font-medium truncate max-w-[140px] sm:max-w-[200px]">{listing.title}</span>
         </nav>
 
-        <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
+        <div className="grid gap-6 sm:gap-8 lg:grid-cols-[1fr_380px]">
           {/* ============ LEFT COLUMN ============ */}
           <div className="space-y-8">
             {/* Hero Image */}
@@ -408,11 +408,11 @@ const ServiceDetail = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.1 }}
             >
-              <h1 className="text-2xl md:text-3xl font-heading font-bold text-foreground leading-tight">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-heading font-bold text-foreground leading-tight">
                 {listing.title}
               </h1>
 
-              <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-4">
+              <div className="flex flex-wrap items-center gap-x-3 sm:gap-x-5 gap-y-2 mt-3 sm:mt-4">
                 {listing.cleaner_rating > 0 && (
                   <div className="flex items-center gap-1.5">
                     <div className="flex items-center gap-0.5">
@@ -460,7 +460,7 @@ const ServiceDetail = () => {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.2 }}
-              className="grid grid-cols-2 sm:grid-cols-3 gap-3"
+              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"
             >
               {listing.location && (
                 <div className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border/60">
@@ -525,8 +525,8 @@ const ServiceDetail = () => {
             >
               <Separator className="mb-8" />
               <h2 className="font-heading font-bold text-lg text-foreground mb-4">About the Provider</h2>
-              <div className="flex items-start gap-4 p-5 rounded-2xl bg-card border border-border/60">
-                <Avatar className="h-16 w-16 ring-2 ring-primary/10">
+              <div className="flex flex-col sm:flex-row items-start gap-4 p-4 sm:p-5 rounded-2xl bg-card border border-border/60">
+                <Avatar className="h-14 w-14 sm:h-16 sm:w-16 ring-2 ring-primary/10 shrink-0">
                   <AvatarImage src={listing.cleaner_image || undefined} />
                   <AvatarFallback className="bg-primary/10 text-primary font-bold text-xl">
                     {listing.cleaner_name.charAt(0)}
@@ -566,7 +566,7 @@ const ServiceDetail = () => {
                     )}
                   </div>
                 </div>
-                <Button variant="outline" size="sm" className="shrink-0" onClick={() => navigate(`/cleaner/${listing.cleaner_profile_id}`)}>
+                <Button variant="outline" size="sm" className="shrink-0 w-full sm:w-auto" onClick={() => navigate(`/cleaner/${listing.cleaner_profile_id}`)}>
                   View Profile
                 </Button>
               </div>
@@ -579,7 +579,7 @@ const ServiceDetail = () => {
               transition={{ duration: 0.4, delay: 0.35 }}
             >
               <Separator className="mb-8" />
-              <div className="flex items-center justify-between mb-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
                 <h2 className="font-heading font-bold text-lg text-foreground flex items-center gap-2">
                   <MessageSquare className="h-5 w-5 text-primary" />
                   Customer Reviews
@@ -846,7 +846,7 @@ const ServiceDetail = () => {
                 View All <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
               {similarListings.map((s) => (
                 <Card
                   key={s.id}
