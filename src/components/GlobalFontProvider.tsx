@@ -13,6 +13,10 @@ interface ThemeSettings {
   body_size?: string;
   small_text_size?: string;
   og_image?: string;
+  site_title?: string;
+  site_description?: string;
+  og_title?: string;
+  og_description?: string;
 }
 
 const THEME_KEYS = [
@@ -25,6 +29,10 @@ const THEME_KEYS = [
   "body_size",
   "small_text_size",
   "og_image",
+  "site_title",
+  "site_description",
+  "og_title",
+  "og_description",
 ];
 
 function loadGoogleFont(font: string, linkId: string) {
@@ -96,17 +104,30 @@ const GlobalFontProvider = ({ children }: { children: React.ReactNode }) => {
     `;
   }, [settings]);
 
-  // Dynamically update OG image meta tags
+  // Dynamically update meta tags (title, description, OG)
   useEffect(() => {
+    const updateMeta = (selector: string, attr: string, value: string) => {
+      const el = document.querySelector(selector) as HTMLMetaElement | null;
+      if (el) el.setAttribute(attr, value);
+    };
+
+    if (settings.site_title) {
+      document.title = settings.site_title;
+    }
+    if (settings.site_description) {
+      updateMeta('meta[name="description"]', 'content', settings.site_description);
+    }
+    if (settings.og_title) {
+      updateMeta('meta[property="og:title"]', 'content', settings.og_title);
+    }
+    if (settings.og_description) {
+      updateMeta('meta[property="og:description"]', 'content', settings.og_description);
+    }
     if (settings.og_image) {
-      const updateMeta = (selector: string, attr: string, value: string) => {
-        const el = document.querySelector(selector) as HTMLMetaElement | null;
-        if (el) el.setAttribute(attr, value);
-      };
       updateMeta('meta[property="og:image"]', 'content', settings.og_image);
       updateMeta('meta[name="twitter:image"]', 'content', settings.og_image);
     }
-  }, [settings.og_image]);
+  }, [settings.site_title, settings.site_description, settings.og_title, settings.og_description, settings.og_image]);
 
   return <>{children}</>;
 };
