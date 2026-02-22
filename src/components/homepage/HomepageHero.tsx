@@ -60,7 +60,7 @@ const HomepageHero = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
-              className={`relative flex items-center glass-strong rounded-xl shadow-md mb-4 w-full max-w-lg transition-all duration-300 ${
+              className={`relative flex items-center glass-strong rounded-xl shadow-md mb-4 w-full max-w-lg transition-all duration-300 z-20 ${
                 isFocused ? "shadow-lg ring-2 ring-primary/20" : ""
               }`}
             >
