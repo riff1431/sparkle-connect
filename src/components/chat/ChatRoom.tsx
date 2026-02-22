@@ -454,11 +454,12 @@ function formatDateLabel(dateStr: string) {
 
 /** Detects if a message is a booking details card */
 function isBookingDetailsMessage(text: string): boolean {
-  return text.startsWith("📋 **Booking Details**");
+  return text.startsWith("📋 **Booking Details**") || text.startsWith("📋 **Quote Request**");
 }
 
-/** Parses and renders booking details as a styled card */
+/** Parses and renders booking/quote details as a styled card */
 const BookingDetailsCard = ({ text }: { text: string }) => {
+  const isQuoteRequest = text.startsWith("📋 **Quote Request**");
   const lines = text.split("\n").filter(Boolean);
 
   const extract = (prefix: string) => {
@@ -466,30 +467,45 @@ const BookingDetailsCard = ({ text }: { text: string }) => {
     return line ? line.split(prefix)[1]?.trim() : null;
   };
 
-  const service = extract("🧹 Service: ");
-  const date = extract("📅 Date: ");
+  const service = extract("🧹 Service") || extract("🧹 Services: ");
+  const quoteType = extract("🏷️ Type: ");
+  const date = extract("📅 Date: ") || extract("📅 Preferred Date: ");
   const rawTime = extract("🕐 Time: ");
-  // Handle combined format "14:00 • 2 hours" or plain "14:00"
   const time = rawTime?.split("•")[0]?.trim() ?? rawTime;
   const duration = extract("⏱️ Duration: ") ?? (rawTime?.includes("•") ? rawTime.split("•")[1]?.trim() : null);
   const total = extract("💰 Total: ");
   const address = extract("📍 ");
   const notes = extract("📝 Notes: ");
 
+  const headerTitle = isQuoteRequest ? "Quote Request" : "Booking Details";
+  const headerBg = isQuoteRequest ? "bg-secondary" : "bg-primary";
+  const headerText = isQuoteRequest ? "text-secondary-foreground" : "text-primary-foreground";
+
   return (
     <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden w-64 sm:w-72">
-      <div className="bg-primary px-4 py-2.5">
+      <div className={cn(headerBg, "px-4 py-2.5")}>
         <div className="flex items-center gap-2">
-          <ClipboardList className="h-4 w-4 text-primary-foreground" />
-          <span className="text-sm font-semibold text-primary-foreground">Booking Details</span>
+          <ClipboardList className={cn("h-4 w-4", headerText)} />
+          <span className={cn("text-sm font-semibold", headerText)}>{headerTitle}</span>
         </div>
       </div>
       <div className="p-3 space-y-2.5 text-sm">
+        {quoteType && (
+          <div className="flex items-start gap-2.5">
+            <ClipboardList className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+            <div>
+              <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wide">Type</p>
+              <p className="font-semibold text-foreground">{quoteType}</p>
+            </div>
+          </div>
+        )}
         {service && (
           <div className="flex items-start gap-2.5">
             <ClipboardList className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
             <div>
-              <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wide">Service</p>
+              <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wide">
+                {isQuoteRequest ? "Services" : "Service"}
+              </p>
               <p className="font-semibold text-foreground">{service}</p>
             </div>
           </div>
@@ -498,7 +514,9 @@ const BookingDetailsCard = ({ text }: { text: string }) => {
           <div className="flex items-start gap-2.5">
             <CalendarDays className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
             <div>
-              <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wide">Date</p>
+              <p className="text-[11px] text-muted-foreground font-medium uppercase tracking-wide">
+                {isQuoteRequest ? "Preferred Date" : "Date"}
+              </p>
               <p className="font-medium text-foreground">{date}</p>
             </div>
           </div>

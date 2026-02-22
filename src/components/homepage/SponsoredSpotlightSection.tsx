@@ -43,6 +43,7 @@ const SponsoredSpotlightSection = () => {
               startingPrice: listing.cleaner_profiles?.hourly_rate || 0,
               services: listing.cleaner_profiles?.services || [],
               isVerified: listing.cleaner_profiles?.is_verified || false,
+              userId: listing.user_id,
             }}
             listingId={listing.id}
           />
