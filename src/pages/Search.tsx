@@ -96,8 +96,8 @@ const Search = () => {
 
       {/* Search Header */}
       <div className="bg-primary/5 border-b border-border">
-        <div className="container mx-auto px-4 py-6">
-          <form onSubmit={handleSearch} className="flex gap-3 max-w-3xl w-full">
+        <div className="container mx-auto px-4 py-4 sm:py-6">
+          <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3 max-w-3xl w-full">
             <div className="relative flex-1 min-w-0">
               <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10" />
               <Input
@@ -125,18 +125,20 @@ const Search = () => {
                 />
               )}
             </div>
-            <div className="w-56 shrink-0">
-              <LocationAutocomplete
-                value={locationQuery}
-                onChange={setLocationQuery}
-                onSelect={setLocationQuery}
-                placeholder="City or postal code"
-                className="h-12 rounded-lg bg-background"
-              />
+            <div className="flex gap-3">
+              <div className="flex-1 sm:w-56 sm:flex-none">
+                <LocationAutocomplete
+                  value={locationQuery}
+                  onChange={setLocationQuery}
+                  onSelect={setLocationQuery}
+                  placeholder="City or postal code"
+                  className="h-12 rounded-lg bg-background"
+                />
+              </div>
+              <Button type="submit" size="lg" className="shrink-0">
+                Search
+              </Button>
             </div>
-            <Button type="submit" size="lg">
-              Search
-            </Button>
           </form>
         </div>
       </div>
