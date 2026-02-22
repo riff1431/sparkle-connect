@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { LayoutGrid, List, Search as SearchIcon, Map, Loader2 } from "lucide-react";
 import Header from "@/components/Header";
+import LocationAutocomplete from "@/components/LocationAutocomplete";
 import Footer from "@/components/Footer";
 import SearchFilters, { FilterState } from "@/components/SearchFilters";
 import CleanerCard, { Cleaner } from "@/components/CleanerCard";
@@ -46,7 +47,10 @@ const Search = () => {
   const [viewMode, setViewMode] = useState<"grid" | "list" | "map">("grid");
   const [activeMapCleaner, setActiveMapCleaner] = useState<number | string | null>(null);
   const [searchQuery, setSearchQuery] = useState(
-    searchParams.get("q") || searchParams.get("location") || ""
+    searchParams.get("q") || ""
+  );
+  const [locationQuery, setLocationQuery] = useState(
+    searchParams.get("location") || ""
   );
   const [showLiveSearch, setShowLiveSearch] = useState(false);
 
@@ -64,7 +68,7 @@ const Search = () => {
   // Full search query
   const { data: searchResults = [], isLoading } = useSearchCleaners({
     query: searchQuery,
-    location: filters.location,
+    location: locationQuery || filters.location,
     serviceTypes: filters.serviceTypes,
     minRating: filters.minRating,
     priceRange: filters.priceRange,
@@ -93,11 +97,11 @@ const Search = () => {
       {/* Search Header */}
       <div className="bg-primary/5 border-b border-border">
         <div className="container mx-auto px-4 py-6">
-          <form onSubmit={handleSearch} className="flex gap-3 max-w-2xl relative">
-            <div className="relative flex-1">
-              <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <form onSubmit={handleSearch} className="flex gap-3 max-w-3xl w-full">
+            <div className="relative flex-1 min-w-0">
+              <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10" />
               <Input
-                placeholder="Search by cleaner name, service, or location..."
+                placeholder="Search by cleaner name or service..."
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
@@ -120,6 +124,15 @@ const Search = () => {
                   className="top-full mt-1"
                 />
               )}
+            </div>
+            <div className="w-56 shrink-0">
+              <LocationAutocomplete
+                value={locationQuery}
+                onChange={setLocationQuery}
+                onSelect={setLocationQuery}
+                placeholder="City or postal code"
+                className="h-12 rounded-lg bg-background"
+              />
             </div>
             <Button type="submit" size="lg">
               Search
