@@ -13,6 +13,7 @@ export interface CleanerOfTheWeek {
   updated_at: string;
   cleaner_profiles: {
     id: string;
+    user_id: string;
     business_name: string;
     profile_image: string | null;
     hourly_rate: number;
@@ -37,6 +38,7 @@ export function useActiveCleanerOfTheWeek() {
           *,
           cleaner_profiles (
             id,
+            user_id,
             business_name,
             profile_image,
             hourly_rate,
@@ -68,6 +70,7 @@ export function useAllCleanerOfTheWeek() {
           *,
           cleaner_profiles (
             id,
+            user_id,
             business_name,
             profile_image,
             hourly_rate,

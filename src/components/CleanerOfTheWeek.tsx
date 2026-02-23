@@ -1,9 +1,11 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Crown, Star, MapPin, Shield, CheckCircle, Clock, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useActiveCleanerOfTheWeek } from "@/hooks/useCleanerOfTheWeek";
 import { Skeleton } from "@/components/ui/skeleton";
+import RequestQuoteDialog from "@/components/RequestQuoteDialog";
 
 const CleanerOfTheWeekSkeleton = () => (
   <section className="py-10 lg:py-14">
@@ -16,6 +18,8 @@ const CleanerOfTheWeekSkeleton = () => (
 
 const CleanerOfTheWeek = () => {
   const { data: entry, isLoading } = useActiveCleanerOfTheWeek();
+  const navigate = useNavigate();
+  const [quoteOpen, setQuoteOpen] = useState(false);
 
   if (isLoading) return <CleanerOfTheWeekSkeleton />;
   if (!entry || !entry.cleaner_profiles) return null;
@@ -149,13 +153,13 @@ const CleanerOfTheWeek = () => {
 
               {/* CTAs */}
               <div className="flex flex-wrap gap-3 mt-6 pt-5 border-t border-border">
-                <Button variant="outline" size="lg" className="flex-1 sm:flex-none" onClick={(e) => e.preventDefault()}>
+                <Button variant="outline" size="lg" className="flex-1 sm:flex-none" onClick={(e) => { e.preventDefault(); setQuoteOpen(true); }}>
                   Request Quote
                 </Button>
-                <Button variant="secondary" size="lg" className="flex-1 sm:flex-none" onClick={(e) => e.preventDefault()}>
+                <Button variant="secondary" size="lg" className="flex-1 sm:flex-none" onClick={(e) => { e.preventDefault(); navigate(`/cleaner/${cp.id}?action=book`); }}>
                   Book Now
                 </Button>
-                <Button variant="ghost" size="lg" className="ml-auto gap-1 text-primary hover:text-primary">
+                <Button variant="ghost" size="lg" className="ml-auto gap-1 text-primary hover:text-primary" onClick={(e) => e.preventDefault()}>
                   View Profile
                   <ChevronRight className="h-4 w-4" />
                 </Button>
@@ -164,6 +168,13 @@ const CleanerOfTheWeek = () => {
           </div>
         </Link>
       </div>
+      <RequestQuoteDialog
+        open={quoteOpen}
+        onOpenChange={setQuoteOpen}
+        cleanerProfileId={cp.id}
+        cleanerUserId={cp.user_id}
+        cleanerName={cp.business_name}
+      />
     </section>
   );
 };
