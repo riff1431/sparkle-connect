@@ -61,6 +61,9 @@ import AdminMessages from "./pages/admin-dashboard/AdminMessages";
 import AdminInvoices from "./pages/admin-dashboard/AdminInvoices";
 import AdminQuoteRequests from "./pages/admin-dashboard/AdminQuoteRequests";
 import AdminNotifications from "./pages/admin-dashboard/AdminNotifications";
+import CustomerWallet from "./pages/dashboard/Wallet";
+import CleanerWallet from "./pages/cleaner-dashboard/CleanerWallet";
+import AdminWallets from "./pages/admin-dashboard/AdminWallets";
 import NotFound from "./pages/NotFound";
 import { useMessageNotifications } from "@/hooks/useMessageNotifications";
 const queryClient = new QueryClient();
@@ -92,6 +95,7 @@ const AnimatedApp = () => {
           <Route path="quotes" element={<MyQuotes />} />
           <Route path="messages" element={<CustomerMessages />} />
           <Route path="invoices" element={<CustomerInvoices />} />
+          <Route path="wallet" element={<CustomerWallet />} />
           <Route path="subscription" element={<Subscription />} />
           <Route path="profile" element={<Profile />} />
           <Route path="settings" element={<Settings />} />
@@ -111,6 +115,7 @@ const AnimatedApp = () => {
           <Route path="quotes" element={<CleanerQuoteRequests />} />
           <Route path="messages" element={<CleanerMessages />} />
           <Route path="invoices" element={<CleanerInvoices />} />
+          <Route path="wallet" element={<CleanerWallet />} />
         </Route>
 
         {/* Admin Dashboard Routes */}
@@ -132,6 +137,7 @@ const AnimatedApp = () => {
           <Route path="quotes" element={<AdminQuoteRequests />} />
           <Route path="messages" element={<AdminMessages />} />
           <Route path="invoices" element={<AdminInvoices />} />
+          <Route path="wallets" element={<AdminWallets />} />
           <Route path="notifications" element={<AdminNotifications />} />
         </Route>
         
