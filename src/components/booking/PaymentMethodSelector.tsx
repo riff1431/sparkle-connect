@@ -1,14 +1,28 @@
 import { useState } from "react";
-import { CreditCard, Banknote, Landmark, Check, Copy, AlertCircle, Wallet } from "lucide-react";
+import { CreditCard, Banknote, Landmark, Check, Copy, AlertCircle, Wallet, Plus } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { usePaymentSettings, PaymentMethod, PaymentMethodOption } from "@/hooks/usePaymentSettings";
 import { useToast } from "@/hooks/use-toast";
 import { useWallet } from "@/hooks/useWallet";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface PaymentMethodSelectorProps {
   selectedMethod: PaymentMethod | null;
@@ -31,9 +45,13 @@ const PaymentMethodSelector = ({
   servicePrice,
 }: PaymentMethodSelectorProps) => {
   const { getAvailablePaymentMethods, getBankDetails, loading, hasPaymentMethods } = usePaymentSettings();
-  const { wallet } = useWallet();
+  const { wallet, requestTopUp } = useWallet();
   const { toast } = useToast();
   const [copiedField, setCopiedField] = useState<string | null>(null);
+
+  const [topUpOpen, setTopUpOpen] = useState(false);
+  const [topUpAmount, setTopUpAmount] = useState("");
+  const [topUpPaymentMethod, setTopUpPaymentMethod] = useState("bank_transfer");
 
   const paymentMethods = getAvailablePaymentMethods();
   const walletBalance = wallet?.balance ?? 0;
@@ -50,6 +68,14 @@ const PaymentMethodSelector = ({
     ...paymentMethods,
   ];
   const bankDetails = getBankDetails();
+
+  const handleTopUp = async () => {
+    const amount = parseFloat(topUpAmount);
+    if (isNaN(amount) || amount <= 0) return;
+    await requestTopUp(amount, topUpPaymentMethod);
+    setTopUpAmount("");
+    setTopUpOpen(false);
+  };
 
   const copyToClipboard = (text: string, field: string) => {
     navigator.clipboard.writeText(text);
@@ -150,11 +176,23 @@ const PaymentMethodSelector = ({
                         {servicePrice && <> Remaining: <strong>${(walletBalance - servicePrice).toFixed(2)}</strong></>}
                       </p>
                     ) : (
-                      <div className="flex items-start gap-2">
-                        <AlertCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
-                        <p className="text-sm text-destructive">
-                          Insufficient balance. You need <strong>${servicePrice?.toFixed(2)}</strong> but only have <strong>${walletBalance.toFixed(2)}</strong>. Please top up your wallet first.
-                        </p>
+                      <div className="space-y-3">
+                        <div className="flex items-start gap-2">
+                          <AlertCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
+                          <p className="text-sm text-destructive">
+                            Insufficient balance. You need <strong>${servicePrice?.toFixed(2)}</strong> but only have <strong>${walletBalance.toFixed(2)}</strong>.
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="w-full"
+                          onClick={() => setTopUpOpen(true)}
+                        >
+                          <Plus className="h-4 w-4 mr-1" />
+                          Top Up Wallet
+                        </Button>
                       </div>
                     )}
                   </CardContent>
@@ -289,6 +327,51 @@ const PaymentMethodSelector = ({
           );
         })}
       </RadioGroup>
+
+      {/* Top-up Dialog */}
+      <Dialog open={topUpOpen} onOpenChange={setTopUpOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Top Up Wallet</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {servicePrice && (
+              <p className="text-sm text-muted-foreground">
+                You need at least <strong>${(servicePrice - walletBalance).toFixed(2)}</strong> more to complete this booking.
+              </p>
+            )}
+            <div className="space-y-2">
+              <Label>Amount ($)</Label>
+              <Input
+                type="number"
+                min="1"
+                step="0.01"
+                placeholder={servicePrice ? (servicePrice - walletBalance).toFixed(2) : "50.00"}
+                value={topUpAmount}
+                onChange={(e) => setTopUpAmount(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Payment Method</Label>
+              <Select value={topUpPaymentMethod} onValueChange={setTopUpPaymentMethod}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+                  <SelectItem value="cash">Cash</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button onClick={handleTopUp} className="w-full" disabled={!topUpAmount || parseFloat(topUpAmount) <= 0}>
+              Submit Top-Up Request
+            </Button>
+            <p className="text-xs text-muted-foreground text-center">
+              Your top-up will be verified by admin before the balance is updated.
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
