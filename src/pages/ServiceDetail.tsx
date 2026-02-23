@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { playBookingSound } from "@/lib/sounds";
 import { useAuth } from "@/contexts/AuthContext";
+import { useWallet } from "@/hooks/useWallet";
+import { PaymentMethod } from "@/hooks/usePaymentSettings";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
@@ -32,6 +34,7 @@ import {
 import { toast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import WriteReviewDialog from "@/components/WriteReviewDialog";
+import PaymentMethodSelector from "@/components/booking/PaymentMethodSelector";
 import { getOrCreateConversation } from "@/hooks/useChatConversations";
 const TIME_SLOTS = [
   "08:00", "09:00", "10:00", "11:00", "12:00",
@@ -65,6 +68,8 @@ const ServiceDetail = () => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
   const [startingChat, setStartingChat] = useState(false);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);
+  const { wallet, refetch: refetchWallet } = useWallet();
 
   const { data: addresses = [] } = useQuery({
     queryKey: ["user-addresses", user?.id],
@@ -238,10 +243,19 @@ const ServiceDetail = () => {
   const handleConfirmBooking = useCallback(async () => {
     if (!user || !listing || !selectedDate) return;
 
+    // Validate wallet balance if wallet payment selected
+    if (selectedPaymentMethod === "wallet") {
+      const balance = wallet?.balance ?? 0;
+      if (balance < listing.price) {
+        toast({ title: "Insufficient wallet balance", description: `You need $${listing.price.toFixed(2)} but only have $${balance.toFixed(2)}.`, variant: "destructive" });
+        return;
+      }
+    }
+
     setIsBuying(true);
     try {
       const scheduledDate = format(selectedDate, "yyyy-MM-dd");
-      const { error } = await supabase.from("bookings").insert({
+      const { data: booking, error } = await supabase.from("bookings").insert({
         customer_id: user.id,
         cleaner_id: listing.cleaner_user_id,
         cleaner_name: listing.cleaner_name,
@@ -257,20 +271,52 @@ const ServiceDetail = () => {
 
       if (error) throw error;
 
+      // Debit wallet if wallet payment
+      if (selectedPaymentMethod === "wallet" && booking) {
+        const { error: debitError } = await supabase.rpc("debit_wallet", {
+          p_user_id: user.id,
+          p_amount: listing.price,
+          p_type: "booking_payment",
+          p_description: `Payment for ${listing.title}`,
+          p_reference_id: booking.id,
+        });
+        if (debitError) throw debitError;
+        await refetchWallet();
+      }
+
+      // Record payment for bank/cash methods
+      if (selectedPaymentMethod === "bank" || selectedPaymentMethod === "cash") {
+        const { data: profile } = await supabase.from("profiles").select("email, full_name").eq("id", user.id).single();
+        await supabase.from("payment_records").insert({
+          customer_id: user.id,
+          customer_name: profile?.full_name || "Customer",
+          customer_email: profile?.email || "",
+          cleaner_id: listing.cleaner_user_id,
+          cleaner_name: listing.cleaner_name,
+          booking_id: booking.id,
+          amount: listing.price,
+          service_type: listing.title,
+          booking_date: scheduledDate,
+          booking_time: selectedTime,
+          payment_method: selectedPaymentMethod,
+          status: "pending",
+        });
+      }
+
       await supabase.from("service_listings")
         .update({ orders_count: (listing.orders_count || 0) + 1 })
         .eq("id", listing.id);
 
       setShowConfirmDialog(false);
       playBookingSound();
-      toast({ title: "Service Booked!", description: "Your booking has been placed. The cleaner will confirm shortly." });
+      toast({ title: "Service Booked!", description: selectedPaymentMethod === "wallet" ? "Payment deducted from your wallet." : "Your booking has been placed. The cleaner will confirm shortly." });
       navigate("/dashboard/upcoming");
     } catch (err: any) {
       toast({ title: "Booking failed", description: err.message || "Something went wrong.", variant: "destructive" });
     } finally {
       setIsBuying(false);
     }
-  }, [user, listing, selectedDate, selectedTime, selectedAddressId, specialInstructions, navigate]);
+  }, [user, listing, selectedDate, selectedTime, selectedAddressId, specialInstructions, selectedPaymentMethod, wallet, navigate, refetchWallet]);
 
   const selectedAddress = addresses.find((a) => a.id === selectedAddressId);
 
@@ -954,6 +1000,14 @@ const ServiceDetail = () => {
                   <p className="text-foreground text-xs">{specialInstructions}</p>
                 </div>
               )}
+              {/* Payment Method */}
+              <Separator />
+              <PaymentMethodSelector
+                selectedMethod={selectedPaymentMethod}
+                onMethodChange={setSelectedPaymentMethod}
+                disabled={isBuying}
+                servicePrice={listing?.price}
+              />
             </div>
           )}
 
@@ -961,7 +1015,11 @@ const ServiceDetail = () => {
             <Button variant="outline" onClick={() => setShowConfirmDialog(false)} disabled={isBuying}>
               Cancel
             </Button>
-            <Button variant="cta" onClick={handleConfirmBooking} disabled={isBuying}>
+            <Button
+              variant="cta"
+              onClick={handleConfirmBooking}
+              disabled={isBuying || !selectedPaymentMethod || (selectedPaymentMethod === "wallet" && (wallet?.balance ?? 0) < (listing?.price ?? 0))}
+            >
               {isBuying ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CheckCircle className="h-4 w-4 mr-2" />}
               {isBuying ? "Booking..." : "Confirm Booking"}
             </Button>

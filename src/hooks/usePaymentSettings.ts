@@ -19,7 +19,7 @@ export interface PaymentGatewaySettings {
   bank_instructions: string;
 }
 
-export type PaymentMethod = "stripe" | "cash" | "bank";
+export type PaymentMethod = "stripe" | "cash" | "bank" | "wallet";
 
 export interface PaymentMethodOption {
   id: PaymentMethod;
