@@ -26,7 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Wallet, CheckCircle, XCircle, Plus, Minus } from "lucide-react";
+import { Wallet, CheckCircle, XCircle, Plus, Minus, Image } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePlatformSettings } from "@/hooks/usePlatformSettings";
@@ -50,6 +50,7 @@ interface TopUpRequestWithProfile {
   payment_method: string;
   status: string;
   rejection_reason: string | null;
+  proof_image_url: string | null;
   created_at: string;
   profile?: { full_name: string | null; email: string | null };
 }
@@ -70,6 +71,7 @@ const AdminWallets = () => {
   const [adjustDescription, setAdjustDescription] = useState("");
   const [rejectReason, setRejectReason] = useState("");
   const [topUpFilter, setTopUpFilter] = useState("pending");
+  const [proofImageUrl, setProofImageUrl] = useState<string | null>(null);
 
   const fetchWallets = async () => {
     const { data, error } = await supabase.from("wallets").select("*").order("updated_at", { ascending: false });
@@ -297,6 +299,7 @@ const AdminWallets = () => {
                     <TableHead>User</TableHead>
                     <TableHead>Amount</TableHead>
                     <TableHead>Method</TableHead>
+                    <TableHead>Proof</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
@@ -308,6 +311,18 @@ const AdminWallets = () => {
                       <TableCell className="font-medium">{req.profile?.full_name || "Unknown"}</TableCell>
                       <TableCell className="font-semibold">{formatCurrency(req.amount)}</TableCell>
                       <TableCell className="capitalize">{req.payment_method.replace(/_/g, " ")}</TableCell>
+                      <TableCell>
+                        {req.proof_image_url ? (
+                          <button
+                            onClick={() => setProofImageUrl(req.proof_image_url)}
+                            className="group relative h-10 w-10 rounded-md overflow-hidden border border-border hover:border-primary transition-colors"
+                          >
+                            <img src={req.proof_image_url} alt="Proof" className="h-full w-full object-cover" />
+                          </button>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">None</span>
+                        )}
+                      </TableCell>
                       <TableCell className="text-muted-foreground">{format(new Date(req.created_at), "MMM d, yyyy")}</TableCell>
                       <TableCell>
                         {req.status === "verified" && <Badge className="bg-primary/10 text-primary">Verified</Badge>}
@@ -330,7 +345,7 @@ const AdminWallets = () => {
                   ))}
                   {topUpRequests.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">No top-up requests found.</TableCell>
+                      <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No top-up requests found.</TableCell>
                     </TableRow>
                   )}
                 </TableBody>
@@ -339,6 +354,18 @@ const AdminWallets = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Proof Image Dialog */}
+      <Dialog open={!!proofImageUrl} onOpenChange={(open) => !open && setProofImageUrl(null)}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Payment Proof</DialogTitle>
+          </DialogHeader>
+          {proofImageUrl && (
+            <img src={proofImageUrl} alt="Payment proof" className="w-full rounded-lg border border-border" />
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Credit/Debit Dialog */}
       <Dialog open={adjustDialog.open} onOpenChange={(open) => setAdjustDialog({ ...adjustDialog, open })}>
