@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, addDays } from "date-fns";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { playBookingSound } from "@/lib/sounds";
 import { useAuth } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -261,6 +262,7 @@ const ServiceDetail = () => {
         .eq("id", listing.id);
 
       setShowConfirmDialog(false);
+      playBookingSound();
       toast({ title: "Service Booked!", description: "Your booking has been placed. The cleaner will confirm shortly." });
       navigate("/dashboard/upcoming");
     } catch (err: any) {
