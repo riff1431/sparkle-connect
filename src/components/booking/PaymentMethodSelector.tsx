@@ -10,6 +10,9 @@ import { cn } from "@/lib/utils";
 import { usePaymentSettings, PaymentMethod, PaymentMethodOption } from "@/hooks/usePaymentSettings";
 import { useToast } from "@/hooks/use-toast";
 import { useWallet } from "@/hooks/useWallet";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import BankTransferProofDialog from "./BankTransferProofDialog";
 import {
   Dialog,
   DialogContent,
@@ -45,13 +48,17 @@ const PaymentMethodSelector = ({
   servicePrice,
 }: PaymentMethodSelectorProps) => {
   const { getAvailablePaymentMethods, getBankDetails, loading, hasPaymentMethods } = usePaymentSettings();
-  const { wallet, requestTopUp } = useWallet();
+  const { wallet, requestTopUp, refetch: refetchWallet } = useWallet();
+  const { user } = useAuth();
   const { toast } = useToast();
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
   const [topUpOpen, setTopUpOpen] = useState(false);
   const [topUpAmount, setTopUpAmount] = useState("");
   const [topUpPaymentMethod, setTopUpPaymentMethod] = useState("bank_transfer");
+  const [bankProofOpen, setBankProofOpen] = useState(false);
+  const [bankProofAmount, setBankProofAmount] = useState(0);
+  const [topUpSubmitting, setTopUpSubmitting] = useState(false);
 
   const paymentMethods = getAvailablePaymentMethods();
   const walletBalance = wallet?.balance ?? 0;
@@ -72,9 +79,46 @@ const PaymentMethodSelector = ({
   const handleTopUp = async () => {
     const amount = parseFloat(topUpAmount);
     if (isNaN(amount) || amount <= 0) return;
+
+    // If bank transfer, open the bank proof dialog
+    if (topUpPaymentMethod === "bank_transfer") {
+      setBankProofAmount(amount);
+      setTopUpOpen(false);
+      setBankProofOpen(true);
+      return;
+    }
+
     await requestTopUp(amount, topUpPaymentMethod);
     setTopUpAmount("");
     setTopUpOpen(false);
+  };
+
+  const handleBankProofSubmit = async (proofImageUrl: string | null) => {
+    setTopUpSubmitting(true);
+    try {
+      if (!user || !wallet) return;
+
+      const { error } = await supabase
+        .from("wallet_topup_requests")
+        .insert({
+          user_id: user.id,
+          wallet_id: wallet.id,
+          amount: bankProofAmount,
+          payment_method: "bank_transfer",
+          proof_image_url: proofImageUrl,
+        });
+
+      if (error) throw error;
+
+      toast({ title: "Top-up request submitted", description: "Your request will be verified by admin." });
+      setBankProofOpen(false);
+      setTopUpAmount("");
+      await refetchWallet();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setTopUpSubmitting(false);
+    }
   };
 
   const copyToClipboard = (text: string, field: string) => {
@@ -369,7 +413,7 @@ const PaymentMethodSelector = ({
               </Select>
             </div>
             <Button onClick={handleTopUp} className="w-full" disabled={!topUpAmount || parseFloat(topUpAmount) <= 0}>
-              Submit Top-Up Request
+              {topUpPaymentMethod === "bank_transfer" ? "Continue to Bank Details" : "Submit Top-Up Request"}
             </Button>
             <p className="text-xs text-muted-foreground text-center">
               Your top-up will be verified by admin before the balance is updated.
@@ -377,6 +421,15 @@ const PaymentMethodSelector = ({
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Bank Transfer Proof Dialog */}
+      <BankTransferProofDialog
+        open={bankProofOpen}
+        onOpenChange={setBankProofOpen}
+        amount={bankProofAmount}
+        onSubmit={handleBankProofSubmit}
+        submitting={topUpSubmitting}
+      />
     </div>
   );
 };

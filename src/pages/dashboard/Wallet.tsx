@@ -5,8 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Wallet as WalletIcon, ArrowUpCircle, ArrowDownCircle, Plus, Clock, CheckCircle, XCircle } from "lucide-react";
 import { useWallet } from "@/hooks/useWallet";
+import { useAuth } from "@/contexts/AuthContext";
 import { usePlatformSettings } from "@/hooks/usePlatformSettings";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import BankTransferProofDialog from "@/components/booking/BankTransferProofDialog";
 import {
   Dialog,
   DialogContent,
@@ -23,18 +27,59 @@ import {
 } from "@/components/ui/select";
 
 const WalletPage = () => {
-  const { wallet, transactions, topUpRequests, loading, requestTopUp } = useWallet();
+  const { wallet, transactions, topUpRequests, loading, requestTopUp, refetch } = useWallet();
+  const { user } = useAuth();
+  const { toast } = useToast();
   const { formatCurrency } = usePlatformSettings();
   const [topUpAmount, setTopUpAmount] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("bank_transfer");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [bankProofOpen, setBankProofOpen] = useState(false);
+  const [bankProofAmount, setBankProofAmount] = useState(0);
+  const [topUpSubmitting, setTopUpSubmitting] = useState(false);
 
   const handleTopUp = async () => {
     const amount = parseFloat(topUpAmount);
     if (isNaN(amount) || amount <= 0) return;
+
+    if (paymentMethod === "bank_transfer") {
+      setBankProofAmount(amount);
+      setDialogOpen(false);
+      setBankProofOpen(true);
+      return;
+    }
+
     await requestTopUp(amount, paymentMethod);
     setTopUpAmount("");
     setDialogOpen(false);
+  };
+
+  const handleBankProofSubmit = async (proofImageUrl: string | null) => {
+    setTopUpSubmitting(true);
+    try {
+      if (!user || !wallet) return;
+
+      const { error } = await supabase
+        .from("wallet_topup_requests")
+        .insert({
+          user_id: user.id,
+          wallet_id: wallet.id,
+          amount: bankProofAmount,
+          payment_method: "bank_transfer",
+          proof_image_url: proofImageUrl,
+        });
+
+      if (error) throw error;
+
+      toast({ title: "Top-up request submitted", description: "Your request will be verified by admin." });
+      setBankProofOpen(false);
+      setTopUpAmount("");
+      await refetch();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setTopUpSubmitting(false);
+    }
   };
 
   const getTypeIcon = (type: string, amount: number) => {
@@ -103,7 +148,7 @@ const WalletPage = () => {
                 After submitting, complete the payment and an admin will verify your top-up.
               </p>
               <Button onClick={handleTopUp} className="w-full" disabled={!topUpAmount || parseFloat(topUpAmount) <= 0}>
-                Submit Top-Up Request
+                {paymentMethod === "bank_transfer" ? "Continue to Bank Details" : "Submit Top-Up Request"}
               </Button>
             </div>
           </DialogContent>
@@ -222,6 +267,15 @@ const WalletPage = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Bank Transfer Proof Dialog */}
+      <BankTransferProofDialog
+        open={bankProofOpen}
+        onOpenChange={setBankProofOpen}
+        amount={bankProofAmount}
+        onSubmit={handleBankProofSubmit}
+        submitting={topUpSubmitting}
+      />
     </div>
   );
 };
