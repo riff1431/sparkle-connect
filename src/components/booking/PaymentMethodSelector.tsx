@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CreditCard, Banknote, Landmark, Check, Copy, AlertCircle } from "lucide-react";
+import { CreditCard, Banknote, Landmark, Check, Copy, AlertCircle, Wallet } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,29 +8,47 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { usePaymentSettings, PaymentMethod, PaymentMethodOption } from "@/hooks/usePaymentSettings";
 import { useToast } from "@/hooks/use-toast";
+import { useWallet } from "@/hooks/useWallet";
 
 interface PaymentMethodSelectorProps {
   selectedMethod: PaymentMethod | null;
   onMethodChange: (method: PaymentMethod) => void;
   disabled?: boolean;
+  servicePrice?: number;
 }
 
 const iconMap = {
   "credit-card": CreditCard,
   "banknote": Banknote,
   "landmark": Landmark,
+  "wallet": Wallet,
 };
 
 const PaymentMethodSelector = ({
   selectedMethod,
   onMethodChange,
   disabled = false,
+  servicePrice,
 }: PaymentMethodSelectorProps) => {
   const { getAvailablePaymentMethods, getBankDetails, loading, hasPaymentMethods } = usePaymentSettings();
+  const { wallet } = useWallet();
   const { toast } = useToast();
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
   const paymentMethods = getAvailablePaymentMethods();
+  const walletBalance = wallet?.balance ?? 0;
+  const hasEnoughBalance = servicePrice ? walletBalance >= servicePrice : true;
+
+  // Add wallet option to payment methods
+  const allMethods: PaymentMethodOption[] = [
+    ...(wallet ? [{
+      id: "wallet" as PaymentMethod,
+      name: "Wallet Balance",
+      description: `Available: $${walletBalance.toFixed(2)}`,
+      icon: "wallet",
+    }] : []),
+    ...paymentMethods,
+  ];
   const bankDetails = getBankDetails();
 
   const copyToClipboard = (text: string, field: string) => {
@@ -80,7 +98,7 @@ const PaymentMethodSelector = ({
         disabled={disabled}
         className="space-y-2"
       >
-        {paymentMethods.map((method) => {
+        {allMethods.map((method) => {
           const Icon = iconMap[method.icon as keyof typeof iconMap] || CreditCard;
           const isSelected = selectedMethod === method.id;
 
@@ -93,7 +111,8 @@ const PaymentMethodSelector = ({
                   isSelected
                     ? "border-primary bg-primary/5 ring-1 ring-primary"
                     : "border-border hover:border-primary/50 hover:bg-muted/50",
-                  disabled && "opacity-50 cursor-not-allowed"
+                  disabled && "opacity-50 cursor-not-allowed",
+                  method.id === "wallet" && !hasEnoughBalance && "opacity-60"
                 )}
               >
                 <RadioGroupItem value={method.id} id={method.id} className="sr-only" />
@@ -120,6 +139,27 @@ const PaymentMethodSelector = ({
                   </div>
                 )}
               </label>
+
+              {/* Wallet balance info */}
+              {isSelected && method.id === "wallet" && (
+                <Card className={cn("mt-2", !hasEnoughBalance ? "border-destructive/50 bg-destructive/5" : "border-muted bg-muted/30")}>
+                  <CardContent className="py-3 px-4">
+                    {hasEnoughBalance ? (
+                      <p className="text-sm text-muted-foreground">
+                        <strong>${walletBalance.toFixed(2)}</strong> will be used from your wallet.
+                        {servicePrice && <> Remaining: <strong>${(walletBalance - servicePrice).toFixed(2)}</strong></>}
+                      </p>
+                    ) : (
+                      <div className="flex items-start gap-2">
+                        <AlertCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
+                        <p className="text-sm text-destructive">
+                          Insufficient balance. You need <strong>${servicePrice?.toFixed(2)}</strong> but only have <strong>${walletBalance.toFixed(2)}</strong>. Please top up your wallet first.
+                        </p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Show instructions for selected non-Stripe methods */}
               {isSelected && method.id === "cash" && method.instructions && (
