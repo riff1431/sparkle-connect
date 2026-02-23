@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { ChevronDown, Phone, CalendarIcon, Clock, Send } from "lucide-react";
+import { ChevronDown, Phone, CalendarIcon, Clock, Send, Check } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,8 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -164,28 +166,48 @@ const QuoteRequestSidebar = () => {
             </Select>
           </div>
 
-          {/* Services Multi-Select */}
+          {/* Services Multi-Select Dropdown */}
           <div>
             <Label className="text-xs text-muted-foreground mb-1 block">Services *</Label>
-            <div className="flex flex-wrap gap-1.5">
-              {SERVICE_OPTIONS.map((service) => (
-                <motion.button
-                  key={service}
-                  type="button"
-                  onClick={() => toggleService(service)}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
                   className={cn(
-                    "px-2.5 py-1 rounded-full text-xs font-medium border transition-all duration-200",
-                    services.includes(service)
-                      ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                      : "bg-muted text-muted-foreground border-border hover:border-primary/50 hover:bg-primary/5"
+                    "w-full h-9 justify-between text-left font-normal text-sm",
+                    services.length === 0 && "text-muted-foreground"
                   )}
                 >
-                  {service}
-                </motion.button>
-              ))}
-            </div>
+                  {services.length === 0
+                    ? "Select services"
+                    : `${services.length} service${services.length > 1 ? "s" : ""} selected`}
+                  <ChevronDown className="ml-2 h-3.5 w-3.5 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                <div className="max-h-52 overflow-y-auto p-1">
+                  {SERVICE_OPTIONS.map((service) => (
+                    <div
+                      key={service}
+                      className="flex items-center gap-2 px-2 py-1.5 rounded-sm cursor-pointer hover:bg-accent text-sm"
+                      onClick={() => toggleService(service)}
+                    >
+                      <Checkbox checked={services.includes(service)} onCheckedChange={() => toggleService(service)} />
+                      <span>{service}</span>
+                    </div>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
+            {services.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-1.5">
+                {services.map((s) => (
+                  <Badge key={s} variant="secondary" className="text-xs">
+                    {s}
+                  </Badge>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Preferred Date */}

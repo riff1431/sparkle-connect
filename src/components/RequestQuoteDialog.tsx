@@ -24,7 +24,8 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
-import { CalendarIcon, Loader2 } from "lucide-react";
+import { CalendarIcon, ChevronDown, Loader2 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -183,23 +184,45 @@ const RequestQuoteDialog = ({
           {/* Services */}
           <div className="space-y-1.5">
             <Label className="text-sm font-medium">Services Needed</Label>
-            <div className="flex flex-wrap gap-1.5">
-              {SERVICE_OPTIONS.map((s) => (
-                <Badge
-                  key={s}
-                  variant={services.includes(s) ? "default" : "outline"}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
                   className={cn(
-                    "cursor-pointer transition-colors text-xs",
-                    services.includes(s)
-                      ? "bg-primary text-primary-foreground"
-                      : "hover:bg-muted"
+                    "w-full justify-between text-left font-normal",
+                    services.length === 0 && "text-muted-foreground"
                   )}
-                  onClick={() => toggleService(s)}
                 >
-                  {s}
-                </Badge>
-              ))}
-            </div>
+                  {services.length === 0
+                    ? "Select services"
+                    : `${services.length} service${services.length > 1 ? "s" : ""} selected`}
+                  <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                <div className="max-h-60 overflow-y-auto p-1">
+                  {SERVICE_OPTIONS.map((s) => (
+                    <div
+                      key={s}
+                      className="flex items-center gap-2 px-2 py-1.5 rounded-sm cursor-pointer hover:bg-accent text-sm"
+                      onClick={() => toggleService(s)}
+                    >
+                      <Checkbox checked={services.includes(s)} onCheckedChange={() => toggleService(s)} />
+                      <span>{s}</span>
+                    </div>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
+            {services.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-1">
+                {services.map((s) => (
+                  <Badge key={s} variant="secondary" className="text-xs">
+                    {s}
+                  </Badge>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Address */}
