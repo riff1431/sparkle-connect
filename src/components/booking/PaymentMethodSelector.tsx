@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { CreditCard, Banknote, Landmark, Check, Copy, AlertCircle, Wallet, Plus } from "lucide-react";
+import { useState, useRef } from "react";
+import { CreditCard, Banknote, Landmark, Check, Copy, AlertCircle, Wallet, Plus, Upload, X, Loader2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent } from "@/components/ui/card";
@@ -32,6 +32,7 @@ interface PaymentMethodSelectorProps {
   onMethodChange: (method: PaymentMethod) => void;
   disabled?: boolean;
   servicePrice?: number;
+  onBankProofChange?: (proofUrl: string | null) => void;
 }
 
 const iconMap = {
@@ -46,12 +47,17 @@ const PaymentMethodSelector = ({
   onMethodChange,
   disabled = false,
   servicePrice,
+  onBankProofChange,
 }: PaymentMethodSelectorProps) => {
   const { getAvailablePaymentMethods, getBankDetails, loading, hasPaymentMethods } = usePaymentSettings();
   const { wallet, requestTopUp, refetch: refetchWallet } = useWallet();
   const { user } = useAuth();
   const { toast } = useToast();
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [bookingProofFile, setBookingProofFile] = useState<File | null>(null);
+  const [bookingProofPreview, setBookingProofPreview] = useState<string | null>(null);
+  const [bookingProofUploading, setBookingProofUploading] = useState(false);
+  const bookingProofInputRef = useRef<HTMLInputElement>(null);
 
   const [topUpOpen, setTopUpOpen] = useState(false);
   const [topUpAmount, setTopUpAmount] = useState("");
@@ -129,6 +135,52 @@ const PaymentMethodSelector = ({
       description: `${field} copied to clipboard`,
     });
     setTimeout(() => setCopiedField(null), 2000);
+  };
+
+  const handleBookingProofSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Invalid file", description: "Please upload an image file.", variant: "destructive" });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Maximum file size is 5MB.", variant: "destructive" });
+      return;
+    }
+    setBookingProofFile(file);
+    const reader = new FileReader();
+    reader.onload = (ev) => setBookingProofPreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
+    // Upload immediately
+    uploadBookingProof(file);
+  };
+
+  const uploadBookingProof = async (file: File) => {
+    if (!user) return;
+    setBookingProofUploading(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const filePath = `${user.id}/${Date.now()}.${ext}`;
+      const { error: uploadError } = await supabase.storage.from("payment-proofs").upload(filePath, file);
+      if (uploadError) throw uploadError;
+      const { data: urlData } = supabase.storage.from("payment-proofs").getPublicUrl(filePath);
+      onBankProofChange?.(urlData.publicUrl);
+    } catch (err: any) {
+      toast({ title: "Upload failed", description: err.message, variant: "destructive" });
+      setBookingProofFile(null);
+      setBookingProofPreview(null);
+      onBankProofChange?.(null);
+    } finally {
+      setBookingProofUploading(false);
+    }
+  };
+
+  const removeBookingProof = () => {
+    setBookingProofFile(null);
+    setBookingProofPreview(null);
+    if (bookingProofInputRef.current) bookingProofInputRef.current.value = "";
+    onBankProofChange?.(null);
   };
 
   if (loading) {
@@ -369,6 +421,51 @@ const PaymentMethodSelector = ({
                     <p className="text-xs text-muted-foreground pt-2 border-t border-border">
                       Your booking will be confirmed once payment is verified by our team.
                     </p>
+
+                    {/* Payment Proof Upload */}
+                    <div className="pt-3 border-t border-border space-y-2">
+                      <Label className="text-sm font-semibold">Payment Proof (Screenshot)</Label>
+                      <input
+                        ref={bookingProofInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleBookingProofSelect}
+                      />
+                      {bookingProofPreview ? (
+                        <div className="relative rounded-lg border border-border overflow-hidden">
+                          <img src={bookingProofPreview} alt="Payment proof" className="w-full max-h-32 object-contain bg-muted/30" />
+                          {bookingProofUploading && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-background/60">
+                              <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                            </div>
+                          )}
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute top-1 right-1 h-6 w-6"
+                            onClick={removeBookingProof}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => bookingProofInputRef.current?.click()}
+                          className={cn(
+                            "w-full flex flex-col items-center justify-center gap-1 p-4 rounded-lg border-2 border-dashed",
+                            "border-muted-foreground/25 hover:border-primary/50 transition-colors cursor-pointer",
+                            "bg-muted/20 hover:bg-muted/40"
+                          )}
+                        >
+                          <Upload className="h-6 w-6 text-muted-foreground" />
+                          <p className="text-xs font-medium text-foreground">Upload Screenshot</p>
+                          <p className="text-[10px] text-muted-foreground">PNG, JPG up to 5MB</p>
+                        </button>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               )}
