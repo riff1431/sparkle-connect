@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
+import { playMessageSound } from "@/lib/sounds";
 
 /**
  * Global hook: listens for new messages via realtime and shows
@@ -74,6 +75,9 @@ export function useMessageNotifications() {
               .maybeSingle();
             if (profile?.full_name) senderName = profile.full_name;
           }
+
+          // Play sound
+          playMessageSound();
 
           // Show browser notification
           if ("Notification" in window && Notification.permission === "granted") {
