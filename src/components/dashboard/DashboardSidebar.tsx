@@ -12,6 +12,7 @@ import {
   FileQuestion,
   MessageSquare,
   FileText,
+  Wallet,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
@@ -39,6 +40,7 @@ const menuItems = [
   { title: "Messages", url: "/dashboard/messages", icon: MessageSquare },
   { title: "Invoices", url: "/dashboard/invoices", icon: FileText },
   { title: "Addresses", url: "/dashboard/addresses", icon: MapPin },
+  { title: "Wallet", url: "/dashboard/wallet", icon: Wallet },
   { title: "Membership", url: "/dashboard/subscription", icon: Crown },
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ];

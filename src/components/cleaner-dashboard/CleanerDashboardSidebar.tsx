@@ -12,6 +12,7 @@ import {
   FileQuestion,
   FileText,
   MessageSquare,
+  Wallet,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
@@ -42,6 +43,7 @@ const menuItems = [
   { title: "Sponsored Spotlight", url: "/cleaner/sponsorship", icon: Zap },
   { title: "My Profile", url: "/cleaner/profile", icon: User },
   { title: "Invoices", url: "/cleaner/invoices", icon: FileText },
+  { title: "Wallet", url: "/cleaner/wallet", icon: Wallet },
   { title: "Earnings", url: "/cleaner/earnings", icon: DollarSign },
   { title: "Settings", url: "/cleaner/settings", icon: Settings },
 ];
