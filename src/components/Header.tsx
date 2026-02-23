@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { AvatarImage } from "@/components/ui/avatar";
-import { Menu, X, Search, Briefcase, CalendarDays, Star, User, LogOut, LayoutDashboard, Shield, ShoppingBag } from "lucide-react";
+import { Menu, X, Search, Briefcase, CalendarDays, Star, User, LogOut, LayoutDashboard, Shield, ShoppingBag, Wallet } from "lucide-react";
+import { useWallet } from "@/hooks/useWallet";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   DropdownMenu,
@@ -26,6 +27,7 @@ const Header = () => {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const { user, signOut, loading, role } = useAuth();
   const unreadCount = useUnreadMessages();
+  const { wallet } = useWallet();
 
   useEffect(() => {
     if (!user) { setAvatarUrl(null); return; }
@@ -135,6 +137,14 @@ const Header = () => {
                         Admin
                       </Link>
                     )}
+                    <Link
+                      to="/dashboard/wallet"
+                      className="inline-flex items-center gap-1 px-2 py-1 rounded-md hover:bg-muted transition-colors text-[13px] font-medium text-foreground"
+                      title="Wallet"
+                    >
+                      <Wallet className="h-3.5 w-3.5 text-secondary" />
+                      <span>R{wallet?.balance?.toFixed(2) ?? "0.00"}</span>
+                    </Link>
                     <NotificationBell />
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -254,6 +264,14 @@ const Header = () => {
                           </Avatar>
                           <span className="text-sm font-medium text-foreground">{getUserName()}</span>
                         </div>
+                        <Link
+                          to="/dashboard/wallet"
+                          onClick={() => setIsMenuOpen(false)}
+                          className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-foreground hover:bg-muted rounded-lg transition-colors"
+                        >
+                          <Wallet className="h-4 w-4 text-secondary" />
+                          Wallet: R{wallet?.balance?.toFixed(2) ?? "0.00"}
+                        </Link>
                         <Button variant="outline" size="sm" className="w-full justify-start" asChild>
                           <Link to="/dashboard" onClick={() => setIsMenuOpen(false)}>
                             <LayoutDashboard className="h-4 w-4 mr-2" />
