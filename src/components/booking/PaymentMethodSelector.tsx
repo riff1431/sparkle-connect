@@ -190,7 +190,7 @@ const PaymentMethodSelector = ({
                           className="w-full"
                           onClick={() => {
                             if (servicePrice) {
-                              setTopUpAmount((servicePrice - walletBalance).toFixed(2));
+                              setTopUpAmount(Math.ceil(servicePrice - walletBalance).toString());
                             }
                             setTopUpOpen(true);
                           }}
