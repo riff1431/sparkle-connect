@@ -188,7 +188,12 @@ const PaymentMethodSelector = ({
                           variant="outline"
                           size="sm"
                           className="w-full"
-                          onClick={() => setTopUpOpen(true)}
+                          onClick={() => {
+                            if (servicePrice) {
+                              setTopUpAmount((servicePrice - walletBalance).toFixed(2));
+                            }
+                            setTopUpOpen(true);
+                          }}
                         >
                           <Plus className="h-4 w-4 mr-1" />
                           Top Up Wallet
