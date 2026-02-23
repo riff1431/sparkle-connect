@@ -1234,6 +1234,7 @@ export type Database = {
           created_at: string
           id: string
           payment_method: string
+          proof_image_url: string | null
           rejection_reason: string | null
           status: string
           updated_at: string
@@ -1247,6 +1248,7 @@ export type Database = {
           created_at?: string
           id?: string
           payment_method?: string
+          proof_image_url?: string | null
           rejection_reason?: string | null
           status?: string
           updated_at?: string
@@ -1260,6 +1262,7 @@ export type Database = {
           created_at?: string
           id?: string
           payment_method?: string
+          proof_image_url?: string | null
           rejection_reason?: string | null
           status?: string
           updated_at?: string
