@@ -406,7 +406,7 @@ const ServiceDetail = () => {
           <span className="text-foreground font-medium truncate max-w-[140px] sm:max-w-[200px]">{listing.title}</span>
         </nav>
 
-        <div className="grid gap-6 sm:gap-8 lg:grid-cols-[1fr_380px]">
+        <div className="grid gap-6 sm:gap-8 lg:grid-cols-[1fr_400px]">
           {/* ============ LEFT COLUMN ============ */}
           <div className="space-y-8">
             {/* Hero Image */}
@@ -415,14 +415,14 @@ const ServiceDetail = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
             >
-              <div className="rounded-2xl overflow-hidden bg-muted relative group">
+              <div className="rounded-2xl overflow-hidden bg-muted relative group shadow-lg">
                 <img
                   src={allImages[activeImage] || getServiceImage(listing)}
                   alt={listing.title}
-                  className="w-full aspect-[16/9] object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+                  className="w-full aspect-[16/9] object-cover transition-transform duration-700 group-hover:scale-105"
                 />
                 {/* Overlay gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/5 to-transparent" />
                 {/* Share button floating */}
                 <div className="absolute top-4 right-4">
                   <DropdownMenu>
@@ -536,35 +536,35 @@ const ServiceDetail = () => {
               className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"
             >
               {listing.location && (
-                <div className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border/60">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 shrink-0">
+                <div className="flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-br from-card to-muted/30 border border-border/40 shadow-sm hover:shadow-md transition-shadow duration-300">
+                  <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-primary/10 shrink-0">
                     <MapPin className="h-5 w-5 text-primary" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Location</p>
-                    <p className="font-semibold text-foreground text-sm truncate">{listing.location}</p>
+                    <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-semibold">Location</p>
+                    <p className="font-bold text-foreground text-sm truncate">{listing.location}</p>
                   </div>
                 </div>
               )}
               {listing.duration_hours && (
-                <div className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border/60">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-secondary/10 shrink-0">
+                <div className="flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-br from-card to-muted/30 border border-border/40 shadow-sm hover:shadow-md transition-shadow duration-300">
+                  <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-secondary/10 shrink-0">
                     <Clock className="h-5 w-5 text-secondary" />
                   </div>
                   <div>
-                    <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Duration</p>
-                    <p className="font-semibold text-foreground text-sm">{listing.duration_hours} hours</p>
+                    <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-semibold">Duration</p>
+                    <p className="font-bold text-foreground text-sm">{listing.duration_hours} hours</p>
                   </div>
                 </div>
               )}
               {listing.delivery_time && (
-                <div className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border/60">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-accent/10 shrink-0">
+                <div className="flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-br from-card to-muted/30 border border-border/40 shadow-sm hover:shadow-md transition-shadow duration-300">
+                  <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-accent/10 shrink-0">
                     <Timer className="h-5 w-5 text-accent" />
                   </div>
                   <div>
-                    <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Delivery</p>
-                    <p className="font-semibold text-foreground text-sm">{listing.delivery_time}</p>
+                    <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-semibold">Delivery</p>
+                    <p className="font-bold text-foreground text-sm">{listing.delivery_time}</p>
                   </div>
                 </div>
               )}
@@ -743,13 +743,14 @@ const ServiceDetail = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.15 }}
             >
-              <Card className="shadow-lg border-border/60 overflow-hidden">
+              <Card className="shadow-xl border-0 overflow-hidden ring-1 ring-border/40">
                 {/* Price Header */}
-                <div className="bg-gradient-to-r from-primary to-primary-dark p-6 text-center">
-                  <p className="text-4xl font-bold text-primary-foreground">
+                <div className="relative bg-gradient-to-br from-primary via-primary to-primary-dark p-8 text-center overflow-hidden">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,hsl(var(--primary-light)/0.3),transparent_60%)]" />
+                  <p className="relative text-4xl sm:text-5xl font-extrabold text-primary-foreground tracking-tight">
                     {getPriceLabel(listing.price_type, listing.price)}
                   </p>
-                  <p className="text-sm text-primary-foreground/80 mt-1">
+                  <p className="relative text-sm text-primary-foreground/70 mt-2 font-medium">
                     {listing.price_type === "hourly" ? "per hour" : listing.price_type === "starting_at" ? "starting price" : "fixed price"}
                   </p>
                 </div>
@@ -843,10 +844,9 @@ const ServiceDetail = () => {
                   </div>
 
                   {/* CTA Buttons */}
-                  <div className="space-y-2.5 pt-2">
+                  <div className="space-y-3 pt-3">
                     <Button
-                      variant="cta"
-                      className="w-full h-12 text-base font-bold shadow-md"
+                      className="w-full h-13 text-base font-bold rounded-xl shadow-lg hover:shadow-xl bg-gradient-to-r from-secondary to-secondary-light text-secondary-foreground transform hover:-translate-y-0.5 transition-all duration-300"
                       size="lg"
                       disabled={isBuying}
                       onClick={handleOpenConfirmDialog}
@@ -860,8 +860,7 @@ const ServiceDetail = () => {
                     </Button>
 
                     <Button
-                      variant="secondary"
-                      className="w-full h-11"
+                      className="w-full h-12 rounded-xl font-bold bg-gradient-to-r from-secondary-dark to-secondary text-secondary-foreground shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300"
                       size="lg"
                       disabled={isInstantBooking}
                       onClick={handleInstantBook}
@@ -873,16 +872,15 @@ const ServiceDetail = () => {
                       )}
                       {isInstantBooking ? "Booking..." : "Instant Book"}
                     </Button>
-
                   </div>
 
                   {/* Trust badges */}
-                  <div className="flex items-center justify-center gap-4 pt-3 border-t border-border/40">
-                    <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                      <Shield className="h-3.5 w-3.5 text-primary" /> Secure Booking
+                  <div className="flex items-center justify-center gap-5 pt-4 border-t border-border/30">
+                    <span className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+                      <Shield className="h-4 w-4 text-primary" /> Secure Booking
                     </span>
-                    <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                      <CheckCircle className="h-3.5 w-3.5 text-secondary" /> Satisfaction Guaranteed
+                    <span className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+                      <CheckCircle className="h-4 w-4 text-secondary" /> Satisfaction Guaranteed
                     </span>
                   </div>
                 </CardContent>
@@ -1038,10 +1036,10 @@ const ServiceDetail = () => {
       </Dialog>
 
       {/* Sticky Mobile Booking Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-background/95 backdrop-blur-md border-t border-border shadow-[0_-4px_20px_-4px_hsl(var(--foreground)/0.1)] px-4 py-3">
+      <div className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-card/98 backdrop-blur-xl border-t border-border/50 shadow-[0_-8px_30px_-4px_hsl(var(--foreground)/0.12)] px-4 py-3.5">
         <div className="flex items-center justify-between gap-4 max-w-6xl mx-auto">
           <div className="flex flex-col">
-            <span className="text-lg font-bold text-foreground">
+            <span className="text-xl font-extrabold text-foreground">
               {getPriceLabel(listing.price_type, listing.price)}
             </span>
             {listing.duration_hours && (
@@ -1052,9 +1050,8 @@ const ServiceDetail = () => {
             )}
           </div>
           <Button
-            variant="cta"
             size="lg"
-            className="shrink-0"
+            className="shrink-0 rounded-xl font-bold shadow-lg bg-gradient-to-r from-secondary to-secondary-light text-secondary-foreground hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 px-6"
             onClick={handleOpenConfirmDialog}
           >
             <Zap className="h-4 w-4 mr-1" />
