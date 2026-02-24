@@ -66,7 +66,7 @@ const ServiceDetail = () => {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
   const [startingChat, setStartingChat] = useState(false);
-  
+  const [isInstantBooking, setIsInstantBooking] = useState(false);
 
   const { data: addresses = [] } = useQuery({
     queryKey: ["user-addresses", user?.id],
@@ -271,6 +271,64 @@ const ServiceDetail = () => {
       toast({ title: "Booking failed", description: err.message || "Something went wrong.", variant: "destructive" });
     } finally {
       setIsBuying(false);
+    }
+  }, [user, listing, selectedDate, selectedTime, selectedAddressId, specialInstructions, navigate]);
+
+  const handleInstantBook = useCallback(async () => {
+    if (!user) {
+      toast({ title: "Please sign in", description: "You need to be logged in to book.", variant: "destructive" });
+      navigate("/auth");
+      return;
+    }
+    if (!listing || !selectedDate) {
+      toast({ title: "Select a date", description: "Please pick a date first.", variant: "destructive" });
+      return;
+    }
+    if (user.id === listing.cleaner_user_id) {
+      toast({ title: "Cannot book", description: "You cannot book your own service.", variant: "destructive" });
+      return;
+    }
+
+    setIsInstantBooking(true);
+    try {
+      const scheduledDate = format(selectedDate, "yyyy-MM-dd");
+      const { data: booking, error } = await supabase.from("bookings").insert({
+        customer_id: user.id,
+        cleaner_id: listing.cleaner_user_id,
+        cleaner_name: listing.cleaner_name,
+        service_type: listing.title,
+        service_price: listing.price,
+        duration_hours: listing.duration_hours || 2,
+        scheduled_date: scheduledDate,
+        scheduled_time: selectedTime,
+        address_id: selectedAddressId || null,
+        status: "confirmed",
+        special_instructions: specialInstructions.trim() || null,
+      }).select().single();
+
+      if (error) throw error;
+
+      // Start a chat conversation automatically
+      const convId = await getOrCreateConversation(user.id, listing.cleaner_user_id);
+      const bookingMsg = `⚡ **Instant Booking Confirmed**\n\n🧹 Service: ${listing.title}\n📅 Date: ${format(selectedDate, "MMMM d, yyyy")}\n🕐 Time: ${selectedTime}\n⏱️ Duration: ${listing.duration_hours || 2} hours\n💰 Price: $${listing.price}${specialInstructions.trim() ? `\n📝 Notes: ${specialInstructions.trim()}` : ""}\n\nThis booking has been instantly confirmed!`;
+
+      await supabase.from("messages").insert({
+        conversation_id: convId,
+        sender_id: user.id,
+        text: bookingMsg,
+      });
+
+      await supabase.from("service_listings")
+        .update({ orders_count: (listing.orders_count || 0) + 1 })
+        .eq("id", listing.id);
+
+      playBookingSound();
+      toast({ title: "Instantly Booked! ⚡", description: "Your booking is confirmed. A chat has been started with the cleaner." });
+      navigate(`/dashboard/messages?conversation=${convId}`);
+    } catch (err: any) {
+      toast({ title: "Booking failed", description: err.message || "Something went wrong.", variant: "destructive" });
+    } finally {
+      setIsInstantBooking(false);
     }
   }, [user, listing, selectedDate, selectedTime, selectedAddressId, specialInstructions, navigate]);
 
@@ -788,6 +846,21 @@ const ServiceDetail = () => {
                         <Zap className="h-5 w-5 mr-2" />
                       )}
                       {isBuying ? "Booking..." : "Book Now"}
+                    </Button>
+
+                    <Button
+                      variant="secondary"
+                      className="w-full h-11"
+                      size="lg"
+                      disabled={isInstantBooking}
+                      onClick={handleInstantBook}
+                    >
+                      {isInstantBooking ? (
+                        <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                      ) : (
+                        <Zap className="h-5 w-5 mr-2" />
+                      )}
+                      {isInstantBooking ? "Booking..." : "Instant Book"}
                     </Button>
 
                     <Button
