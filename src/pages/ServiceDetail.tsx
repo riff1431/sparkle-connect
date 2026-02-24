@@ -323,8 +323,19 @@ const ServiceDetail = () => {
         .eq("id", listing.id);
 
       playBookingSound();
-      toast({ title: "Instantly Booked! ⚡", description: "Your booking is confirmed. A chat has been started with the cleaner." });
-      navigate(`/dashboard/messages?conversation=${convId}`);
+      toast({ title: "Instantly Booked! ⚡", description: "Your booking is confirmed." });
+      navigate("/booking-confirmation", {
+        state: {
+          bookingId: booking.id,
+          conversationId: convId,
+          serviceName: listing.title,
+          cleanerName: listing.cleaner_name,
+          scheduledDate: scheduledDate,
+          scheduledTime: selectedTime,
+          durationHours: listing.duration_hours || 2,
+          price: listing.price,
+        },
+      });
     } catch (err: any) {
       toast({ title: "Booking failed", description: err.message || "Something went wrong.", variant: "destructive" });
     } finally {

@@ -64,6 +64,7 @@ import AdminNotifications from "./pages/admin-dashboard/AdminNotifications";
 import CustomerWallet from "./pages/dashboard/Wallet";
 import CleanerWallet from "./pages/cleaner-dashboard/CleanerWallet";
 import AdminWallets from "./pages/admin-dashboard/AdminWallets";
+import BookingConfirmation from "./pages/dashboard/BookingConfirmation";
 import NotFound from "./pages/NotFound";
 import { useMessageNotifications } from "@/hooks/useMessageNotifications";
 const queryClient = new QueryClient();
@@ -83,6 +84,7 @@ const AnimatedApp = () => {
         <Route path="/jobs/:id" element={<JobDetail />} />
         <Route path="/services" element={<FindServices />} />
         <Route path="/services/:id" element={<ServiceDetail />} />
+        <Route path="/booking-confirmation" element={<BookingConfirmation />} />
         
         {/* Customer Dashboard Routes */}
         <Route path="/dashboard" element={<DashboardLayout />}>
