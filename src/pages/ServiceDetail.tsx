@@ -865,7 +865,7 @@ const ServiceDetail = () => {
 
                     <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                       <Button
-                        className="w-full h-13 rounded-xl font-bold shadow-md hover:shadow-xl transition-all duration-300 relative overflow-hidden group"
+                        className="w-full h-14 rounded-xl font-bold shadow-md hover:shadow-xl transition-all duration-300 relative overflow-hidden group"
                         style={{ background: "linear-gradient(135deg, hsl(207 70% 35%), hsl(220 65% 50%), hsl(207 80% 55%))" }}
                         size="lg"
                         disabled={isInstantBooking}
