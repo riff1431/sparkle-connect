@@ -25,7 +25,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   ArrowLeft, MapPin, Clock, DollarSign, Star, CheckCircle,
   Eye, ShoppingBag, AlertCircle, MessageSquare, Share2, Link, Loader2, Zap, CalendarIcon,
-  Shield, Award, Timer, ChevronRight,
+  Shield, Award, Timer, ChevronRight, CalendarCheck, Sparkles,
 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
@@ -845,33 +845,41 @@ const ServiceDetail = () => {
 
                   {/* CTA Buttons */}
                   <div className="space-y-3 pt-3">
-                    <Button
-                      className="w-full h-13 text-base font-bold rounded-xl shadow-lg hover:shadow-xl bg-gradient-to-r from-secondary to-secondary-light text-secondary-foreground transform hover:-translate-y-0.5 transition-all duration-300"
-                      size="lg"
-                      disabled={isBuying}
-                      onClick={handleOpenConfirmDialog}
-                    >
-                      {isBuying ? (
-                        <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                      ) : (
-                        <Zap className="h-5 w-5 mr-2" />
-                      )}
-                      {isBuying ? "Booking..." : "Book Now"}
-                    </Button>
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                      <Button
+                        className="w-full h-14 text-base font-bold rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 relative overflow-hidden group"
+                        style={{ background: "linear-gradient(135deg, hsl(142 70% 40%), hsl(160 60% 45%), hsl(142 70% 50%))" }}
+                        size="lg"
+                        disabled={isBuying}
+                        onClick={handleOpenConfirmDialog}
+                      >
+                        <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                        {isBuying ? (
+                          <Loader2 className="h-5 w-5 mr-2 animate-spin text-white" />
+                        ) : (
+                          <CalendarCheck className="h-5 w-5 mr-2 text-white" />
+                        )}
+                        <span className="text-white">{isBuying ? "Booking..." : "Book Now"}</span>
+                      </Button>
+                    </motion.div>
 
-                    <Button
-                      className="w-full h-12 rounded-xl font-bold bg-gradient-to-r from-secondary-dark to-secondary text-secondary-foreground shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300"
-                      size="lg"
-                      disabled={isInstantBooking}
-                      onClick={handleInstantBook}
-                    >
-                      {isInstantBooking ? (
-                        <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                      ) : (
-                        <Zap className="h-5 w-5 mr-2" />
-                      )}
-                      {isInstantBooking ? "Booking..." : "Instant Book"}
-                    </Button>
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                      <Button
+                        className="w-full h-13 rounded-xl font-bold shadow-md hover:shadow-xl transition-all duration-300 relative overflow-hidden group"
+                        style={{ background: "linear-gradient(135deg, hsl(207 70% 35%), hsl(220 65% 50%), hsl(207 80% 55%))" }}
+                        size="lg"
+                        disabled={isInstantBooking}
+                        onClick={handleInstantBook}
+                      >
+                        <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                        {isInstantBooking ? (
+                          <Loader2 className="h-5 w-5 mr-2 animate-spin text-white" />
+                        ) : (
+                          <Sparkles className="h-5 w-5 mr-2 text-white" />
+                        )}
+                        <span className="text-white">{isInstantBooking ? "Booking..." : "Instant Book"}</span>
+                      </Button>
+                    </motion.div>
                   </div>
 
                   {/* Trust badges */}
