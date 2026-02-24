@@ -3,6 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -19,7 +22,9 @@ import {
   XCircle,
   Eye,
   MessageSquare,
-  Loader2
+  Loader2,
+  DollarSign,
+  Send
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -28,6 +33,7 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 import type { Database } from "@/integrations/supabase/types";
 import GetInvoiceButton from "@/components/GetInvoiceButton";
+import { getOrCreateConversation } from "@/hooks/useChatConversations";
 
 type BookingStatus = Database["public"]["Enums"]["booking_status"];
 
@@ -52,6 +58,10 @@ const CleanerBookingRequests = () => {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [chattingBookingId, setChattingBookingId] = useState<string | null>(null);
+  const [offerBooking, setOfferBooking] = useState<Booking | null>(null);
+  const [offerAmount, setOfferAmount] = useState("");
+  const [offerMessage, setOfferMessage] = useState("");
+  const [sendingOffer, setSendingOffer] = useState(false);
 
   const handleStartChat = async (booking: Booking) => {
     if (!user) return;
@@ -96,6 +106,45 @@ const CleanerBookingRequests = () => {
       toast.error("Failed to start chat");
     } finally {
       setChattingBookingId(null);
+    }
+  };
+
+  const handleSendOffer = async () => {
+    if (!user || !offerBooking || !offerAmount || parseFloat(offerAmount) <= 0) {
+      toast.error("Please enter a valid offer amount");
+      return;
+    }
+    setSendingOffer(true);
+    try {
+      const convId = await getOrCreateConversation(offerBooking.customer_id, user.id);
+
+      const offerText = `💰 **Service Offer**\n\n🧹 Service: ${offerBooking.service_type}\n📅 Date: ${format(new Date(offerBooking.scheduled_date), "MMMM d, yyyy")}\n🕐 Time: ${offerBooking.scheduled_time}\n⏱️ Duration: ${offerBooking.duration_hours} hours\n\n💵 **Offered Price: $${parseFloat(offerAmount).toFixed(2)}**${offerMessage.trim() ? `\n\n📝 ${offerMessage.trim()}` : ""}\n\nPlease reply to accept or discuss this offer.`;
+
+      await supabase.from("messages").insert({
+        conversation_id: convId,
+        sender_id: user.id,
+        text: offerText,
+      });
+
+      // Also create a notification for the customer
+      await supabase.from("notifications").insert({
+        user_id: offerBooking.customer_id,
+        title: "New Service Offer",
+        body: `You received a $${parseFloat(offerAmount).toFixed(2)} offer for ${offerBooking.service_type}`,
+        link: `/dashboard/messages?conversation=${convId}`,
+        type: "booking",
+      });
+
+      toast.success("Offer sent to customer!");
+      setOfferBooking(null);
+      setOfferAmount("");
+      setOfferMessage("");
+      navigate(`/cleaner/messages?conversation=${convId}`);
+    } catch (error) {
+      console.error("Error sending offer:", error);
+      toast.error("Failed to send offer");
+    } finally {
+      setSendingOffer(false);
     }
   };
 
@@ -415,6 +464,17 @@ const CleanerBookingRequests = () => {
             {selectedBooking?.status === "pending" && (
               <>
                 <Button
+                  variant="secondary"
+                  onClick={() => {
+                    const b = selectedBooking;
+                    setSelectedBooking(null);
+                    setOfferBooking(b);
+                  }}
+                >
+                  <DollarSign className="mr-2 h-4 w-4" />
+                  Send Offer
+                </Button>
+                <Button
                   variant="outline"
                   onClick={() => handleDeclineBooking(selectedBooking.id)}
                   disabled={actionLoading}
@@ -440,6 +500,60 @@ const CleanerBookingRequests = () => {
                 Mark Complete
               </Button>
             )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Send Offer Dialog */}
+      <Dialog open={!!offerBooking} onOpenChange={(open) => !open && setOfferBooking(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Send Offer to Customer</DialogTitle>
+            <DialogDescription>
+              Set your price and include a message. The customer will receive this in chat.
+            </DialogDescription>
+          </DialogHeader>
+          {offerBooking && (
+            <div className="space-y-4 py-2">
+              <div className="bg-muted rounded-lg p-3 text-sm space-y-1">
+                <p><strong>Service:</strong> {offerBooking.service_type}</p>
+                <p><strong>Date:</strong> {format(new Date(offerBooking.scheduled_date), "MMMM d, yyyy")}</p>
+                <p><strong>Duration:</strong> {offerBooking.duration_hours} hours</p>
+                <p className="text-muted-foreground text-xs">Listed price: ${Number(offerBooking.service_price).toFixed(0)}</p>
+              </div>
+              <div>
+                <Label>Your Offer Price ($) *</Label>
+                <div className="relative mt-1">
+                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="number"
+                    min="1"
+                    step="0.01"
+                    placeholder={Number(offerBooking.service_price).toFixed(0)}
+                    value={offerAmount}
+                    onChange={(e) => setOfferAmount(e.target.value)}
+                    className="pl-8"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label>Message (optional)</Label>
+                <Textarea
+                  placeholder="Add details about your offer, availability, etc."
+                  value={offerMessage}
+                  onChange={(e) => setOfferMessage(e.target.value)}
+                  className="mt-1"
+                  maxLength={500}
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOfferBooking(null)}>Cancel</Button>
+            <Button onClick={handleSendOffer} disabled={sendingOffer || !offerAmount}>
+              {sendingOffer ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+              {sendingOffer ? "Sending..." : "Send Offer"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
