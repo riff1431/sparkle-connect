@@ -848,7 +848,7 @@ const ServiceDetail = () => {
                     <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                       <Button
                         className="w-full h-14 text-base font-bold rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 relative overflow-hidden group"
-                        style={{ background: "linear-gradient(135deg, hsl(142 70% 40%), hsl(160 60% 45%), hsl(142 70% 50%))" }}
+                        style={{ background: "linear-gradient(135deg, hsl(207 70% 35%), hsl(207 65% 45%), hsl(207 70% 50%))" }}
                         size="lg"
                         disabled={isBuying}
                         onClick={handleOpenConfirmDialog}
@@ -866,7 +866,7 @@ const ServiceDetail = () => {
                     <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                       <Button
                         className="w-full h-14 rounded-xl font-bold shadow-md hover:shadow-xl transition-all duration-300 relative overflow-hidden group"
-                        style={{ background: "linear-gradient(135deg, hsl(207 70% 35%), hsl(220 65% 50%), hsl(207 80% 55%))" }}
+                        style={{ background: "linear-gradient(135deg, hsl(207 80% 30%), hsl(207 70% 40%), hsl(207 65% 50%))" }}
                         size="lg"
                         disabled={isInstantBooking}
                         onClick={handleInstantBook}
