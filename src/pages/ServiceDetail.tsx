@@ -863,35 +863,6 @@ const ServiceDetail = () => {
                       {isInstantBooking ? "Booking..." : "Instant Book"}
                     </Button>
 
-                    <Button
-                      variant="outline"
-                      className="w-full h-11"
-                      size="lg"
-                      disabled={startingChat}
-                      onClick={async () => {
-                        if (!user) {
-                          toast({ title: "Please sign in", description: "You need to be logged in to message a provider.", variant: "destructive" });
-                          navigate("/auth");
-                          return;
-                        }
-                        if (user.id === listing.cleaner_user_id) {
-                          toast({ title: "Cannot message yourself", variant: "destructive" });
-                          return;
-                        }
-                        setStartingChat(true);
-                        try {
-                          const convId = await getOrCreateConversation(user.id, listing.cleaner_user_id);
-                          navigate("/dashboard/messages", { state: { conversationId: convId } });
-                        } catch (err: any) {
-                          toast({ title: "Failed to start chat", description: err.message, variant: "destructive" });
-                        } finally {
-                          setStartingChat(false);
-                        }
-                      }}
-                    >
-                      {startingChat ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <MessageSquare className="h-4 w-4 mr-2" />}
-                      {startingChat ? "Starting Chat..." : "Send Message"}
-                    </Button>
                   </div>
 
                   {/* Trust badges */}
