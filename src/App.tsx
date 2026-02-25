@@ -50,6 +50,12 @@ import Jobs from "./pages/Jobs";
 import JobDetail from "./pages/JobDetail";
 import FindServices from "./pages/FindServices";
 import ServiceDetail from "./pages/ServiceDetail";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
+import FAQ from "./pages/FAQ";
+import Pricing from "./pages/Pricing";
 import CleanerServiceListings from "./pages/cleaner-dashboard/CleanerServiceListings";
 import CleanerQuoteRequests from "./pages/cleaner-dashboard/CleanerQuoteRequests";
 import MyQuotes from "./pages/dashboard/MyQuotes";
@@ -84,6 +90,12 @@ const AnimatedApp = () => {
         <Route path="/jobs/:id" element={<JobDetail />} />
         <Route path="/services" element={<FindServices />} />
         <Route path="/services/:id" element={<ServiceDetail />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/faq" element={<FAQ />} />
+        <Route path="/pricing" element={<Pricing />} />
         <Route path="/booking-confirmation" element={<BookingConfirmation />} />
         
         {/* Customer Dashboard Routes */}
