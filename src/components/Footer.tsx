@@ -21,28 +21,27 @@ const Footer = () => {
     forCustomers: [
       { label: "Find Cleaners", href: "/search" },
       { label: "How It Works", href: "/#how-it-works" },
-      { label: "Pricing", href: "/pricing" },
+      { label: "Browse Services", href: "/services" },
       { label: "Reviews", href: "/reviews" },
       { label: "FAQ", href: "/faq" },
     ],
     forCleaners: [
       { label: "Join Our Network", href: "/for-cleaners" },
-      { label: "Cleaner Dashboard", href: "/dashboard/cleaner" },
-      { label: "Success Stories", href: "/success-stories" },
-      { label: "Resources", href: "/resources" },
-      { label: "Support", href: "/support" },
+      { label: "Cleaner Dashboard", href: "/cleaner/dashboard" },
+      { label: "Browse Jobs", href: "/jobs" },
+      { label: "Pricing", href: "/pricing" },
+      { label: "Contact Support", href: "/contact" },
     ],
     company: [
       { label: "About Us", href: "/about" },
-      { label: "Careers", href: "/careers" },
-      { label: "Blog", href: "/blog" },
-      { label: "Press", href: "/press" },
       { label: "Contact", href: "/contact" },
+      { label: "Reviews", href: "/reviews" },
+      { label: "Pricing", href: "/pricing" },
+      { label: "FAQ", href: "/faq" },
     ],
     legal: [
       { label: "Privacy Policy", href: "/privacy" },
       { label: "Terms of Service", href: "/terms" },
-      { label: "Cookie Policy", href: "/cookies" },
     ],
   };
 
