@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import GlobalFontProvider from "@/components/GlobalFontProvider";
 import PageTransition from "@/components/PageTransition";
+import BackToTop from "@/components/BackToTop";
 import Index from "./pages/Index";
 import Search from "./pages/Search";
 import CleanerPublicProfile from "./pages/CleanerProfile";
@@ -171,6 +172,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AnimatedApp />
+          <BackToTop />
         </BrowserRouter>
       </TooltipProvider>
       </GlobalFontProvider>
