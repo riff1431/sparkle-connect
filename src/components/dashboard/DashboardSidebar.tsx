@@ -62,10 +62,7 @@ const DashboardSidebar = () => {
   return (
     <Sidebar
       collapsible="icon"
-      className="border-r-0"
-      style={{
-        background: "linear-gradient(180deg, hsl(210 60% 92%) 0%, hsl(210 70% 82%) 50%, hsl(210 65% 72%) 100%)",
-      }}
+      className="border-r-0 [&_[data-sidebar=sidebar]]:!bg-[linear-gradient(180deg,hsl(210_60%_92%)_0%,hsl(210_70%_82%)_50%,hsl(210_65%_72%)_100%)]"
     >
       <SidebarContent
         className="pt-6 px-2"
