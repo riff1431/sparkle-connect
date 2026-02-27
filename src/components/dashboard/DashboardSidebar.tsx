@@ -60,8 +60,19 @@ const DashboardSidebar = () => {
   };
 
   return (
-    <Sidebar collapsible="icon" className="border-r-0 bg-white shadow-[2px_0_12px_-4px_rgba(0,0,0,0.08)]">
-      <SidebarContent className="pt-6 px-2 bg-white">
+    <Sidebar
+      collapsible="icon"
+      className="border-r-0"
+      style={{
+        background: "linear-gradient(180deg, hsl(210 60% 92%) 0%, hsl(210 70% 82%) 50%, hsl(210 65% 72%) 100%)",
+      }}
+    >
+      <SidebarContent
+        className="pt-6 px-2"
+        style={{
+          background: "transparent",
+        }}
+      >
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-0.5">
@@ -76,8 +87,8 @@ const DashboardSidebar = () => {
                       className={`
                         rounded-lg px-3 py-2.5 transition-all duration-200
                         ${active
-                          ? "bg-gradient-to-r from-primary/10 to-primary/5 text-primary font-semibold border-l-[3px] border-primary"
-                          : "text-muted-foreground hover:bg-muted/60 hover:text-foreground border-l-[3px] border-transparent"
+                          ? "bg-white/30 backdrop-blur-sm text-white font-semibold shadow-sm"
+                          : "text-white/80 hover:bg-white/15 hover:text-white"
                         }
                       `}
                     >
@@ -87,7 +98,7 @@ const DashboardSidebar = () => {
                         className="flex items-center gap-3"
                         activeClassName=""
                       >
-                        <item.icon className={`h-[18px] w-[18px] shrink-0 ${active ? "text-primary" : "text-muted-foreground"}`} />
+                        <item.icon className={`h-[18px] w-[18px] shrink-0 ${active ? "text-white" : "text-white/80"}`} />
                         <span className="text-[14px]">{item.title}</span>
                         {item.title === "Messages" && unreadCount > 0 && (
                           <Badge variant="destructive" className="ml-auto h-5 min-w-5 px-1.5 text-[10px] justify-center">
@@ -104,10 +115,13 @@ const DashboardSidebar = () => {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-3 bg-white border-t border-border/50">
+      <SidebarFooter
+        className="p-3 border-t border-white/20"
+        style={{ background: "transparent" }}
+      >
         <button
           onClick={signOut}
-          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-colors text-[14px]"
+          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-white/70 hover:text-white hover:bg-white/15 transition-colors text-[14px]"
         >
           <LogOut className="h-[18px] w-[18px] shrink-0" />
           {!collapsed && <span>Sign Out</span>}
