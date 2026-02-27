@@ -14,21 +14,20 @@ import {
   MessageSquare,
   Wallet,
 } from "lucide-react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import { NavLink } from "@/components/NavLink";
 import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarFooter,
+  useSidebar,
 } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { cn } from "@/lib/utils";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { Badge } from "@/components/ui/badge";
 
@@ -49,45 +48,64 @@ const menuItems = [
 ];
 
 const CleanerDashboardSidebar = () => {
-  const navigate = useNavigate();
+  const { state } = useSidebar();
+  const collapsed = state === "collapsed";
   const location = useLocation();
   const { signOut } = useAuth();
   const unreadCount = useUnreadMessages();
 
-  const handleSignOut = async () => {
-    await signOut();
-    navigate("/");
+  const isActive = (path: string) => {
+    if (path === "/cleaner/dashboard") {
+      return location.pathname === "/cleaner/dashboard";
+    }
+    return location.pathname.startsWith(path);
   };
 
   return (
-    <Sidebar className="border-r border-border">
-      <SidebarContent className="pt-4">
+    <Sidebar
+      collapsible="icon"
+      className="border-r-0"
+      style={{
+        background: "linear-gradient(180deg, hsl(210 60% 92%) 0%, hsl(210 70% 82%) 50%, hsl(210 65% 72%) 100%)",
+      }}
+    >
+      <SidebarContent
+        className="pt-6 px-2"
+        style={{ background: "transparent" }}
+      >
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-4 mb-2">
-            Cleaner Dashboard
-          </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-y-0.5">
               {menuItems.map((item) => {
-                const isActive = location.pathname === item.url;
+                const active = isActive(item.url);
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
-                      onClick={() => navigate(item.url)}
-                      className={cn(
-                        "w-full justify-start gap-3 px-4 py-2.5 rounded-lg transition-all",
-                        isActive
-                          ? "bg-primary text-primary-foreground font-medium"
-                          : "hover:bg-muted text-muted-foreground hover:text-foreground"
-                      )}
+                      asChild
+                      isActive={active}
+                      tooltip={item.title}
+                      className={`
+                        rounded-lg px-3 py-2.5 transition-all duration-200
+                        ${active
+                          ? "bg-white/30 backdrop-blur-sm text-white font-semibold shadow-sm"
+                          : "text-white/80 hover:bg-white/15 hover:text-white"
+                        }
+                      `}
                     >
-                      <item.icon className="h-5 w-5" />
-                      <span className="flex-1">{item.title}</span>
-                      {item.title === "Messages" && unreadCount > 0 && (
-                        <Badge variant="destructive" className="ml-auto h-5 min-w-5 px-1.5 text-[10px] justify-center">
-                          {unreadCount > 99 ? "99+" : unreadCount}
-                        </Badge>
-                      )}
+                      <NavLink
+                        to={item.url}
+                        end={item.url === "/cleaner/dashboard"}
+                        className="flex items-center gap-3"
+                        activeClassName=""
+                      >
+                        <item.icon className={`h-[18px] w-[18px] shrink-0 ${active ? "text-white" : "text-white/80"}`} />
+                        <span className="text-[14px]">{item.title}</span>
+                        {item.title === "Messages" && unreadCount > 0 && (
+                          <Badge variant="destructive" className="ml-auto h-5 min-w-5 px-1.5 text-[10px] justify-center">
+                            {unreadCount > 99 ? "99+" : unreadCount}
+                          </Badge>
+                        )}
+                      </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
@@ -97,15 +115,17 @@ const CleanerDashboardSidebar = () => {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 border-t border-border">
-        <Button
-          variant="ghost"
-          className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive"
-          onClick={handleSignOut}
+      <SidebarFooter
+        className="p-3 border-t border-white/20"
+        style={{ background: "transparent" }}
+      >
+        <button
+          onClick={signOut}
+          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-white/70 hover:text-white hover:bg-white/15 transition-colors text-[14px]"
         >
-          <LogOut className="h-5 w-5" />
-          <span>Sign Out</span>
-        </Button>
+          <LogOut className="h-[18px] w-[18px] shrink-0" />
+          {!collapsed && <span>Sign Out</span>}
+        </button>
       </SidebarFooter>
     </Sidebar>
   );
