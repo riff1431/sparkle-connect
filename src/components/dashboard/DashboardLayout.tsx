@@ -79,7 +79,7 @@ const DashboardLayout = () => {
           </header>
 
           {/* Main Content */}
-          <main className="flex-1 p-4 md:p-6">
+          <main className="flex-1 p-4 md:p-6 bg-muted/30">
             <Outlet />
           </main>
         </SidebarInset>

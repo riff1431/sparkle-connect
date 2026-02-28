@@ -32,29 +32,40 @@ import {
   SidebarMenuItem,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import defaultLogo from "@/assets/logo-new.png";
 
-const menuItems = [
+const overviewItems = [
   { title: "Overview", url: "/admin/dashboard", icon: LayoutDashboard },
+];
+
+const managementItems = [
   { title: "Users", url: "/admin/users", icon: Users },
   { title: "Cleaners", url: "/admin/cleaners", icon: Briefcase },
   { title: "Bookings", url: "/admin/bookings", icon: CalendarCheck },
   { title: "Jobs", url: "/admin/jobs", icon: Briefcase },
-  { title: "Cleaner of the Week", url: "/admin/cleaner-of-the-week", icon: Crown },
-  { title: "Sponsored Spotlight", url: "/admin/sponsored", icon: Zap },
-  { title: "Subscription Plans", url: "/admin/subscriptions", icon: Crown },
-  { title: "Subscription Payments", url: "/admin/subscription-verification", icon: BadgeCheck },
-  { title: "Payment Gateway", url: "/admin/payment-gateway", icon: CreditCard },
-  { title: "Payment Verification", url: "/admin/payment-verification", icon: BadgeCheck },
   { title: "Service Listings", url: "/admin/service-listings", icon: ShoppingBag },
   { title: "Quote Requests", url: "/admin/quotes", icon: FileQuestion },
   { title: "Conversations", url: "/admin/messages", icon: MessageSquare },
+];
+
+const promotionItems = [
+  { title: "Cleaner of the Week", url: "/admin/cleaner-of-the-week", icon: Crown },
+  { title: "Sponsored Spotlight", url: "/admin/sponsored", icon: Zap },
+  { title: "Subscription Plans", url: "/admin/subscriptions", icon: Crown },
+];
+
+const financeItems = [
+  { title: "Subscription Payments", url: "/admin/subscription-verification", icon: BadgeCheck },
+  { title: "Payment Gateway", url: "/admin/payment-gateway", icon: CreditCard },
+  { title: "Payment Verification", url: "/admin/payment-verification", icon: BadgeCheck },
   { title: "Invoices", url: "/admin/invoices", icon: FileText },
   { title: "Wallets", url: "/admin/wallets", icon: Wallet },
+];
+
+const systemItems = [
   { title: "Notifications", url: "/admin/notifications", icon: Bell },
   { title: "Settings", url: "/admin/settings", icon: Settings },
   { title: "Theme Management", url: "/admin/theme", icon: Paintbrush },
@@ -82,54 +93,89 @@ const AdminDashboardSidebar = () => {
     navigate("/");
   };
 
+  const isActive = (path: string) => location.pathname === path;
+
+  const renderMenuItems = (items: typeof overviewItems) => (
+    <SidebarMenu className="space-y-0.5">
+      {items.map((item) => {
+        const active = isActive(item.url);
+        return (
+          <SidebarMenuItem key={item.title}>
+            <SidebarMenuButton
+              onClick={() => navigate(item.url)}
+              className={cn(
+                "w-full justify-start gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 font-medium text-[13px]",
+                active
+                  ? "bg-primary/10 text-primary border-l-[3px] border-primary"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              )}
+            >
+              <item.icon className={cn("h-[18px] w-[18px] shrink-0", active && "text-primary")} />
+              <span>{item.title}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        );
+      })}
+    </SidebarMenu>
+  );
+
   return (
-    <Sidebar className="border-r border-border">
-      <SidebarContent className="pt-4">
-        <div className="px-4 mb-4">
-          <img src={logo} alt="Logo" className="h-10 w-auto rounded" />
-        </div>
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-4 mb-2 flex items-center gap-2">
+    <Sidebar className="border-r border-border/50 [&_[data-sidebar=sidebar]]:!bg-card">
+      <SidebarContent className="pt-4 px-2" style={{ background: "transparent" }}>
+        {/* Logo */}
+        <div className="px-3 mb-4 flex items-center gap-2">
+          <img src={logo} alt="Logo" className="h-9 w-auto rounded" />
+          <div className="flex items-center gap-1.5">
             <Shield className="h-4 w-4 text-destructive" />
-            Admin Panel
+            <span className="text-xs font-semibold text-destructive uppercase tracking-wider">Admin</span>
+          </div>
+        </div>
+
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-1">
+            Dashboard
           </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {menuItems.map((item) => {
-                const isActive = location.pathname === item.url;
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      onClick={() => navigate(item.url)}
-                      className={cn(
-                        "w-full justify-start gap-3 px-4 py-2.5 rounded-lg transition-all",
-                        isActive
-                          ? "bg-destructive text-destructive-foreground font-medium"
-                          : "hover:bg-muted text-muted-foreground hover:text-foreground"
-                      )}
-                    >
-                      <item.icon className="h-5 w-5" />
-                      <span>{item.title}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
+          <SidebarGroupContent>{renderMenuItems(overviewItems)}</SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup className="mt-6">
-          <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-4 mb-2">
-            Quick Links
+        <SidebarGroup className="mt-2">
+          <SidebarGroupLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-1">
+            Management
           </SidebarGroupLabel>
+          <SidebarGroupContent>{renderMenuItems(managementItems)}</SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup className="mt-2">
+          <SidebarGroupLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-1">
+            Promotions
+          </SidebarGroupLabel>
+          <SidebarGroupContent>{renderMenuItems(promotionItems)}</SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup className="mt-2">
+          <SidebarGroupLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-1">
+            Finance
+          </SidebarGroupLabel>
+          <SidebarGroupContent>{renderMenuItems(financeItems)}</SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup className="mt-2">
+          <SidebarGroupLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-1">
+            System
+          </SidebarGroupLabel>
+          <SidebarGroupContent>{renderMenuItems(systemItems)}</SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Quick link */}
+        <SidebarGroup className="mt-4">
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton
                   onClick={() => navigate("/")}
-                  className="w-full justify-start gap-3 px-4 py-2.5 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
+                  className="w-full justify-start gap-3 px-3 py-2.5 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground font-medium text-[13px]"
                 >
-                  <Home className="h-5 w-5" />
+                  <Home className="h-[18px] w-[18px] shrink-0" />
                   <span>Back to Site</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -138,15 +184,14 @@ const AdminDashboardSidebar = () => {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 border-t border-border">
-        <Button
-          variant="ghost"
-          className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive"
+      <SidebarFooter className="p-3 border-t border-border/50" style={{ background: "transparent" }}>
+        <button
           onClick={handleSignOut}
+          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors text-[13px] font-medium"
         >
-          <LogOut className="h-5 w-5" />
+          <LogOut className="h-[18px] w-[18px] shrink-0" />
           <span>Sign Out</span>
-        </Button>
+        </button>
       </SidebarFooter>
     </Sidebar>
   );
