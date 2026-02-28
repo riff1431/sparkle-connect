@@ -16,6 +16,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import defaultLogo from "@/assets/logo-new.png";
+import defaultAvatar from "@/assets/default-avatar.png";
 import { motion, AnimatePresence } from "framer-motion";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { Badge } from "@/components/ui/badge";
@@ -152,7 +153,7 @@ const Header = () => {
                       <DropdownMenuTrigger asChild>
                         <button className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md hover:bg-muted transition-colors outline-none">
                           <Avatar className="h-6 w-6">
-                            {avatarUrl && <AvatarImage src={avatarUrl} alt="Profile" />}
+                            <AvatarImage src={avatarUrl || defaultAvatar} alt="Profile" />
                             <AvatarFallback className="bg-primary text-primary-foreground text-[10px] font-semibold">
                               {getInitials(user.email || "U")}
                             </AvatarFallback>
@@ -259,7 +260,7 @@ const Header = () => {
                       <>
                         <div className="flex items-center gap-2.5 px-1 py-1 mb-1">
                           <Avatar className="h-8 w-8">
-                            {avatarUrl && <AvatarImage src={avatarUrl} alt="Profile" />}
+                            <AvatarImage src={avatarUrl || defaultAvatar} alt="Profile" />
                             <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
                               {getInitials(user.email || "U")}
                             </AvatarFallback>
