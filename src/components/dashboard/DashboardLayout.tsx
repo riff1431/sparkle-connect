@@ -1,12 +1,11 @@
 import { useEffect } from "react";
 import { Outlet, useNavigate, Link } from "react-router-dom";
-import { Loader2, MessageSquare, User } from "lucide-react";
+import { Loader2, MessageSquare, User, Search } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
 import DashboardSidebar from "./DashboardSidebar";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import NotificationBell from "@/components/NotificationBell";
-import logo from "@/assets/logo.jpeg";
 
 const DashboardLayout = () => {
   const { user, loading, role, roleLoading } = useAuth();
@@ -19,7 +18,6 @@ const DashboardLayout = () => {
     }
   }, [user, loading, navigate]);
 
-  // Redirect cleaners to their dashboard
   useEffect(() => {
     if (!roleLoading && role === "cleaner") {
       navigate("/cleaner/dashboard", { replace: true });
@@ -40,29 +38,24 @@ const DashboardLayout = () => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
+      <div className="min-h-screen flex w-full bg-muted/40">
         <DashboardSidebar />
         <SidebarInset className="flex-1">
-          {/* Dashboard Header */}
-          <header className="sticky top-0 z-40 flex h-16 items-center justify-between gap-4 border-b border-border bg-background px-4 md:px-6">
-            <div className="flex items-center gap-4">
-              <SidebarTrigger className="-ml-1" />
-              <Link to="/" className="flex items-center gap-2">
-                <img src={logo} alt="The Cleaning Network" className="h-8 w-auto rounded" />
-                <span className="font-heading font-semibold text-foreground hidden sm:inline">
-                  The Cleaning Network
-                </span>
-              </Link>
+          {/* MaterialM-style Header */}
+          <header className="sticky top-0 z-40 flex h-[60px] items-center justify-between gap-4 border-b border-border/30 bg-card px-4 md:px-6 shadow-sm">
+            <div className="flex items-center gap-3">
+              <SidebarTrigger className="-ml-1 text-foreground/60 hover:text-foreground" />
             </div>
+
             <div className="flex items-center gap-1">
               <Link
                 to="/dashboard/messages"
-                className="relative p-2 rounded-md hover:bg-muted transition-colors"
+                className="relative p-2.5 rounded-full hover:bg-muted transition-colors"
                 title="Messages"
               >
-                <MessageSquare className="h-5 w-5 text-muted-foreground" />
+                <MessageSquare className="h-[18px] w-[18px] text-foreground/60" />
                 {unreadCount > 0 && (
-                  <span className="absolute top-0.5 right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-bold text-destructive-foreground">
+                  <span className="absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-bold text-destructive-foreground">
                     {unreadCount > 99 ? "99+" : unreadCount}
                   </span>
                 )}
@@ -70,16 +63,18 @@ const DashboardLayout = () => {
               <NotificationBell />
               <Link
                 to="/dashboard/profile"
-                className="p-2 rounded-md hover:bg-muted transition-colors"
+                className="p-2.5 rounded-full hover:bg-muted transition-colors"
                 title="Profile"
               >
-                <User className="h-5 w-5 text-muted-foreground" />
+                <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center">
+                  <User className="h-4 w-4 text-primary" />
+                </div>
               </Link>
             </div>
           </header>
 
           {/* Main Content */}
-          <main className="flex-1 p-4 md:p-6 bg-muted/30">
+          <main className="flex-1 p-5 md:p-7">
             <Outlet />
           </main>
         </SidebarInset>

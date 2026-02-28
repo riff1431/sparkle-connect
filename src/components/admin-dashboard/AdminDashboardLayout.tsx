@@ -3,16 +3,15 @@ import { Outlet, Navigate, useNavigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AdminDashboardSidebar from "./AdminDashboardSidebar";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2, Shield } from "lucide-react";
+import { Loader2, Shield, User } from "lucide-react";
+import NotificationBell from "@/components/NotificationBell";
 
 const AdminDashboardLayout = () => {
   const { user, loading, role, roleLoading } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect non-admin users
   useEffect(() => {
     if (!roleLoading && role && role !== "admin") {
-      // Redirect to appropriate dashboard based on role
       if (role === "cleaner") {
         navigate("/cleaner/dashboard", { replace: true });
       } else {
@@ -33,24 +32,34 @@ const AdminDashboardLayout = () => {
     return <Navigate to="/auth" replace />;
   }
 
-  // Don't render if user is not an admin (will redirect via useEffect)
   if (role && role !== "admin") {
     return null;
   }
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
+      <div className="min-h-screen flex w-full bg-muted/40">
         <AdminDashboardSidebar />
         <div className="flex-1 flex flex-col">
-          <header className="sticky top-0 z-40 h-16 border-b border-border/50 flex items-center px-4 md:px-6 bg-card">
-            <SidebarTrigger className="mr-4" />
-            <div className="flex items-center gap-2">
-              <Shield className="h-5 w-5 text-destructive" />
-              <h1 className="font-heading text-lg font-semibold text-foreground">Admin Panel</h1>
+          {/* MaterialM-style Header */}
+          <header className="sticky top-0 z-40 h-[60px] border-b border-border/30 flex items-center justify-between px-4 md:px-6 bg-card shadow-sm">
+            <div className="flex items-center gap-3">
+              <SidebarTrigger className="-ml-1 text-foreground/60 hover:text-foreground" />
+              <div className="flex items-center gap-1.5">
+                <Shield className="h-4 w-4 text-destructive" />
+                <span className="text-xs font-semibold text-destructive">Admin Panel</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-1">
+              <NotificationBell />
+              <div className="p-2.5 rounded-full hover:bg-muted transition-colors cursor-pointer">
+                <div className="h-7 w-7 rounded-full bg-destructive/10 flex items-center justify-center">
+                  <User className="h-4 w-4 text-destructive" />
+                </div>
+              </div>
             </div>
           </header>
-          <main className="flex-1 p-4 md:p-6 overflow-auto bg-muted/30">
+          <main className="flex-1 p-5 md:p-7 overflow-auto">
             <Outlet />
           </main>
         </div>
