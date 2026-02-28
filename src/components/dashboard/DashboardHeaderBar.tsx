@@ -7,6 +7,7 @@ import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import NotificationBell from "@/components/NotificationBell";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import defaultAvatar from "@/assets/default-avatar.png";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -190,7 +191,7 @@ const DashboardHeaderBar = ({
           title="Profile"
         >
           <Avatar className="h-9 w-9 ring-2 ring-border/30 group-hover:ring-primary/40 transition-all duration-200 group-hover:shadow-md group-active:scale-95">
-            {avatarUrl && <AvatarImage src={avatarUrl} alt="Profile" className="object-cover" />}
+            <AvatarImage src={avatarUrl || defaultAvatar} alt="Profile" className="object-cover" />
             <AvatarFallback className={`bg-gradient-to-br ${isAdmin ? "from-destructive to-destructive/60" : "from-primary via-primary/80 to-secondary"} text-primary-foreground text-sm font-semibold`}>
               {getInitials()}
             </AvatarFallback>
