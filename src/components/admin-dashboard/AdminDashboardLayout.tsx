@@ -43,14 +43,14 @@ const AdminDashboardLayout = () => {
       <div className="min-h-screen flex w-full bg-background">
         <AdminDashboardSidebar />
         <div className="flex-1 flex flex-col">
-          <header className="h-16 border-b border-border flex items-center px-4 bg-card">
+          <header className="sticky top-0 z-40 h-16 border-b border-border/50 flex items-center px-4 md:px-6 bg-card">
             <SidebarTrigger className="mr-4" />
             <div className="flex items-center gap-2">
               <Shield className="h-5 w-5 text-destructive" />
-              <h1 className="font-heading text-lg font-semibold">Admin Panel</h1>
+              <h1 className="font-heading text-lg font-semibold text-foreground">Admin Panel</h1>
             </div>
           </header>
-          <main className="flex-1 p-6 overflow-auto">
+          <main className="flex-1 p-4 md:p-6 overflow-auto bg-muted/30">
             <Outlet />
           </main>
         </div>
