@@ -96,7 +96,7 @@ const AdminDashboardSidebar = () => {
   const isActive = (path: string) => location.pathname === path;
 
   const renderMenuItems = (items: typeof overviewItems) => (
-    <SidebarMenu className="space-y-0.5">
+    <SidebarMenu>
       {items.map((item) => {
         const active = isActive(item.url);
         return (
@@ -104,14 +104,14 @@ const AdminDashboardSidebar = () => {
             <SidebarMenuButton
               onClick={() => navigate(item.url)}
               className={cn(
-                "w-full justify-start gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 font-medium text-[13px]",
+                "w-full justify-start gap-3 px-3 py-2 rounded-lg transition-all duration-150 text-sm font-normal",
                 active
-                  ? "bg-primary/10 text-primary border-l-[3px] border-primary"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  ? "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground"
+                  : "text-foreground/70 hover:bg-muted hover:text-foreground"
               )}
             >
-              <item.icon className={cn("h-[18px] w-[18px] shrink-0", active && "text-primary")} />
-              <span>{item.title}</span>
+              <item.icon className={cn("h-[18px] w-[18px] shrink-0", active ? "text-primary-foreground" : "text-foreground/50")} />
+              <span className="truncate">{item.title}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         );
@@ -120,47 +120,53 @@ const AdminDashboardSidebar = () => {
   );
 
   return (
-    <Sidebar className="border-r border-border/50 [&_[data-sidebar=sidebar]]:!bg-card">
-      <SidebarContent className="pt-4 px-2" style={{ background: "transparent" }}>
-        {/* Logo */}
-        <div className="px-3 mb-4 flex items-center gap-2">
-          <img src={logo} alt="Logo" className="h-9 w-auto rounded" />
+    <Sidebar
+      className="border-r border-border/40 [&_[data-sidebar=sidebar]]:!bg-card"
+      style={{
+        "--sidebar-accent": "var(--primary)",
+        "--sidebar-accent-foreground": "var(--primary-foreground)",
+      } as React.CSSProperties}
+    >
+      <SidebarContent className="px-3 pt-5 pb-2" style={{ background: "transparent" }}>
+        {/* Logo & Admin Badge */}
+        <div className="px-3 mb-6 flex items-center gap-2.5">
+          <img src={logo} alt="Logo" className="h-8 w-auto rounded" />
           <div className="flex items-center gap-1.5">
-            <Shield className="h-4 w-4 text-destructive" />
-            <span className="text-xs font-semibold text-destructive uppercase tracking-wider">Admin</span>
+            <Shield className="h-3.5 w-3.5 text-destructive" />
+            <span className="text-[10px] font-bold text-destructive uppercase tracking-wider">Admin</span>
           </div>
         </div>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-1">
+          <SidebarGroupLabel className="text-[10px] font-semibold text-foreground/40 uppercase tracking-[0.1em] px-3 mb-1">
             Dashboard
           </SidebarGroupLabel>
           <SidebarGroupContent>{renderMenuItems(overviewItems)}</SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup className="mt-2">
-          <SidebarGroupLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-1">
+        <SidebarGroup className="mt-4">
+          <SidebarGroupLabel className="text-[10px] font-semibold text-foreground/40 uppercase tracking-[0.1em] px-3 mb-1">
             Management
           </SidebarGroupLabel>
           <SidebarGroupContent>{renderMenuItems(managementItems)}</SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup className="mt-2">
-          <SidebarGroupLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-1">
+        <SidebarGroup className="mt-4">
+          <SidebarGroupLabel className="text-[10px] font-semibold text-foreground/40 uppercase tracking-[0.1em] px-3 mb-1">
             Promotions
           </SidebarGroupLabel>
           <SidebarGroupContent>{renderMenuItems(promotionItems)}</SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup className="mt-2">
-          <SidebarGroupLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-1">
+        <SidebarGroup className="mt-4">
+          <SidebarGroupLabel className="text-[10px] font-semibold text-foreground/40 uppercase tracking-[0.1em] px-3 mb-1">
             Finance
           </SidebarGroupLabel>
           <SidebarGroupContent>{renderMenuItems(financeItems)}</SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup className="mt-2">
-          <SidebarGroupLabel className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-1">
+        <SidebarGroup className="mt-4">
+          <SidebarGroupLabel className="text-[10px] font-semibold text-foreground/40 uppercase tracking-[0.1em] px-3 mb-1">
             System
           </SidebarGroupLabel>
           <SidebarGroupContent>{renderMenuItems(systemItems)}</SidebarGroupContent>
@@ -173,9 +179,9 @@ const AdminDashboardSidebar = () => {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   onClick={() => navigate("/")}
-                  className="w-full justify-start gap-3 px-3 py-2.5 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground font-medium text-[13px]"
+                  className="w-full justify-start gap-3 px-3 py-2 rounded-lg text-foreground/70 hover:bg-muted hover:text-foreground text-sm font-normal"
                 >
-                  <Home className="h-[18px] w-[18px] shrink-0" />
+                  <Home className="h-[18px] w-[18px] shrink-0 text-foreground/50" />
                   <span>Back to Site</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -184,10 +190,10 @@ const AdminDashboardSidebar = () => {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-3 border-t border-border/50" style={{ background: "transparent" }}>
+      <SidebarFooter className="p-3 border-t border-border/30" style={{ background: "transparent" }}>
         <button
           onClick={handleSignOut}
-          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors text-[13px] font-medium"
+          className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-foreground/50 hover:text-destructive hover:bg-destructive/8 transition-colors text-sm"
         >
           <LogOut className="h-[18px] w-[18px] shrink-0" />
           <span>Sign Out</span>

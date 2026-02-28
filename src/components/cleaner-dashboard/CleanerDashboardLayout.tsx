@@ -12,7 +12,6 @@ const CleanerDashboardLayout = () => {
   const navigate = useNavigate();
   const unreadCount = useUnreadMessages();
 
-  // Redirect customers to their dashboard
   useEffect(() => {
     if (!roleLoading && role && role !== "cleaner") {
       navigate("/dashboard", { replace: true });
@@ -31,37 +30,38 @@ const CleanerDashboardLayout = () => {
     return <Navigate to="/auth" replace />;
   }
 
-  // Don't render if user is not a cleaner (will redirect via useEffect)
   if (role && role !== "cleaner") {
     return null;
   }
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
+      <div className="min-h-screen flex w-full bg-muted/40">
         <CleanerDashboardSidebar />
         <div className="flex-1 flex flex-col">
-          <header className="sticky top-0 z-40 h-16 border-b border-border/50 flex items-center justify-between px-4 md:px-6 bg-card">
-            <div className="flex items-center gap-4">
-              <SidebarTrigger className="-ml-1" />
-              <h1 className="font-heading text-lg font-semibold text-foreground">Cleaner Portal</h1>
+          {/* MaterialM-style Header */}
+          <header className="sticky top-0 z-40 h-[60px] border-b border-border/30 flex items-center justify-between px-4 md:px-6 bg-card shadow-sm">
+            <div className="flex items-center gap-3">
+              <SidebarTrigger className="-ml-1 text-foreground/60 hover:text-foreground" />
             </div>
             <div className="flex items-center gap-1">
-              <Link to="/cleaner/messages" className="relative p-2 rounded-md hover:bg-muted transition-colors" title="Messages">
-                <MessageSquare className="h-5 w-5 text-muted-foreground" />
+              <Link to="/cleaner/messages" className="relative p-2.5 rounded-full hover:bg-muted transition-colors" title="Messages">
+                <MessageSquare className="h-[18px] w-[18px] text-foreground/60" />
                 {unreadCount > 0 && (
-                  <span className="absolute top-0.5 right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-bold text-destructive-foreground">
+                  <span className="absolute top-1 right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-bold text-destructive-foreground">
                     {unreadCount > 99 ? "99+" : unreadCount}
                   </span>
                 )}
               </Link>
               <NotificationBell />
-              <Link to="/cleaner/profile" className="p-2 rounded-md hover:bg-muted transition-colors" title="Profile">
-                <User className="h-5 w-5 text-muted-foreground" />
+              <Link to="/cleaner/profile" className="p-2.5 rounded-full hover:bg-muted transition-colors" title="Profile">
+                <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center">
+                  <User className="h-4 w-4 text-primary" />
+                </div>
               </Link>
             </div>
           </header>
-          <main className="flex-1 p-4 md:p-6 overflow-auto bg-muted/30">
+          <main className="flex-1 p-5 md:p-7 overflow-auto">
             <Outlet />
           </main>
         </div>
