@@ -1,4 +1,4 @@
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
@@ -68,11 +68,23 @@ const ParticleField = () => {
 };
 
 const ThreeBackground = () => {
+  const [hasError, setHasError] = useState(false);
+
   const prefersReducedMotion =
     typeof window !== "undefined" &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  if (prefersReducedMotion) return null;
+  // Check for WebGL support
+  const supportsWebGL = useMemo(() => {
+    try {
+      const canvas = document.createElement("canvas");
+      return !!(canvas.getContext("webgl") || canvas.getContext("webgl2"));
+    } catch {
+      return false;
+    }
+  }, []);
+
+  if (prefersReducedMotion || !supportsWebGL || hasError) return null;
 
   return (
     <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 0 }}>
@@ -81,6 +93,9 @@ const ThreeBackground = () => {
         dpr={[1, 1.5]}
         gl={{ antialias: false, alpha: true, powerPreference: "low-power" }}
         style={{ background: "transparent" }}
+        onCreated={() => {}}
+        fallback={null}
+        onError={() => setHasError(true)}
       >
         <ParticleField />
       </Canvas>
