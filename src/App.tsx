@@ -1,164 +1,178 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import GlobalFontProvider from "@/components/GlobalFontProvider";
 import PageTransition from "@/components/PageTransition";
 import BackToTop from "@/components/BackToTop";
-import Index from "./pages/Index";
-import Search from "./pages/Search";
-import CleanerPublicProfile from "./pages/CleanerProfile";
-import Auth from "./pages/Auth";
-import ForCleaners from "./pages/ForCleaners";
-import DashboardLayout from "./components/dashboard/DashboardLayout";
-import DashboardOverview from "./pages/dashboard/DashboardOverview";
-import UpcomingBookings from "./pages/dashboard/UpcomingBookings";
-import BookingHistory from "./pages/dashboard/BookingHistory";
-import Addresses from "./pages/dashboard/Addresses";
-import Profile from "./pages/dashboard/Profile";
-import Settings from "./pages/dashboard/Settings";
-import Subscription from "./pages/dashboard/Subscription";
-import MyJobs from "./pages/dashboard/MyJobs";
-import BookingDetail from "./pages/dashboard/BookingDetail";
-import CleanerDashboardLayout from "./components/cleaner-dashboard/CleanerDashboardLayout";
-import CleanerDashboardOverview from "./pages/cleaner-dashboard/CleanerDashboardOverview";
-import CleanerBookingRequests from "./pages/cleaner-dashboard/CleanerBookingRequests";
-import CleanerSchedule from "./pages/cleaner-dashboard/CleanerSchedule";
-import CleanerProfile from "./pages/cleaner-dashboard/CleanerProfile";
-import CleanerEarnings from "./pages/cleaner-dashboard/CleanerEarnings";
-import CleanerSettings from "./pages/cleaner-dashboard/CleanerSettings";
-import CleanerSubscription from "./pages/cleaner-dashboard/CleanerSubscription";
-import AdminDashboardLayout from "./components/admin-dashboard/AdminDashboardLayout";
-import AdminDashboardOverview from "./pages/admin-dashboard/AdminDashboardOverview";
-import AdminUsers from "./pages/admin-dashboard/AdminUsers";
-import AdminCleaners from "./pages/admin-dashboard/AdminCleaners";
-import AdminBookings from "./pages/admin-dashboard/AdminBookings";
-import AdminPaymentGateway from "./pages/admin-dashboard/AdminPaymentGateway";
-import AdminPaymentVerification from "./pages/admin-dashboard/AdminPaymentVerification";
-import AdminSettings from "./pages/admin-dashboard/AdminSettings";
-import AdminSubscriptionPlans from "./pages/admin-dashboard/AdminSubscriptionPlans";
-import AdminSubscriptionVerification from "./pages/admin-dashboard/AdminSubscriptionVerification";
-import AdminSponsoredListings from "./pages/admin-dashboard/AdminSponsoredListings";
-import AdminCleanerOfTheWeek from "./pages/admin-dashboard/AdminCleanerOfTheWeek";
-import AdminThemeManagement from "./pages/admin-dashboard/AdminThemeManagement";
-import AdminServiceListings from "./pages/admin-dashboard/AdminServiceListings";
-import AdminJobs from "./pages/admin-dashboard/AdminJobs";
-import CleanerSponsorship from "./pages/cleaner-dashboard/CleanerSponsorship";
-import Reviews from "./pages/Reviews";
-import Jobs from "./pages/Jobs";
-import JobDetail from "./pages/JobDetail";
-import FindServices from "./pages/FindServices";
-import ServiceDetail from "./pages/ServiceDetail";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import Privacy from "./pages/Privacy";
-import Terms from "./pages/Terms";
-import FAQ from "./pages/FAQ";
-import Pricing from "./pages/Pricing";
-import CleanerServiceListings from "./pages/cleaner-dashboard/CleanerServiceListings";
-import CleanerQuoteRequests from "./pages/cleaner-dashboard/CleanerQuoteRequests";
-import MyQuotes from "./pages/dashboard/MyQuotes";
-import CustomerMessages from "./pages/dashboard/Messages";
-import CustomerInvoices from "./pages/dashboard/Invoices";
-import CleanerMessages from "./pages/cleaner-dashboard/CleanerMessages";
-import CleanerInvoices from "./pages/cleaner-dashboard/CleanerInvoices";
-import AdminMessages from "./pages/admin-dashboard/AdminMessages";
-import AdminInvoices from "./pages/admin-dashboard/AdminInvoices";
-import AdminQuoteRequests from "./pages/admin-dashboard/AdminQuoteRequests";
-import AdminNotifications from "./pages/admin-dashboard/AdminNotifications";
-import CustomerWallet from "./pages/dashboard/Wallet";
-import CleanerWallet from "./pages/cleaner-dashboard/CleanerWallet";
-import AdminWallets from "./pages/admin-dashboard/AdminWallets";
-import BookingConfirmation from "./pages/dashboard/BookingConfirmation";
-import NotFound from "./pages/NotFound";
 import { useMessageNotifications } from "@/hooks/useMessageNotifications";
+
+// Only the homepage is eagerly loaded for fastest initial paint
+import Index from "./pages/Index";
+
+// All other pages are lazy-loaded for code splitting
+const Search = lazy(() => import("./pages/Search"));
+const CleanerPublicProfile = lazy(() => import("./pages/CleanerProfile"));
+const Auth = lazy(() => import("./pages/Auth"));
+const ForCleaners = lazy(() => import("./pages/ForCleaners"));
+const Reviews = lazy(() => import("./pages/Reviews"));
+const Jobs = lazy(() => import("./pages/Jobs"));
+const JobDetail = lazy(() => import("./pages/JobDetail"));
+const FindServices = lazy(() => import("./pages/FindServices"));
+const ServiceDetail = lazy(() => import("./pages/ServiceDetail"));
+const About = lazy(() => import("./pages/About"));
+const Contact = lazy(() => import("./pages/Contact"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const Terms = lazy(() => import("./pages/Terms"));
+const FAQ = lazy(() => import("./pages/FAQ"));
+const Pricing = lazy(() => import("./pages/Pricing"));
+const BookingConfirmation = lazy(() => import("./pages/dashboard/BookingConfirmation"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
+// Customer Dashboard
+const DashboardLayout = lazy(() => import("./components/dashboard/DashboardLayout"));
+const DashboardOverview = lazy(() => import("./pages/dashboard/DashboardOverview"));
+const UpcomingBookings = lazy(() => import("./pages/dashboard/UpcomingBookings"));
+const BookingHistory = lazy(() => import("./pages/dashboard/BookingHistory"));
+const Addresses = lazy(() => import("./pages/dashboard/Addresses"));
+const Profile = lazy(() => import("./pages/dashboard/Profile"));
+const Settings = lazy(() => import("./pages/dashboard/Settings"));
+const Subscription = lazy(() => import("./pages/dashboard/Subscription"));
+const MyJobs = lazy(() => import("./pages/dashboard/MyJobs"));
+const BookingDetail = lazy(() => import("./pages/dashboard/BookingDetail"));
+const MyQuotes = lazy(() => import("./pages/dashboard/MyQuotes"));
+const CustomerMessages = lazy(() => import("./pages/dashboard/Messages"));
+const CustomerInvoices = lazy(() => import("./pages/dashboard/Invoices"));
+const CustomerWallet = lazy(() => import("./pages/dashboard/Wallet"));
+
+// Cleaner Dashboard
+const CleanerDashboardLayout = lazy(() => import("./components/cleaner-dashboard/CleanerDashboardLayout"));
+const CleanerDashboardOverview = lazy(() => import("./pages/cleaner-dashboard/CleanerDashboardOverview"));
+const CleanerBookingRequests = lazy(() => import("./pages/cleaner-dashboard/CleanerBookingRequests"));
+const CleanerSchedule = lazy(() => import("./pages/cleaner-dashboard/CleanerSchedule"));
+const CleanerProfile = lazy(() => import("./pages/cleaner-dashboard/CleanerProfile"));
+const CleanerEarnings = lazy(() => import("./pages/cleaner-dashboard/CleanerEarnings"));
+const CleanerSettings = lazy(() => import("./pages/cleaner-dashboard/CleanerSettings"));
+const CleanerSubscription = lazy(() => import("./pages/cleaner-dashboard/CleanerSubscription"));
+const CleanerSponsorship = lazy(() => import("./pages/cleaner-dashboard/CleanerSponsorship"));
+const CleanerServiceListings = lazy(() => import("./pages/cleaner-dashboard/CleanerServiceListings"));
+const CleanerQuoteRequests = lazy(() => import("./pages/cleaner-dashboard/CleanerQuoteRequests"));
+const CleanerMessages = lazy(() => import("./pages/cleaner-dashboard/CleanerMessages"));
+const CleanerInvoices = lazy(() => import("./pages/cleaner-dashboard/CleanerInvoices"));
+const CleanerWallet = lazy(() => import("./pages/cleaner-dashboard/CleanerWallet"));
+
+// Admin Dashboard
+const AdminDashboardLayout = lazy(() => import("./components/admin-dashboard/AdminDashboardLayout"));
+const AdminDashboardOverview = lazy(() => import("./pages/admin-dashboard/AdminDashboardOverview"));
+const AdminUsers = lazy(() => import("./pages/admin-dashboard/AdminUsers"));
+const AdminCleaners = lazy(() => import("./pages/admin-dashboard/AdminCleaners"));
+const AdminBookings = lazy(() => import("./pages/admin-dashboard/AdminBookings"));
+const AdminPaymentGateway = lazy(() => import("./pages/admin-dashboard/AdminPaymentGateway"));
+const AdminPaymentVerification = lazy(() => import("./pages/admin-dashboard/AdminPaymentVerification"));
+const AdminSettings = lazy(() => import("./pages/admin-dashboard/AdminSettings"));
+const AdminSubscriptionPlans = lazy(() => import("./pages/admin-dashboard/AdminSubscriptionPlans"));
+const AdminSubscriptionVerification = lazy(() => import("./pages/admin-dashboard/AdminSubscriptionVerification"));
+const AdminSponsoredListings = lazy(() => import("./pages/admin-dashboard/AdminSponsoredListings"));
+const AdminCleanerOfTheWeek = lazy(() => import("./pages/admin-dashboard/AdminCleanerOfTheWeek"));
+const AdminThemeManagement = lazy(() => import("./pages/admin-dashboard/AdminThemeManagement"));
+const AdminServiceListings = lazy(() => import("./pages/admin-dashboard/AdminServiceListings"));
+const AdminJobs = lazy(() => import("./pages/admin-dashboard/AdminJobs"));
+const AdminQuoteRequests = lazy(() => import("./pages/admin-dashboard/AdminQuoteRequests"));
+const AdminMessages = lazy(() => import("./pages/admin-dashboard/AdminMessages"));
+const AdminInvoices = lazy(() => import("./pages/admin-dashboard/AdminInvoices"));
+const AdminWallets = lazy(() => import("./pages/admin-dashboard/AdminWallets"));
+const AdminNotifications = lazy(() => import("./pages/admin-dashboard/AdminNotifications"));
+
 const queryClient = new QueryClient();
 
 const AnimatedApp = () => {
   useMessageNotifications();
   return (
     <PageTransition>
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/search" element={<Search />} />
-        <Route path="/cleaner/:id" element={<CleanerPublicProfile />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/for-cleaners" element={<ForCleaners />} />
-        <Route path="/reviews" element={<Reviews />} />
-        <Route path="/jobs" element={<Jobs />} />
-        <Route path="/jobs/:id" element={<JobDetail />} />
-        <Route path="/services" element={<FindServices />} />
-        <Route path="/services/:id" element={<ServiceDetail />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="/terms" element={<Terms />} />
-        <Route path="/faq" element={<FAQ />} />
-        <Route path="/pricing" element={<Pricing />} />
-        <Route path="/booking-confirmation" element={<BookingConfirmation />} />
-        
-        {/* Customer Dashboard Routes */}
-        <Route path="/dashboard" element={<DashboardLayout />}>
-          <Route index element={<DashboardOverview />} />
-          <Route path="upcoming" element={<UpcomingBookings />} />
-          <Route path="history" element={<BookingHistory />} />
-          <Route path="addresses" element={<Addresses />} />
-          <Route path="my-jobs" element={<MyJobs />} />
-          <Route path="booking/:id" element={<BookingDetail />} />
-          <Route path="quotes" element={<MyQuotes />} />
-          <Route path="messages" element={<CustomerMessages />} />
-          <Route path="invoices" element={<CustomerInvoices />} />
-          <Route path="wallet" element={<CustomerWallet />} />
-          <Route path="subscription" element={<Subscription />} />
-          <Route path="profile" element={<Profile />} />
-          <Route path="settings" element={<Settings />} />
-        </Route>
+      <Suspense fallback={<div className="min-h-screen bg-background" />}>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/search" element={<Search />} />
+          <Route path="/cleaner/:id" element={<CleanerPublicProfile />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/for-cleaners" element={<ForCleaners />} />
+          <Route path="/reviews" element={<Reviews />} />
+          <Route path="/jobs" element={<Jobs />} />
+          <Route path="/jobs/:id" element={<JobDetail />} />
+          <Route path="/services" element={<FindServices />} />
+          <Route path="/services/:id" element={<ServiceDetail />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/booking-confirmation" element={<BookingConfirmation />} />
+          
+          {/* Customer Dashboard Routes */}
+          <Route path="/dashboard" element={<DashboardLayout />}>
+            <Route index element={<DashboardOverview />} />
+            <Route path="upcoming" element={<UpcomingBookings />} />
+            <Route path="history" element={<BookingHistory />} />
+            <Route path="addresses" element={<Addresses />} />
+            <Route path="my-jobs" element={<MyJobs />} />
+            <Route path="booking/:id" element={<BookingDetail />} />
+            <Route path="quotes" element={<MyQuotes />} />
+            <Route path="messages" element={<CustomerMessages />} />
+            <Route path="invoices" element={<CustomerInvoices />} />
+            <Route path="wallet" element={<CustomerWallet />} />
+            <Route path="subscription" element={<Subscription />} />
+            <Route path="profile" element={<Profile />} />
+            <Route path="settings" element={<Settings />} />
+          </Route>
 
-        {/* Cleaner Dashboard Routes */}
-        <Route path="/cleaner" element={<CleanerDashboardLayout />}>
-          <Route path="dashboard" element={<CleanerDashboardOverview />} />
-          <Route path="bookings" element={<CleanerBookingRequests />} />
-          <Route path="schedule" element={<CleanerSchedule />} />
-          <Route path="subscription" element={<CleanerSubscription />} />
-          <Route path="sponsorship" element={<CleanerSponsorship />} />
-          <Route path="profile" element={<CleanerProfile />} />
-          <Route path="earnings" element={<CleanerEarnings />} />
-          <Route path="settings" element={<CleanerSettings />} />
-          <Route path="services" element={<CleanerServiceListings />} />
-          <Route path="quotes" element={<CleanerQuoteRequests />} />
-          <Route path="messages" element={<CleanerMessages />} />
-          <Route path="invoices" element={<CleanerInvoices />} />
-          <Route path="wallet" element={<CleanerWallet />} />
-        </Route>
+          {/* Cleaner Dashboard Routes */}
+          <Route path="/cleaner" element={<CleanerDashboardLayout />}>
+            <Route path="dashboard" element={<CleanerDashboardOverview />} />
+            <Route path="bookings" element={<CleanerBookingRequests />} />
+            <Route path="schedule" element={<CleanerSchedule />} />
+            <Route path="subscription" element={<CleanerSubscription />} />
+            <Route path="sponsorship" element={<CleanerSponsorship />} />
+            <Route path="profile" element={<CleanerProfile />} />
+            <Route path="earnings" element={<CleanerEarnings />} />
+            <Route path="settings" element={<CleanerSettings />} />
+            <Route path="services" element={<CleanerServiceListings />} />
+            <Route path="quotes" element={<CleanerQuoteRequests />} />
+            <Route path="messages" element={<CleanerMessages />} />
+            <Route path="invoices" element={<CleanerInvoices />} />
+            <Route path="wallet" element={<CleanerWallet />} />
+          </Route>
 
-        {/* Admin Dashboard Routes */}
-        <Route path="/admin" element={<AdminDashboardLayout />}>
-          <Route path="dashboard" element={<AdminDashboardOverview />} />
-          <Route path="users" element={<AdminUsers />} />
-          <Route path="cleaners" element={<AdminCleaners />} />
-          <Route path="bookings" element={<AdminBookings />} />
-          <Route path="subscriptions" element={<AdminSubscriptionPlans />} />
-          <Route path="subscription-verification" element={<AdminSubscriptionVerification />} />
-          <Route path="sponsored" element={<AdminSponsoredListings />} />
-          <Route path="cleaner-of-the-week" element={<AdminCleanerOfTheWeek />} />
-          <Route path="jobs" element={<AdminJobs />} />
-          <Route path="payment-gateway" element={<AdminPaymentGateway />} />
-          <Route path="payment-verification" element={<AdminPaymentVerification />} />
-          <Route path="settings" element={<AdminSettings />} />
-          <Route path="theme" element={<AdminThemeManagement />} />
-          <Route path="service-listings" element={<AdminServiceListings />} />
-          <Route path="quotes" element={<AdminQuoteRequests />} />
-          <Route path="messages" element={<AdminMessages />} />
-          <Route path="invoices" element={<AdminInvoices />} />
-          <Route path="wallets" element={<AdminWallets />} />
-          <Route path="notifications" element={<AdminNotifications />} />
-        </Route>
-        
-        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+          {/* Admin Dashboard Routes */}
+          <Route path="/admin" element={<AdminDashboardLayout />}>
+            <Route path="dashboard" element={<AdminDashboardOverview />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="cleaners" element={<AdminCleaners />} />
+            <Route path="bookings" element={<AdminBookings />} />
+            <Route path="subscriptions" element={<AdminSubscriptionPlans />} />
+            <Route path="subscription-verification" element={<AdminSubscriptionVerification />} />
+            <Route path="sponsored" element={<AdminSponsoredListings />} />
+            <Route path="cleaner-of-the-week" element={<AdminCleanerOfTheWeek />} />
+            <Route path="jobs" element={<AdminJobs />} />
+            <Route path="payment-gateway" element={<AdminPaymentGateway />} />
+            <Route path="payment-verification" element={<AdminPaymentVerification />} />
+            <Route path="settings" element={<AdminSettings />} />
+            <Route path="theme" element={<AdminThemeManagement />} />
+            <Route path="service-listings" element={<AdminServiceListings />} />
+            <Route path="quotes" element={<AdminQuoteRequests />} />
+            <Route path="messages" element={<AdminMessages />} />
+            <Route path="invoices" element={<AdminInvoices />} />
+            <Route path="wallets" element={<AdminWallets />} />
+            <Route path="notifications" element={<AdminNotifications />} />
+          </Route>
+          
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
     </PageTransition>
   );
 };
