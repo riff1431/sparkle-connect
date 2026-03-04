@@ -8,6 +8,7 @@ const PRECACHE_URLS = [
   '/favicon.ico',
   '/placeholder.svg',
   '/robots.txt',
+  '/offline.html',
 ];
 
 // Install: pre-cache critical static assets
