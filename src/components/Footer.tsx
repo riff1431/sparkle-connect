@@ -166,6 +166,17 @@ const Footer = () => {
                   </Link>
                 </li>
               ))}
+              {!isInstalled && (
+                <li>
+                  <button
+                    onClick={handleInstall}
+                    className="flex items-center gap-2 text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors"
+                  >
+                    <Smartphone className="h-4 w-4" />
+                    Install Mobile App
+                  </button>
+                </li>
+              )}
             </ul>
           </div>
         </div>
