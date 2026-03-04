@@ -87,7 +87,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // HTML navigation: Network-first, fallback to cache
+  // HTML navigation: Network-first, fallback to cache, then offline page
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
@@ -96,7 +96,11 @@ self.addEventListener('fetch', (event) => {
           caches.open(STATIC_CACHE).then((cache) => cache.put(request, clone));
           return response;
         })
-        .catch(() => caches.match(request).then((cached) => cached || caches.match('/')))
+        .catch(() =>
+          caches.match(request)
+            .then((cached) => cached || caches.match('/'))
+            .then((cached) => cached || caches.match('/offline.html'))
+        )
     );
     return;
   }
