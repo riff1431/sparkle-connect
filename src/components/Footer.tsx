@@ -1,11 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from "lucide-react";
+import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin, Smartphone } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import defaultLogo from "@/assets/logo.jpeg";
 
 const Footer = () => {
   const [logo, setLogo] = useState(defaultLogo);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
     supabase
@@ -16,7 +18,27 @@ const Footer = () => {
       .then(({ data }) => {
         if (data?.setting_value) setLogo(data.setting_value);
       });
+
+    // Check if already installed
+    if (window.matchMedia("(display-mode: standalone)").matches) {
+      setIsInstalled(true);
+    }
+
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
+
+  const handleInstall = useCallback(async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === "accepted") setIsInstalled(true);
+    setDeferredPrompt(null);
+  }, [deferredPrompt]);
   const footerLinks = {
     forCustomers: [
       { label: "Find Cleaners", href: "/search" },
@@ -144,6 +166,17 @@ const Footer = () => {
                   </Link>
                 </li>
               ))}
+              {!isInstalled && (
+                <li>
+                  <button
+                    onClick={handleInstall}
+                    className="flex items-center gap-2 text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors"
+                  >
+                    <Smartphone className="h-4 w-4" />
+                    Install Mobile App
+                  </button>
+                </li>
+              )}
             </ul>
           </div>
         </div>
