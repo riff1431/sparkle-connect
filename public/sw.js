@@ -23,7 +23,7 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE).then((cache) => cache.addAll(PRECACHE_URLS))
   );
-  self.skipWaiting();
+  // Don't skipWaiting here — let the client decide via UpdateBanner
 });
 
 // Activate: clean up old caches
