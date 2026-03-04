@@ -1,13 +1,16 @@
+import { lazy, Suspense } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import HomepageHero from "@/components/homepage/HomepageHero";
 import SearchFilterBar from "@/components/homepage/SearchFilterBar";
 import CleanerOfTheWeekCard from "@/components/homepage/CleanerOfTheWeekCard";
 import CategoryChipsRow from "@/components/homepage/CategoryChipsRow";
-import SponsoredSpotlightSection from "@/components/homepage/SponsoredSpotlightSection";
-import HomepageServicesGrid from "@/components/homepage/HomepageServicesGrid";
-import QuoteRequestSidebar from "@/components/homepage/QuoteRequestSidebar";
-import MapPreviewCard from "@/components/homepage/MapPreviewCard";
+
+// Lazy-load below-the-fold sections
+const SponsoredSpotlightSection = lazy(() => import("@/components/homepage/SponsoredSpotlightSection"));
+const HomepageServicesGrid = lazy(() => import("@/components/homepage/HomepageServicesGrid"));
+const QuoteRequestSidebar = lazy(() => import("@/components/homepage/QuoteRequestSidebar"));
+const MapPreviewCard = lazy(() => import("@/components/homepage/MapPreviewCard"));
 
 const Index = () => {
   return (
@@ -27,14 +30,22 @@ const Index = () => {
               <div className="space-y-4 sm:space-y-6">
                 <CleanerOfTheWeekCard />
                 <CategoryChipsRow />
-                <SponsoredSpotlightSection />
-                <HomepageServicesGrid />
+                <Suspense fallback={<div className="h-48 rounded-xl bg-muted/30 animate-pulse" />}>
+                  <SponsoredSpotlightSection />
+                </Suspense>
+                <Suspense fallback={<div className="h-64 rounded-xl bg-muted/30 animate-pulse" />}>
+                  <HomepageServicesGrid />
+                </Suspense>
               </div>
 
               {/* Right Sidebar - stacks below on mobile */}
               <div className="space-y-4 sm:space-y-6">
-                <QuoteRequestSidebar />
-                <MapPreviewCard />
+                <Suspense fallback={<div className="h-64 rounded-xl bg-muted/30 animate-pulse" />}>
+                  <QuoteRequestSidebar />
+                </Suspense>
+                <Suspense fallback={<div className="h-48 rounded-xl bg-muted/30 animate-pulse" />}>
+                  <MapPreviewCard />
+                </Suspense>
               </div>
             </div>
           </div>
