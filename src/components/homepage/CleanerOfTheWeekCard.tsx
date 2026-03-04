@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import bgCleanerWeek from "@/assets/bg-cleaner-week.png";
 import bgGoldRibbon from "@/assets/bg-gold-ribbon.png";
+import BlurImage from "@/components/ui/blur-image";
 
 const CleanerOfTheWeekCard = () => {
   const { data, isLoading } = useActiveCleanerOfTheWeek();
@@ -85,10 +86,10 @@ const CleanerOfTheWeekCard = () => {
               transition={{ type: "spring", stiffness: 300 }}
             >
               <div className="w-28 h-32 sm:w-36 sm:h-44 rounded-xl overflow-hidden shadow-md border-2 border-white/80 ring-1 ring-border/30 transition-shadow duration-300 hover:shadow-xl">
-                <img
+                <BlurImage
                   src={profile.profile_image || "https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=300&h=400&fit=crop"}
                   alt={profile.business_name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full"
                 />
               </div>
             </motion.div>

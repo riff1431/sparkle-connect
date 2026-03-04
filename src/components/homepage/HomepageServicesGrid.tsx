@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { motion } from "framer-motion";
+import BlurImage from "@/components/ui/blur-image";
 
 const PAGE_SIZE = 6;
 
@@ -51,10 +52,10 @@ const ServiceCard = ({ service }: { service: any }) => (
     className="group block rounded-xl border border-border/50 bg-card overflow-hidden shadow-sm transition-all duration-300 hover:shadow-xl hover:shadow-primary/10"
   >
     <div className="aspect-[16/10] overflow-hidden bg-muted relative">
-      <img
+      <BlurImage
         src={getServiceImage(service)}
         alt={service.title}
-        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+        className="w-full h-full group-hover:scale-105 transition-transform duration-500"
       />
       <div className="absolute bottom-2 left-2">
         <img

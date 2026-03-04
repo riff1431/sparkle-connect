@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import RequestQuoteDialog from "@/components/RequestQuoteDialog";
+import BlurImage from "@/components/ui/blur-image";
 
 export interface Cleaner {
   id: number | string;
@@ -129,10 +130,10 @@ const CleanerCard = ({ cleaner, variant = "grid" }: CleanerCardProps) => {
         >
           {/* Image */}
           <div className="relative w-full md:w-64 aspect-[4/3] md:aspect-auto shrink-0 overflow-hidden">
-            <img
+            <BlurImage
               src={cleaner.image}
               alt={cleaner.name}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              className="w-full h-full group-hover:scale-105 transition-transform duration-500"
             />
             {cleaner.featured && (
               <Badge className="absolute top-3 left-3 bg-accent text-accent-foreground">
@@ -234,10 +235,10 @@ const CleanerCard = ({ cleaner, variant = "grid" }: CleanerCardProps) => {
       >
         {/* Image */}
         <div className="relative aspect-[4/3] overflow-hidden">
-          <img
+          <BlurImage
             src={cleaner.image}
             alt={cleaner.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full group-hover:scale-105 transition-transform duration-500"
           />
           {cleaner.featured && (
             <Badge className="absolute top-3 left-3 bg-accent text-accent-foreground">
