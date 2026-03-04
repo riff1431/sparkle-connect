@@ -11,6 +11,13 @@ const PRECACHE_URLS = [
   '/offline.html',
 ];
 
+// Listen for skip waiting message from client
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
 // Install: pre-cache critical static assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
