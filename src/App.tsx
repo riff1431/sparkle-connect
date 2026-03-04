@@ -188,6 +188,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <UpdateBanner />
+          <OfflineBanner />
           <AnimatedApp />
           <BackToTop />
         </BrowserRouter>
