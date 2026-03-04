@@ -8,6 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import GlobalFontProvider from "@/components/GlobalFontProvider";
 import PageTransition from "@/components/PageTransition";
 import BackToTop from "@/components/BackToTop";
+import UpdateBanner from "@/components/UpdateBanner";
 import { useMessageNotifications } from "@/hooks/useMessageNotifications";
 
 // Only the homepage is eagerly loaded for fastest initial paint
@@ -185,6 +186,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <UpdateBanner />
           <AnimatedApp />
           <BackToTop />
         </BrowserRouter>
