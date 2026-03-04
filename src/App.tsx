@@ -9,6 +9,7 @@ import GlobalFontProvider from "@/components/GlobalFontProvider";
 import PageTransition from "@/components/PageTransition";
 import BackToTop from "@/components/BackToTop";
 import UpdateBanner from "@/components/UpdateBanner";
+import OfflineBanner from "@/components/OfflineBanner";
 import { useMessageNotifications } from "@/hooks/useMessageNotifications";
 
 // Only the homepage is eagerly loaded for fastest initial paint
@@ -187,6 +188,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <UpdateBanner />
+          <OfflineBanner />
           <AnimatedApp />
           <BackToTop />
         </BrowserRouter>
