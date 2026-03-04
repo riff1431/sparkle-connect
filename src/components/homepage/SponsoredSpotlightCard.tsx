@@ -7,6 +7,7 @@ import { trackSponsoredClick } from "@/hooks/useSponsoredListings";
 import { motion } from "framer-motion";
 import bgSponsored from "@/assets/bg-sponsored.png";
 import RequestQuoteDialog from "@/components/RequestQuoteDialog";
+import BlurImage from "@/components/ui/blur-image";
 
 interface SponsoredCleaner {
   id: string;
@@ -50,7 +51,7 @@ const SponsoredSpotlightCard = ({ cleaner, listingId }: { cleaner: SponsoredClea
             transition={{ type: "spring", stiffness: 300 }}
           >
             <div className="w-20 h-24 sm:w-24 sm:h-28 rounded-xl overflow-hidden shadow-md border-2 border-white/80 ring-1 ring-border/30 transition-shadow duration-300 hover:shadow-xl">
-              <img src={cleaner.image} alt={cleaner.name} className="w-full h-full object-cover" />
+              <BlurImage src={cleaner.image} alt={cleaner.name} className="w-full h-full" />
             </div>
           </motion.div>
 

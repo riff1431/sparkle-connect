@@ -7,6 +7,7 @@ import bgHero from "@/assets/bg-hero.png";
 import heroCleaners from "@/assets/hero-cleaners.png";
 import { useLiveSearch } from "@/hooks/useSearchCleaners";
 import LiveSearchDropdown from "@/components/LiveSearchDropdown";
+import BlurImage from "@/components/ui/blur-image";
 
 const ThreeBackground = lazy(() => import("./ThreeBackground"));
 
@@ -27,9 +28,13 @@ const HomepageHero = () => {
 
   return (
     <section className="relative overflow-hidden">
-      <div className="absolute inset-0">
-        <img src={bgHero} alt="" className="w-full h-full object-cover" />
-      </div>
+      <BlurImage
+        src={bgHero}
+        alt=""
+        loading="eager"
+        className="absolute inset-0 w-full h-full"
+        placeholderColor="hsl(210 60% 95%)"
+      />
 
       <Suspense fallback={null}>
         <ThreeBackground />
@@ -128,13 +133,11 @@ const HomepageHero = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
           >
-            <div className="rounded-2xl overflow-hidden">
-              <img
-                src={heroCleaners}
-                alt="Professional cleaning team"
-                className="w-full h-auto object-cover"
-              />
-            </div>
+            <BlurImage
+              src={heroCleaners}
+              alt="Professional cleaning team"
+              className="rounded-2xl aspect-[4/3]"
+            />
           </motion.div>
         </div>
       </div>
