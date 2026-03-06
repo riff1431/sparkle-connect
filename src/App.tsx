@@ -11,6 +11,7 @@ import BackToTop from "@/components/BackToTop";
 import UpdateBanner from "@/components/UpdateBanner";
 import OfflineBanner from "@/components/OfflineBanner";
 import { useMessageNotifications } from "@/hooks/useMessageNotifications";
+import { usePushSubscription } from "@/hooks/usePushSubscription";
 
 // Only the homepage is eagerly loaded for fastest initial paint
 import Index from "./pages/Index";
@@ -92,6 +93,7 @@ const queryClient = new QueryClient();
 
 const AnimatedApp = () => {
   useMessageNotifications();
+  usePushSubscription();
   return (
     <PageTransition>
       <Suspense fallback={<div className="min-h-screen bg-background" />}>
